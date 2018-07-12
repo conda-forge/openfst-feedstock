@@ -16,8 +16,10 @@ build:
 
 requirements:
   build:
-    - toolchain
     - automake
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+  host:
 
 about:
   home: http://www.openfst.org/
