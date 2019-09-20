@@ -19,6 +19,8 @@ requirements:
     - automake
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
+  test:
+    - {{ compiler('cxx') }}
   host:
 
 about:
