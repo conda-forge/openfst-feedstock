@@ -1,11 +1,15 @@
-#! /usr/bin/env bash
+./configure \
+   --prefix="${PREFIX}" \
+   --enable-compact-fsts \
+   --enable-compress \
+   --enable-const-fsts \
+   --enable-far \
+   --enable-linear-fsts \
+   --enable-lookahead-fsts \
+   --enable-mpdt \
+   --enable-ngram-fsts \
+   --enable-pdt \
+   --enable-special
 
-# we need to run autoreconf and automake here because somehow `make` thinks
-# that it needs to update the scripts. This answer may be relevant:
-# https://stackoverflow.com/a/30386141/1286165
-autoreconf
-bash ./configure --prefix=${PREFIX} --enable-static=no
-automake
-make -j ${CPU_COUNT}
-make check
-make install
+make -j"${CPU_COUNT}"
+make -j"${CPU_COUNT}" install

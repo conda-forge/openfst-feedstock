@@ -1,37 +1,45 @@
-{% set version = "1.6.1" %}
-{% set sha256 = "c623a39394158cc5abd2e54c6dd7934b07394440" %}
+{% set name = "openfst" %}
+{% set version = "1.7.5" %}
 
-package:
-  name: openfst
+package: 
+  name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  fn: openfst-{{ version }}.tar.gz
-  url: http://www.openfst.org/twiki/pub/FST/FstDownload/openfst-{{ version }}.tar.gz
-  sha1: {{ sha256 }}
-
+  url: http://www.openfst.org/twiki/pub/FST/FstDownload/{{ name }}-{{ version }}.tar.gz
+  sha256: 85031ee2052dcc7c4f2f7d224599ba6467481168e36df515edd44aa4fa6de0de
+  
 build:
   number: 0
-  skip: true  # [win]
+  skip: True  # [win]
 
 requirements:
   build:
-    - automake
-    - {{ compiler('c') }}
     - {{ compiler('cxx') }}
+    - make
   host:
+    - zlib
+
+test:
+  # If behaving properly these will have return code 1.
+  commands:
+    - fstinfo --helpshort >/dev/null || [[ $? == 1 ]]
+    - fstcompress --helpshort >/dev/null || [[ $? == 1 ]]
+    - farinfo --helpshort >/dev/null || [[ $? == 1 ]]
+    - fstspecial --helpshort >/dev/null || [[ $? == 1 ]]
+    - mpdtcompose --helpshort >/dev/null || [[ $? == 1 ]]
+    - pdtcompose --helpshort >/dev/null || [[ $? == 1 ]]
 
 about:
-  home: http://www.openfst.org/
+  home: http://openfst.org
   license: Apache-2.0
-  license_file: COPYING
-  summary: 'A library for constructing, combining, optimizing, and searching weighted finite-state transducers (FSTs)'
+  license_file: LICENSE
+  summary: Weighted finite-state transducers
   description: |
-    OpenFST library was developed by contributors <http://www.openfst.org/twiki/bin/view/FST/FstContributors> from Google Research and NYU's Courant Institute. It is intended to be comprehensive, flexible, efficient and scale well to large problems.
-  doc_url: http://www.openfst.org/doxygen/fst/html
-  dev_url: http://www.openfst.org/twiki/bin/view/Forum/FstForum
+    A library for constructing, combining, optimizing, and searching weighted 
+    finite-state transducers (FSTs)
+  doc_url: http://www.openfst.org/twiki/bin/view/FST/FstQuickTour
 
 extra:
   recipe-maintainers:
-    - mcernak
-    - 183amir
+    - kylebgorman
