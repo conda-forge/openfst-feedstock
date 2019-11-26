@@ -11,7 +11,7 @@ source:
   
 build:
   number: 0
-  skip: True  # [win]
+  skip: true  # [win]
 
 requirements:
   build:
@@ -42,4 +42,6 @@ about:
 
 extra:
   recipe-maintainers:
+    - 183amir
     - kylebgorman
+    - mcernak
