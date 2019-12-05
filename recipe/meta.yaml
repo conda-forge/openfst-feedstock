@@ -33,7 +33,6 @@ test:
 about:
   home: http://openfst.org
   license: Apache-2.0
-  license_file: LICENSE
   summary: Weighted finite-state transducers
   description: |
     A library for constructing, combining, optimizing, and searching weighted 
