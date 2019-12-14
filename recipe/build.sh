@@ -10,6 +10,5 @@
    --enable-ngram-fsts \
    --enable-pdt \
    --enable-special
-
-make -j"${CPU_COUNT}"
+make -j"${CPU_COUNT}" check
 make -j"${CPU_COUNT}" install
