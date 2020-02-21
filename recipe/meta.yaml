@@ -1,5 +1,5 @@
 {% set name = "openfst" %}
-{% set version = "1.7.5" %}
+{% set version = "1.7.6" %}
 
 package: 
   name: {{ name|lower }}
@@ -7,25 +7,23 @@ package:
 
 source:
   url: http://www.openfst.org/twiki/pub/FST/FstDownload/{{ name }}-{{ version }}.tar.gz
-  sha256: 85031ee2052dcc7c4f2f7d224599ba6467481168e36df515edd44aa4fa6de0de
+  sha256: 759d8423744621d4eba79cfee8fbb56cecfde259d61a8be35e4e2e6c52001a0e
   
 build:
-  number: 1
+  number: 0
   skip: true  # [win]
 
 requirements:
   build:
     - {{ compiler('cxx') }}
     - make
-  host:
-    - zlib
 
 test:
   # If behaving properly these will have return code 1.
   commands:
-    - fstinfo --helpshort >/dev/null || [[ $? == 1 ]]
-    - fstcompress --helpshort >/dev/null || [[ $? == 1 ]]
     - farinfo --helpshort >/dev/null || [[ $? == 1 ]]
+    - fstcompress --helpshort >/dev/null || [[ $? == 1 ]]
+    - fstinfo --helpshort >/dev/null || [[ $? == 1 ]]
     - fstspecial --helpshort >/dev/null || [[ $? == 1 ]]
     - mpdtcompose --helpshort >/dev/null || [[ $? == 1 ]]
     - pdtcompose --helpshort >/dev/null || [[ $? == 1 ]]
