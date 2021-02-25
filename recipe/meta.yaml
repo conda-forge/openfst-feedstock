@@ -1,5 +1,5 @@
 {% set name = "openfst" %}
-{% set version = "1.8.0" %}
+{% set version = "1.8.1" %}
 
 package:
   name: {{ name|lower }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: http://www.openfst.org/twiki/pub/FST/FstDownload/{{ name }}-{{ version }}.tar.gz
-  sha256: 9730f1934f60f1320e46af44826e954bc6f7a695946548005ac33c1821745440
+  sha256: 24fb53b72bb687e3fa8ee96c72a31ff2920d99b980a0a8f61dda426fca6713f0
 
 build:
   number: 0
