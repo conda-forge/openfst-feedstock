@@ -8,6 +8,8 @@ package:
 source:
   url: http://www.openfst.org/twiki/pub/FST/FstDownload/{{ name }}-{{ version }}.tar.gz
   sha256: de987bf3624721c5d5ba321af95751898e4f4bb41c8a36e2d64f0627656d8b42
+  patches:
+    - osx_arm64_configure.patch  # [build_platform != target_platform]
 
 build:
   number: 1
