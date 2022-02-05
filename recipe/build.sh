@@ -8,7 +8,6 @@ cp $BUILD_PREFIX/share/gnuconfig/config.* .
 
 if [[ "${CONDA_BUILD_CROSS_COMPILATION}" == "1" ]]; then
   OPENFST_CROSS_COMPILATION_CONFIGURE_OPTS="--build=${BUILD} --host=${HOST}"
-  echo "Adding cross compile options: ${OPENFST_CROSS_COMPILATION_CONFIGURE_OPTS}"
 else
   OPENFST_CROSS_COMPILATION_CONFIGURE_OPTS=""
 fi
