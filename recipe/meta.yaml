@@ -10,13 +10,14 @@ source:
   sha256: de987bf3624721c5d5ba321af95751898e4f4bb41c8a36e2d64f0627656d8b42
 
 build:
-  number: 0
+  number: 1
   skip: true  # [win]
 
 requirements:
   build:
     - {{ compiler('cxx') }}
     - make
+    - gnuconfig   # [unix]
 
 test:
   # If behaving properly these will have return code 1.
