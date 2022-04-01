@@ -12,6 +12,10 @@ source:
 
 build:
   number: 1
+  run_exports:
+  # seems to be changing even with patch releases
+  # https://abi-laboratory.pro/tracker/timeline/openfst/
+    - {{ pin_subpackage('openfst', max_pin='x.x.x') }}
 
 requirements:
   build:
