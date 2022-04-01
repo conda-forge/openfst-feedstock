@@ -17,6 +17,7 @@ fi
 
 ./configure \
    --prefix="${PREFIX}" \
+   --enable-static=no \
    --enable-compress \
    --enable-fsts \
    --enable-grm \
