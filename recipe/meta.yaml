@@ -19,15 +19,56 @@ requirements:
     - make
     - gnuconfig   # [unix]
 
+{% set fst_binaries = [
+    "farcompilestrings", "farconvert", "farcreate", "farencode", "farequal", "farextract",
+    "farinfo", "farisomorphic", "farprintstrings", "fstarcsort", "fstclosure", "fstcompile",
+    "fstcompose", "fstcompress", "fstconcat", "fstconnect", "fstconvert", "fstdeterminize",
+    "fstdifference", "fstdisambiguate", "fstdraw", "fstencode", "fstepsnormalize", "fstequal",
+    "fstequivalent", "fstinfo", "fstintersect", "fstinvert", "fstisomorphic", "fstlinear",
+    "fstloglinearapply", "fstmap", "fstminimize", "fstprint", "fstproject", "fstprune", "fstpush",
+    "fstrandgen", "fstrelabel", "fstreplace", "fstreverse", "fstreweight", "fstrmepsilon",
+    "fstshortestdistance", "fstshortestpath", "fstspecial", "fstsymbols", "fstsynchronize",
+    "fsttopsort", "fstunion", "mpdtcompose", "mpdtexpand", "mpdtinfo", "mpdtreverse",
+    "pdtcompose", "pdtexpand", "pdtinfo", "pdtreplace", "pdtreverse", "pdtshortestpath"
+] %}
+{% set fst_libraries = [
+    "", "compact", "compressscript", "const", "far", "farscript",
+    "linearscript", "lookahead", "mpdtscript", "ngram", "pdtscript",
+    "script", "special"
+] %}
+# This list should be substantially longer; this is just a stand-in
+# selection; relevant headers can be added as needed/desired.
+{% set fst_headers = [
+    "fst.h", "shortest-path.h", "weight.h",
+    "extensions/compress/compress.h", "extensions/far/convert.h",
+    "extensions/special/phi-fst.h", "script/compose.h"
+] %}
+
 test:
-  # If behaving properly these will have return code 1.
   commands:
-    - farinfo --helpshort >/dev/null || [[ $? == 1 ]]
-    - fstcompress --helpshort >/dev/null || [[ $? == 1 ]]
-    - fstinfo --helpshort >/dev/null || [[ $? == 1 ]]
-    - fstspecial --helpshort >/dev/null || [[ $? == 1 ]]
-    - mpdtcompose --helpshort >/dev/null || [[ $? == 1 ]]
-    - pdtcompose --helpshort >/dev/null || [[ $? == 1 ]]
+    # binaries:
+    {% for each_bin in fst_binaries %}
+      # If behaving properly these will have return code 1.
+      - {{ each_bin }} --helpshort >/dev/null || [[ $? == 1 ]]    # [unix]
+      - {{ each_bin }} --helpshort                                # [win]
+    {% endfor %}
+
+    # libraries:
+    {% for each_lib in fst_libraries %}
+      # shared
+      - test -f $PREFIX/lib/libfst{{ each_lib }}.so               # [linux]
+      - test -f $PREFIX/lib/libfst{{ each_lib }}.dylib            # [osx]
+      - if not exist %LIBRARY_BIN%\fst{{ each_lib }}.dll exit 1   # [win]
+
+      # absence of static libraries
+      - test ! -f $PREFIX/lib/libfst{{ each_lib }}.a              # [not win]
+    {% endfor %}
+
+    # headers:
+    {% for each_header in fst_headers %}
+      - test -f $PREFIX/include/fst/{{ each_header }} || (echo "{{ each_header }} not found" && exit 1)  # [unix]
+      - if not exist %LIBRARY_INC%\fst\{{ "\\".join(each_header.split("/")) }} exit 1                    # [win]
+    {% endfor %}
 
 about:
   home: http://openfst.org
