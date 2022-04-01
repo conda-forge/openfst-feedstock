@@ -16,8 +16,9 @@ build:
 requirements:
   build:
     - {{ compiler('cxx') }}
-    - make
-    - gnuconfig   # [unix]
+    - make                   # [unix]
+    - gnuconfig              # [unix]
+    - autotools_clang_conda  # [win]
 
 {% set fst_binaries = [
     "farcompilestrings", "farconvert", "farcreate", "farencode", "farequal", "farextract",
