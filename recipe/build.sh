@@ -5,6 +5,8 @@ set -ex
 # Ignores irrelevant Clang availability annotations on MacOS: 
 # https://conda-forge.org/docs/maintainer/knowledge_base.html#newer-c-features-with-old-sdk
 export CXXFLAGS="$(echo "${CXXFLAGS}" | sed -E 's@-std=c\+\+[^ ]+@@g') -D_LIBCPP_DISABLE_AVAILABILITY"
+# avoid non-standard macros on windows
+export CXXFLAGS="${CXXFLAGS} -DNOMINMAX"
 
 # Get an updated config.sub and config.guess
 cp $BUILD_PREFIX/share/gnuconfig/config.* . || true
