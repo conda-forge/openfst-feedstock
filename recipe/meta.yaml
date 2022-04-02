@@ -23,6 +23,8 @@ requirements:
     - make                   # [unix]
     - gnuconfig              # [unix]
     - autotools_clang_conda  # [win]
+  host:
+    - dlfcn-win32            # [win]
 
 {% set fst_binaries = [
     "farcompilestrings", "farconvert", "farcreate", "farencode", "farequal", "farextract",
