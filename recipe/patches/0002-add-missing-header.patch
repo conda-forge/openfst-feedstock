@@ -1,7 +1,7 @@
 From 190209d688d6af874effb325753b5c8eaabf57af Mon Sep 17 00:00:00 2001
 From: "H. Vetinari" <h.vetinari@gmx.com>
 Date: Sun, 3 Apr 2022 10:05:22 +1100
-Subject: [PATCH 2/2] add missing header
+Subject: [PATCH 2/3] add missing header
 
 ---
  src/lib/compat.cc | 1 +

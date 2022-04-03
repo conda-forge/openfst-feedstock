@@ -1,0 +1,22 @@
+From c2a07c77007ac8b2a1c9b1a7e09fa237ac1e0c3d Mon Sep 17 00:00:00 2001
+From: "H. Vetinari" <h.vetinari@gmx.com>
+Date: Mon, 4 Apr 2022 08:40:57 +1100
+Subject: [PATCH 3/3] patch in AM_LDFLAGS
+
+---
+ src/lib/Makefile.am | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/lib/Makefile.am b/src/lib/Makefile.am
+index 272e360..ea106bd 100644
+--- a/src/lib/Makefile.am
++++ b/src/lib/Makefile.am
+@@ -1,4 +1,5 @@
+ AM_CPPFLAGS = -I$(srcdir)/../include $(ICU_CPPFLAGS)
++AM_LDFLAGS = -no-undefined
+ 
+ lib_LTLIBRARIES = libfst.la
+ libfst_la_SOURCES = compat.cc encode.cc flags.cc fst.cc fst-types.cc \
+-- 
+2.35.1.windows.2
+

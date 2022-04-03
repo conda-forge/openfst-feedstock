@@ -9,8 +9,6 @@ export CXXFLAGS="$(echo "${CXXFLAGS}" | sed -E 's@-std=c\+\+[^ ]+@@g') -D_LIBCPP
 if [[ "$target_platform" == "win-64" ]]; then
     # avoid non-standard macros on windows
     export CXXFLAGS="${CXXFLAGS} -DNOMINMAX"
-    # needed by libtool
-    export LDFLAGS="$LDFLAGS -no-undefined"
 fi
 
 # Get an updated config.sub and config.guess
