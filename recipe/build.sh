@@ -5,8 +5,13 @@ set -ex
 # Ignores irrelevant Clang availability annotations on MacOS: 
 # https://conda-forge.org/docs/maintainer/knowledge_base.html#newer-c-features-with-old-sdk
 export CXXFLAGS="$(echo "${CXXFLAGS}" | sed -E 's@-std=c\+\+[^ ]+@@g') -D_LIBCPP_DISABLE_AVAILABILITY"
-# avoid non-standard macros on windows
-export CXXFLAGS="${CXXFLAGS} -DNOMINMAX"
+
+if [[ "$target_platform" == "win-64" ]]; then
+    # avoid non-standard macros on windows
+    export CXXFLAGS="${CXXFLAGS} -DNOMINMAX"
+    # needed by libtool
+    export LDFLAGS="$LDFLAGS -Wl,-no-undefined"
+fi
 
 # Get an updated config.sub and config.guess
 cp $BUILD_PREFIX/share/gnuconfig/config.* . || true
@@ -26,6 +31,7 @@ fi
    --enable-special \
    ${OPENFST_CROSS_COMPILATION_CONFIGURE_OPTS}
 
+# from autotools_clang_conda; needs to come after ./configure
 [[ "$target_platform" == "win-64" ]] && patch_libtool
 
 if [[ "$CONDA_BUILD_CROSS_COMPILATION" != "1" ]]; then
