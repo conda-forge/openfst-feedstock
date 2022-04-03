@@ -10,7 +10,7 @@ source:
   patches:
     - patches/0001-Remove-float-equality-check-in-cross-compiling.patch  # [build_platform != target_platform]
     - patches/0002-add-missing-header.patch
-    - patches/0003-patch-in-AM_LDFLAGS.patch
+    - patches/0003-patch-in-AM_LDFLAGS.patch                             # [win]
 
 build:
   number: 1
@@ -25,6 +25,7 @@ requirements:
     - make                   # [unix]
     - gnuconfig              # [unix]
     - autotools_clang_conda  # [win]
+    - m2-automake            # [win]
   host:
     - dlfcn-win32            # [win]
 
