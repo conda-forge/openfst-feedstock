@@ -10,7 +10,7 @@ source:
   patches:
     - patches/0001-Remove-float-equality-check-in-cross-compiling.patch  # [build_platform != target_platform]
     - patches/0002-add-missing-header.patch
-    - patches/0003-patch-libfst_la_LDFLAGS.patch                         # [win]
+    - patches/0003-add-no-undefined-to-some-LDFLAGS.patch                # [win]
 
 build:
   number: 1
