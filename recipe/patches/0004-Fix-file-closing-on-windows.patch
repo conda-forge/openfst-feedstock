@@ -1,10 +1,10 @@
-From c7b0cf2808ce5800f3933809d210466d4d47d06f Mon Sep 17 00:00:00 2001
+From 74c1b3ee5fb7546f8f07b4397c99f644f15b2235 Mon Sep 17 00:00:00 2001
 From: Michael McAuliffe <michael.e.mcauliffe@gmail.com>
 Date: Sun, 10 Jul 2022 00:50:05 -0700
 Subject: [PATCH] Fix file closing on windows
 
 ---
- .vscode/settings.json                         | 63 +++++++++++++
+ .gitignore                                    |  2 +
  CMakeLists.txt                                | 48 ++++++++++
  src/CMakeLists.txt                            | 17 ++++
  src/bin/CMakeLists.txt                        | 85 +++++++++++++++++
@@ -54,107 +54,23 @@ Subject: [PATCH] Fix file closing on windows
  src/extensions/python/CMakeLists.txt          | 22 +++++
  src/extensions/special/CMakeLists.txt         | 59 ++++++++++++
  src/include/fst/compat.h                      | 22 +++++
- src/include/fst/const-fst.h                   |  1 +
- src/include/fst/determinize.h                 |  1 +
- src/include/fst/dfs-visit.h                   |  1 +
- src/include/fst/difference.h                  |  1 +
- src/include/fst/disambiguate.h                |  1 +
- src/include/fst/edit-fst.h                    |  1 +
- src/include/fst/encode.h                      |  1 +
- src/include/fst/epsnormalize.h                |  1 +
- src/include/fst/equal.h                       |  1 +
- src/include/fst/equivalent.h                  |  1 +
- src/include/fst/error-weight.h                |  1 +
- src/include/fst/expanded-fst.h                |  1 +
- src/include/fst/expander-cache.h              |  1 +
- src/include/fst/expectation-weight.h          |  1 +
  .../fst/extensions/far/compile-strings.h      |  3 -
  src/include/fst/extensions/far/create.h       |  1 -
  src/include/fst/extensions/far/far.h          | 10 ++
  .../fst/extensions/ngram/bitmap-index.h       |  2 +
  src/include/fst/extensions/ngram/nthbit.h     |  9 +-
- src/include/fst/factor-weight.h               |  1 +
- src/include/fst/filter-state.h                |  1 +
- src/include/fst/flags.h                       | 23 +++--
- src/include/fst/float-weight.h                |  1 +
- src/include/fst/fst-decl.h                    |  1 +
- src/include/fst/fst.h                         |  1 +
- src/include/fst/fstlib.h                      |  1 +
- src/include/fst/generic-register.h            |  1 +
- src/include/fst/heap.h                        |  1 +
- src/include/fst/icu.h                         |  1 +
- src/include/fst/intersect.h                   |  1 +
- src/include/fst/interval-set.h                |  1 +
- src/include/fst/invert.h                      |  1 +
- src/include/fst/isomorphic.h                  |  1 +
- src/include/fst/label-reachable.h             |  1 +
- src/include/fst/lexicographic-weight.h        |  1 +
- src/include/fst/lock.h                        |  2 +
- src/include/fst/log.h                         |  1 +
- src/include/fst/lookahead-filter.h            |  1 +
- src/include/fst/lookahead-matcher.h           |  1 +
- src/include/fst/mapped-file.h                 |  1 +
- src/include/fst/matcher-fst.h                 |  1 +
- src/include/fst/matcher.h                     |  1 +
- src/include/fst/memory.h                      |  1 +
- src/include/fst/minimize.h                    |  1 +
- src/include/fst/mutable-fst.h                 |  1 +
- src/include/fst/pair-weight.h                 |  1 +
- src/include/fst/partition.h                   |  1 +
- src/include/fst/power-weight-mappers.h        |  1 +
- src/include/fst/power-weight.h                |  1 +
- src/include/fst/product-weight.h              |  1 +
- src/include/fst/project.h                     |  1 +
+ src/include/fst/flags.h                       | 22 +++--
  src/include/fst/properties.h                  |  3 +-
- src/include/fst/prune.h                       |  1 +
- src/include/fst/push.h                        |  1 +
- src/include/fst/queue.h                       |  1 +
- src/include/fst/randequivalent.h              |  1 +
- src/include/fst/randgen.h                     |  1 +
- src/include/fst/rational.h                    |  1 +
- src/include/fst/register.h                    |  3 +-
- src/include/fst/relabel.h                     |  1 +
- src/include/fst/replace-util.h                |  1 +
- src/include/fst/replace.h                     |  1 +
- src/include/fst/reverse.h                     |  1 +
- src/include/fst/reweight.h                    |  1 +
- src/include/fst/rmepsilon.h                   |  1 +
- src/include/fst/rmfinalepsilon.h              |  1 +
+ src/include/fst/register.h                    |  2 +-
  src/include/fst/script/info-impl.h            |  1 +
- src/include/fst/set-weight.h                  |  1 +
- src/include/fst/shortest-distance.h           |  1 +
- src/include/fst/shortest-path.h               |  1 +
- src/include/fst/signed-log-weight.h           |  1 +
- src/include/fst/sparse-power-weight.h         |  1 +
- src/include/fst/sparse-tuple-weight.h         |  1 +
- src/include/fst/state-map.h                   |  1 +
- src/include/fst/state-reachable.h             |  1 +
- src/include/fst/state-table.h                 |  1 +
- src/include/fst/statesort.h                   |  1 +
- src/include/fst/string-weight.h               |  1 +
- src/include/fst/string.h                      |  1 +
- src/include/fst/symbol-table-ops.h            |  1 +
- src/include/fst/symbol-table.h                | 12 +++
- src/include/fst/synchronize.h                 |  1 +
- src/include/fst/test-properties.h             |  1 +
+ src/include/fst/symbol-table.h                | 11 +++
  src/include/fst/test/algo_test.h              |  2 +-
- src/include/fst/topsort.h                     |  1 +
- src/include/fst/tuple-weight.h                |  1 +
- src/include/fst/union-find.h                  |  1 +
- src/include/fst/union-weight.h                |  1 +
- src/include/fst/union.h                       |  1 +
- src/include/fst/util.h                        |  1 +
- src/include/fst/vector-fst.h                  |  1 +
- src/include/fst/verify.h                      |  1 +
- src/include/fst/visit.h                       |  1 +
- src/include/fst/weight.h                      |  1 +
  src/lib/CMakeLists.txt                        | 41 +++++++++
  src/lib/mapped-file.cc                        |  5 +
- src/lib/properties.cc                         |  1 +
  src/script/CMakeLists.txt                     | 76 +++++++++++++++
  src/test/CMakeLists.txt                       | 54 +++++++++++
- 149 files changed, 1272 insertions(+), 157 deletions(-)
- create mode 100644 .vscode/settings.json
+ 65 files changed, 1123 insertions(+), 157 deletions(-)
+ create mode 100644 .gitignore
  create mode 100644 CMakeLists.txt
  create mode 100644 src/CMakeLists.txt
  create mode 100644 src/bin/CMakeLists.txt
@@ -174,76 +90,14 @@ Subject: [PATCH] Fix file closing on windows
  create mode 100644 src/script/CMakeLists.txt
  create mode 100644 src/test/CMakeLists.txt
 
-diff --git a/.vscode/settings.json b/.vscode/settings.json
+diff --git a/.gitignore b/.gitignore
 new file mode 100644
-index 0000000..0997d6a
+index 0000000..687f872
 --- /dev/null
-+++ b/.vscode/settings.json
-@@ -0,0 +1,63 @@
-+{
-+    "files.associations": {
-+        "*.dict": "tsv",
-+        "string_view": "cpp",
-+        "*.inc": "cpp",
-+        "array": "cpp",
-+        "atomic": "cpp",
-+        "bit": "cpp",
-+        "*.tcc": "cpp",
-+        "cctype": "cpp",
-+        "charconv": "cpp",
-+        "chrono": "cpp",
-+        "clocale": "cpp",
-+        "cmath": "cpp",
-+        "condition_variable": "cpp",
-+        "cstdarg": "cpp",
-+        "cstddef": "cpp",
-+        "cstdint": "cpp",
-+        "cstdio": "cpp",
-+        "cstdlib": "cpp",
-+        "cstring": "cpp",
-+        "ctime": "cpp",
-+        "cwchar": "cpp",
-+        "cwctype": "cpp",
-+        "deque": "cpp",
-+        "forward_list": "cpp",
-+        "list": "cpp",
-+        "map": "cpp",
-+        "set": "cpp",
-+        "unordered_map": "cpp",
-+        "unordered_set": "cpp",
-+        "vector": "cpp",
-+        "exception": "cpp",
-+        "algorithm": "cpp",
-+        "functional": "cpp",
-+        "iterator": "cpp",
-+        "memory": "cpp",
-+        "memory_resource": "cpp",
-+        "numeric": "cpp",
-+        "optional": "cpp",
-+        "random": "cpp",
-+        "ratio": "cpp",
-+        "string": "cpp",
-+        "system_error": "cpp",
-+        "tuple": "cpp",
-+        "type_traits": "cpp",
-+        "utility": "cpp",
-+        "fstream": "cpp",
-+        "initializer_list": "cpp",
-+        "iomanip": "cpp",
-+        "iosfwd": "cpp",
-+        "iostream": "cpp",
-+        "istream": "cpp",
-+        "limits": "cpp",
-+        "new": "cpp",
-+        "ostream": "cpp",
-+        "shared_mutex": "cpp",
-+        "sstream": "cpp",
-+        "stdexcept": "cpp",
-+        "streambuf": "cpp",
-+        "typeinfo": "cpp"
-+    }
-+}
-\ No newline at end of file
++++ b/.gitignore
+@@ -0,0 +1,2 @@
++.vscode/
++
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 new file mode 100644
 index 0000000..aae4dc0
@@ -1776,174 +1630,6 @@ index b7f2087..98c4e73 100644
  namespace fst {
  
  // Downcasting.
-diff --git a/src/include/fst/const-fst.h b/src/include/fst/const-fst.h
-index 134470e..40a344b 100644
---- a/src/include/fst/const-fst.h
-+++ b/src/include/fst/const-fst.h
-@@ -34,6 +34,7 @@
- #include <fst/test-properties.h>
- #include <fst/util.h>
- 
-+
- namespace fst {
- 
- template <class A, class Unsigned>
-diff --git a/src/include/fst/determinize.h b/src/include/fst/determinize.h
-index 47b688f..0fa0be7 100644
---- a/src/include/fst/determinize.h
-+++ b/src/include/fst/determinize.h
-@@ -41,6 +41,7 @@
- #include <fst/prune.h>
- #include <fst/test-properties.h>
- 
-+
- namespace fst {
- 
- // Common divisors are used in determinization to compute transition weights.
-diff --git a/src/include/fst/dfs-visit.h b/src/include/fst/dfs-visit.h
-index 3e12843..a1f708c 100644
---- a/src/include/fst/dfs-visit.h
-+++ b/src/include/fst/dfs-visit.h
-@@ -29,6 +29,7 @@
- #include <fst/fst.h>
- 
- 
-+
- namespace fst {
- 
- // Visitor Interface: class determining actions taken during a depth-first
-diff --git a/src/include/fst/difference.h b/src/include/fst/difference.h
-index ef0e32e..e0d8138 100644
---- a/src/include/fst/difference.h
-+++ b/src/include/fst/difference.h
-@@ -28,6 +28,7 @@
- #include <fst/compose.h>
- 
- 
-+
- namespace fst {
- 
- template <class Arc, class M = Matcher<Fst<Arc>>,
-diff --git a/src/include/fst/disambiguate.h b/src/include/fst/disambiguate.h
-index 1eac382..d3a6bff 100644
---- a/src/include/fst/disambiguate.h
-+++ b/src/include/fst/disambiguate.h
-@@ -41,6 +41,7 @@
- #include <fst/union-find.h>
- #include <fst/verify.h>
- 
-+
- namespace fst {
- 
- template <class Arc>
-diff --git a/src/include/fst/edit-fst.h b/src/include/fst/edit-fst.h
-index b9d9009..898164c 100644
---- a/src/include/fst/edit-fst.h
-+++ b/src/include/fst/edit-fst.h
-@@ -49,6 +49,7 @@
- 
- #include <unordered_map>
- 
-+
- namespace fst {
- namespace internal {
- 
-diff --git a/src/include/fst/encode.h b/src/include/fst/encode.h
-index 62f7c09..7ea7e20 100644
---- a/src/include/fst/encode.h
-+++ b/src/include/fst/encode.h
-@@ -36,6 +36,7 @@
- #include <fst/util.h>
- #include <unordered_map>
- 
-+
- namespace fst {
- 
- enum EncodeType { ENCODE = 1, DECODE = 2 };
-diff --git a/src/include/fst/epsnormalize.h b/src/include/fst/epsnormalize.h
-index a7d1895..3deb1cd 100644
---- a/src/include/fst/epsnormalize.h
-+++ b/src/include/fst/epsnormalize.h
-@@ -27,6 +27,7 @@
- #include <fst/rmepsilon.h>
- 
- 
-+
- namespace fst {
- 
- enum EpsNormalizeType { EPS_NORM_INPUT, EPS_NORM_OUTPUT };
-diff --git a/src/include/fst/equal.h b/src/include/fst/equal.h
-index 2057b8f..e3f92e6 100644
---- a/src/include/fst/equal.h
-+++ b/src/include/fst/equal.h
-@@ -28,6 +28,7 @@
- #include <fst/test-properties.h>
- 
- 
-+
- namespace fst {
- 
- inline constexpr uint8_t kEqualFsts = 0x01;
-diff --git a/src/include/fst/equivalent.h b/src/include/fst/equivalent.h
-index d64dc3c..4f7d52b 100644
---- a/src/include/fst/equivalent.h
-+++ b/src/include/fst/equivalent.h
-@@ -34,6 +34,7 @@
- #include <unordered_map>
- 
- 
-+
- namespace fst {
- namespace internal {
- 
-diff --git a/src/include/fst/error-weight.h b/src/include/fst/error-weight.h
-index bc99b39..451166f 100644
---- a/src/include/fst/error-weight.h
-+++ b/src/include/fst/error-weight.h
-@@ -21,6 +21,7 @@
- 
- #include <fst/util.h>
- 
-+
- namespace fst {
- 
- // A Weight that can never be instantiated. This is not a semi-ring.
-diff --git a/src/include/fst/expanded-fst.h b/src/include/fst/expanded-fst.h
-index 24a21c5..580eafc 100644
---- a/src/include/fst/expanded-fst.h
-+++ b/src/include/fst/expanded-fst.h
-@@ -33,6 +33,7 @@
- #include <fst/fst.h>
- 
- 
-+
- namespace fst {
- 
- // A generic FST plus state count.
-diff --git a/src/include/fst/expander-cache.h b/src/include/fst/expander-cache.h
-index b17f3d6..9c1aab9 100644
---- a/src/include/fst/expander-cache.h
-+++ b/src/include/fst/expander-cache.h
-@@ -53,6 +53,7 @@
- #include <unordered_map>
- #include <unordered_map>
- 
-+
- namespace fst {
- 
- // Stateful allocators can't be used without careful handling in threaded
-diff --git a/src/include/fst/expectation-weight.h b/src/include/fst/expectation-weight.h
-index 16202a9..baacd46 100644
---- a/src/include/fst/expectation-weight.h
-+++ b/src/include/fst/expectation-weight.h
-@@ -48,6 +48,7 @@
- #include <fst/pair-weight.h>
- 
- 
-+
- namespace fst {
- 
- // W1 is usually a probability weight like LogWeight.
 diff --git a/src/include/fst/extensions/far/compile-strings.h b/src/include/fst/extensions/far/compile-strings.h
 index f5d1e06..0f66b96 100644
 --- a/src/include/fst/extensions/far/compile-strings.h
@@ -2049,44 +1735,19 @@ index 13018f2..c5165f6 100644
    const int shift = byte_nr << 3;
    // The top byte contains the whole-word popcount; we never need that.
    byte_sums <<= 8;
-diff --git a/src/include/fst/factor-weight.h b/src/include/fst/factor-weight.h
-index 6ad6d3c..651b7ca 100644
---- a/src/include/fst/factor-weight.h
-+++ b/src/include/fst/factor-weight.h
-@@ -33,6 +33,7 @@
- 
- #include <unordered_map>
- 
-+
- namespace fst {
- 
- inline constexpr uint8_t kFactorFinalWeights = 0x01;
-diff --git a/src/include/fst/filter-state.h b/src/include/fst/filter-state.h
-index 5984bc8..adddef2 100644
---- a/src/include/fst/filter-state.h
-+++ b/src/include/fst/filter-state.h
-@@ -29,6 +29,7 @@
- #include <fst/matcher.h>
- 
- 
-+
- namespace fst {
- 
- // The filter state interface represents the state of a (e.g., composition)
 diff --git a/src/include/fst/flags.h b/src/include/fst/flags.h
-index 9c419ce..8be9059 100644
+index 9c419ce..88e0be8 100644
 --- a/src/include/fst/flags.h
 +++ b/src/include/fst/flags.h
-@@ -31,6 +31,8 @@
+@@ -31,6 +31,7 @@
  #include <utility>
  
  #include <fst/lock.h>
 +#include <fst/fst_Export.h>
-+
  
  // FLAGS USAGE:
  //
-@@ -49,12 +51,19 @@
+@@ -49,12 +50,19 @@
  //
  // ShowUsage() can be used to print out command and flag usage.
  
@@ -2112,7 +1773,7 @@ index 9c419ce..8be9059 100644
  
  template <typename T>
  struct FlagDescription {
-@@ -202,7 +211,7 @@ class FlagRegisterer {
+@@ -202,7 +210,7 @@ class FlagRegisterer {
  
  #define DEFINE_bool(name, value, doc) DEFINE_VAR(bool, name, value, doc)
  #define DEFINE_string(name, value, doc) \
@@ -2121,360 +1782,6 @@ index 9c419ce..8be9059 100644
  #define DEFINE_int32(name, value, doc) DEFINE_VAR(int32_t, name, value, doc)
  #define DEFINE_int64(name, value, doc) DEFINE_VAR(int64_t, name, value, doc)
  #define DEFINE_uint64(name, value, doc) DEFINE_VAR(uint64_t, name, value, doc)
-diff --git a/src/include/fst/float-weight.h b/src/include/fst/float-weight.h
-index 38b7d48..b6ed565 100644
---- a/src/include/fst/float-weight.h
-+++ b/src/include/fst/float-weight.h
-@@ -37,6 +37,7 @@
- #include <fst/compat.h>
- #include <string_view>
- 
-+
- namespace fst {
- 
- namespace internal {
-diff --git a/src/include/fst/fst-decl.h b/src/include/fst/fst-decl.h
-index 0a0f679..1a7e0a2 100644
---- a/src/include/fst/fst-decl.h
-+++ b/src/include/fst/fst-decl.h
-@@ -27,6 +27,7 @@
- 
- #include <fst/windows_defs.inc>
- 
-+
- namespace fst {
- 
- // Symbol table and iterator.
-diff --git a/src/include/fst/fst.h b/src/include/fst/fst.h
-index 80d1150..0c3d347 100644
---- a/src/include/fst/fst.h
-+++ b/src/include/fst/fst.h
-@@ -47,6 +47,7 @@
- #include <string_view>
- 
- 
-+
- DECLARE_bool(fst_align);
- 
- namespace fst {
-diff --git a/src/include/fst/fstlib.h b/src/include/fst/fstlib.h
-index 820719e..da17dc9 100644
---- a/src/include/fst/fstlib.h
-+++ b/src/include/fst/fstlib.h
-@@ -140,4 +140,5 @@
- #include <fst/util.h>
- 
- 
-+
- #endif  // FST_FSTLIB_H_
-diff --git a/src/include/fst/generic-register.h b/src/include/fst/generic-register.h
-index 765ebce..a8d202e 100644
---- a/src/include/fst/generic-register.h
-+++ b/src/include/fst/generic-register.h
-@@ -31,6 +31,7 @@
- 
- #include <fst/log.h>
- 
-+
- // Generic class representing a globally-stored correspondence between
- // objects of KeyType and EntryType.
- //
-diff --git a/src/include/fst/heap.h b/src/include/fst/heap.h
-index 19dfc9d..3c56b65 100644
---- a/src/include/fst/heap.h
-+++ b/src/include/fst/heap.h
-@@ -28,6 +28,7 @@
- #include <fst/compat.h>
- #include <fst/log.h>
- 
-+
- namespace fst {
- 
- // A templated heap implementation that supports in-place update of values.
-diff --git a/src/include/fst/icu.h b/src/include/fst/icu.h
-index 925855e..e7e48e2 100644
---- a/src/include/fst/icu.h
-+++ b/src/include/fst/icu.h
-@@ -31,6 +31,7 @@
- #include <fst/log.h>
- #include <string_view>
- 
-+
- namespace fst {
- 
- // Trivial function to copy bytestrings into vectors of labels, truncating
-diff --git a/src/include/fst/intersect.h b/src/include/fst/intersect.h
-index 8d7b196..53d2619 100644
---- a/src/include/fst/intersect.h
-+++ b/src/include/fst/intersect.h
-@@ -29,6 +29,7 @@
- #include <fst/compose.h>
- 
- 
-+
- namespace fst {
- 
- using IntersectOptions = ComposeOptions;
-diff --git a/src/include/fst/interval-set.h b/src/include/fst/interval-set.h
-index b4eb2db..40860c7 100644
---- a/src/include/fst/interval-set.h
-+++ b/src/include/fst/interval-set.h
-@@ -29,6 +29,7 @@
- #include <fst/util.h>
- 
- 
-+
- namespace fst {
- 
- // Half-open integral interval [a, b) of signed integers of type T.
-diff --git a/src/include/fst/invert.h b/src/include/fst/invert.h
-index a6d87ff..273eec6 100644
---- a/src/include/fst/invert.h
-+++ b/src/include/fst/invert.h
-@@ -27,6 +27,7 @@
- #include <fst/mutable-fst.h>
- 
- 
-+
- namespace fst {
- 
- // Mapper to implement inversion of an arc.
-diff --git a/src/include/fst/isomorphic.h b/src/include/fst/isomorphic.h
-index 2edae3b..a5ce8b5 100644
---- a/src/include/fst/isomorphic.h
-+++ b/src/include/fst/isomorphic.h
-@@ -33,6 +33,7 @@
- #include <fst/fst.h>
- 
- 
-+
- namespace fst {
- namespace internal {
- 
-diff --git a/src/include/fst/label-reachable.h b/src/include/fst/label-reachable.h
-index 267e75a..c38683f 100644
---- a/src/include/fst/label-reachable.h
-+++ b/src/include/fst/label-reachable.h
-@@ -36,6 +36,7 @@
- 
- #include <unordered_map>
- 
-+
- namespace fst {
- 
- // Stores shareable data for label reachable class copies.
-diff --git a/src/include/fst/lexicographic-weight.h b/src/include/fst/lexicographic-weight.h
-index 4bacffb..d276166 100644
---- a/src/include/fst/lexicographic-weight.h
-+++ b/src/include/fst/lexicographic-weight.h
-@@ -37,6 +37,7 @@
- #include <fst/weight.h>
- 
- 
-+
- namespace fst {
- 
- template <class W1, class W2>
-diff --git a/src/include/fst/lock.h b/src/include/fst/lock.h
-index aeb36e6..cd429b7 100644
---- a/src/include/fst/lock.h
-+++ b/src/include/fst/lock.h
-@@ -20,6 +20,7 @@
- #ifndef FST_LOCK_H_
- #define FST_LOCK_H_
- 
-+
- #ifdef OPENFST_HAS_ABSL
- 
- namespace fst {
-@@ -34,6 +35,7 @@ using ReaderMutexLock;
- 
- #include <shared_mutex>  // NOLINT(build/c++14)
- 
-+
- namespace fst {
- 
- class Mutex {
-diff --git a/src/include/fst/log.h b/src/include/fst/log.h
-index 66be8ae..f25e574 100644
---- a/src/include/fst/log.h
-+++ b/src/include/fst/log.h
-@@ -27,6 +27,7 @@
- 
- #include <fst/flags.h>
- 
-+
- DECLARE_int32(v);
- 
- class LogMessage {
-diff --git a/src/include/fst/lookahead-filter.h b/src/include/fst/lookahead-filter.h
-index e87784c..916ff59 100644
---- a/src/include/fst/lookahead-filter.h
-+++ b/src/include/fst/lookahead-filter.h
-@@ -31,6 +31,7 @@
- #include <fst/lookahead-matcher.h>
- 
- 
-+
- namespace fst {
- 
- // Identifies and verifies the capabilities of the matcher to be used for
-diff --git a/src/include/fst/lookahead-matcher.h b/src/include/fst/lookahead-matcher.h
-index 52399e2..a286652 100644
---- a/src/include/fst/lookahead-matcher.h
-+++ b/src/include/fst/lookahead-matcher.h
-@@ -35,6 +35,7 @@
- #include <fst/label-reachable.h>
- #include <fst/matcher.h>
- 
-+
- DECLARE_string(save_relabel_ipairs);
- DECLARE_string(save_relabel_opairs);
- 
-diff --git a/src/include/fst/mapped-file.h b/src/include/fst/mapped-file.h
-index 18a478f..57928ac 100644
---- a/src/include/fst/mapped-file.h
-+++ b/src/include/fst/mapped-file.h
-@@ -29,6 +29,7 @@
- 
- #include <fst/flags.h>
- 
-+
- namespace fst {
- 
- // A memory region is a simple abstraction for allocated memory or data from
-diff --git a/src/include/fst/matcher-fst.h b/src/include/fst/matcher-fst.h
-index 36b78bb..a39de1c 100644
---- a/src/include/fst/matcher-fst.h
-+++ b/src/include/fst/matcher-fst.h
-@@ -30,6 +30,7 @@
- #include <fst/lookahead-matcher.h>
- 
- 
-+
- namespace fst {
- 
- // Writeable matchers have the same interface as Matchers (as defined in
-diff --git a/src/include/fst/matcher.h b/src/include/fst/matcher.h
-index d8ba619..903f020 100644
---- a/src/include/fst/matcher.h
-+++ b/src/include/fst/matcher.h
-@@ -33,6 +33,7 @@
- #include <unordered_map>
- #include <optional>
- 
-+
- namespace fst {
- 
- // Matchers find and iterate through requested labels at FST states. In the
-diff --git a/src/include/fst/memory.h b/src/include/fst/memory.h
-index 7299c53..958a388 100644
---- a/src/include/fst/memory.h
-+++ b/src/include/fst/memory.h
-@@ -29,6 +29,7 @@
- #include <fst/log.h>
- #include <fstream>
- 
-+
- namespace fst {
- 
- // Default block allocation size.
-diff --git a/src/include/fst/minimize.h b/src/include/fst/minimize.h
-index 53d06af..098d25c 100644
---- a/src/include/fst/minimize.h
-+++ b/src/include/fst/minimize.h
-@@ -47,6 +47,7 @@
- #include <fst/weight.h>
- #include <unordered_map>
- 
-+
- namespace fst {
- namespace internal {
- 
-diff --git a/src/include/fst/mutable-fst.h b/src/include/fst/mutable-fst.h
-index 1adb88d..08cf6cd 100644
---- a/src/include/fst/mutable-fst.h
-+++ b/src/include/fst/mutable-fst.h
-@@ -38,6 +38,7 @@
- #include <string_view>
- 
- 
-+
- namespace fst {
- 
- template <class Arc>
-diff --git a/src/include/fst/pair-weight.h b/src/include/fst/pair-weight.h
-index 13333c4..a03177d 100644
---- a/src/include/fst/pair-weight.h
-+++ b/src/include/fst/pair-weight.h
-@@ -33,6 +33,7 @@
- #include <fst/weight.h>
- 
- 
-+
- namespace fst {
- 
- template <class W1, class W2>
-diff --git a/src/include/fst/partition.h b/src/include/fst/partition.h
-index 5893931..a75910e 100644
---- a/src/include/fst/partition.h
-+++ b/src/include/fst/partition.h
-@@ -28,6 +28,7 @@
- #include <fst/queue.h>
- 
- 
-+
- namespace fst {
- namespace internal {
- 
-diff --git a/src/include/fst/power-weight-mappers.h b/src/include/fst/power-weight-mappers.h
-index 36fe15d..a66f289 100644
---- a/src/include/fst/power-weight-mappers.h
-+++ b/src/include/fst/power-weight-mappers.h
-@@ -20,6 +20,7 @@
- #ifndef FST_POWER_WEIGHT_MAPPERS_H_
- #define FST_POWER_WEIGHT_MAPPERS_H_
- 
-+
- namespace fst {
- 
- // Converts FromWeight to ToPowerWeight (with one component).
-diff --git a/src/include/fst/power-weight.h b/src/include/fst/power-weight.h
-index 6749045..d5a629e 100644
---- a/src/include/fst/power-weight.h
-+++ b/src/include/fst/power-weight.h
-@@ -29,6 +29,7 @@
- #include <fst/weight.h>
- 
- 
-+
- namespace fst {
- 
- // Cartesian power semiring: W ^ n
-diff --git a/src/include/fst/product-weight.h b/src/include/fst/product-weight.h
-index e91ebf0..f1c71f6 100644
---- a/src/include/fst/product-weight.h
-+++ b/src/include/fst/product-weight.h
-@@ -30,6 +30,7 @@
- #include <fst/weight.h>
- 
- 
-+
- namespace fst {
- 
- // Product semiring: W1 * W2.
-diff --git a/src/include/fst/project.h b/src/include/fst/project.h
-index 1b07683..911ace2 100644
---- a/src/include/fst/project.h
-+++ b/src/include/fst/project.h
-@@ -26,6 +26,7 @@
- #include <fst/arc-map.h>
- #include <fst/mutable-fst.h>
- 
-+
- namespace fst {
- 
- // This specifies whether to project on input or output.
 diff --git a/src/include/fst/properties.h b/src/include/fst/properties.h
 index c7a110d..99d26fd 100644
 --- a/src/include/fst/properties.h
@@ -2496,91 +1803,11 @@ index c7a110d..99d26fd 100644
  
  // For a binary property, the bit is always returned set. For a trinary (i.e.,
  // two-bit) property, both bits are returned set iff either corresponding input
-diff --git a/src/include/fst/prune.h b/src/include/fst/prune.h
-index 7c8a45e..3412072 100644
---- a/src/include/fst/prune.h
-+++ b/src/include/fst/prune.h
-@@ -31,6 +31,7 @@
- #include <fst/shortest-distance.h>
- 
- 
-+
- namespace fst {
- namespace internal {
- 
-diff --git a/src/include/fst/push.h b/src/include/fst/push.h
-index 3037249..426ab22 100644
---- a/src/include/fst/push.h
-+++ b/src/include/fst/push.h
-@@ -33,6 +33,7 @@
- #include <fst/shortest-distance.h>
- 
- 
-+
- namespace fst {
- 
- // Computes the total weight (sum of the weights of all accepting paths) from
-diff --git a/src/include/fst/queue.h b/src/include/fst/queue.h
-index d71b92b..1fe36e4 100644
---- a/src/include/fst/queue.h
-+++ b/src/include/fst/queue.h
-@@ -35,6 +35,7 @@
- #include <fst/topsort.h>
- #include <fst/weight.h>
- 
-+
- namespace fst {
- 
- // The Queue interface is:
-diff --git a/src/include/fst/randequivalent.h b/src/include/fst/randequivalent.h
-index 9562b1d..52e7449 100644
---- a/src/include/fst/randequivalent.h
-+++ b/src/include/fst/randequivalent.h
-@@ -35,6 +35,7 @@
- #include <fst/weight.h>
- 
- 
-+
- namespace fst {
- 
- // Test if two FSTs are stochastically equivalent by randomly generating
-diff --git a/src/include/fst/randgen.h b/src/include/fst/randgen.h
-index d847d7e..af7ed99 100644
---- a/src/include/fst/randgen.h
-+++ b/src/include/fst/randgen.h
-@@ -47,6 +47,7 @@
- 
- #include <vector>
- 
-+
- namespace fst {
- 
- // The RandGenFst class is roughly similar to ArcMapFst in that it takes two
-diff --git a/src/include/fst/rational.h b/src/include/fst/rational.h
-index 3bfa521..4d07acf 100644
---- a/src/include/fst/rational.h
-+++ b/src/include/fst/rational.h
-@@ -31,6 +31,7 @@
- #include <fst/replace.h>
- #include <fst/test-properties.h>
- 
-+
- namespace fst {
- 
- using RationalFstOptions = CacheOptions;
 diff --git a/src/include/fst/register.h b/src/include/fst/register.h
-index af1b360..8cf6571 100644
+index af1b360..650f8a4 100644
 --- a/src/include/fst/register.h
 +++ b/src/include/fst/register.h
-@@ -32,6 +32,7 @@
- #include <fst/log.h>
- #include <string_view>
- 
-+
- namespace fst {
- 
- template <class Arc>
-@@ -83,7 +84,7 @@ class FstRegister : public GenericRegister<std::string, FstRegisterEntry<Arc>,
+@@ -83,7 +83,7 @@ class FstRegister : public GenericRegister<std::string, FstRegisterEntry<Arc>,
  // The type must have a default constructor and a copy constructor from
  // Fst<Arc>.
  template <class FST>
@@ -2589,90 +1816,6 @@ index af1b360..8cf6571 100644
   public:
    using Arc = typename FST::Arc;
    using Entry = typename FstRegister<Arc>::Entry;
-diff --git a/src/include/fst/relabel.h b/src/include/fst/relabel.h
-index fcc7876..bcdead6 100644
---- a/src/include/fst/relabel.h
-+++ b/src/include/fst/relabel.h
-@@ -32,6 +32,7 @@
- 
- #include <unordered_map>
- 
-+
- namespace fst {
- 
- // Relabels either the input labels or output labels. The old to
-diff --git a/src/include/fst/replace-util.h b/src/include/fst/replace-util.h
-index 0c3e72b..a5c857c 100644
---- a/src/include/fst/replace-util.h
-+++ b/src/include/fst/replace-util.h
-@@ -35,6 +35,7 @@
- #include <unordered_map>
- #include <unordered_set>
- 
-+
- namespace fst {
- 
- // This specifies what labels to output on the call or return arc. Note that
-diff --git a/src/include/fst/replace.h b/src/include/fst/replace.h
-index af78630..c18802c 100644
---- a/src/include/fst/replace.h
-+++ b/src/include/fst/replace.h
-@@ -39,6 +39,7 @@
- 
- #include <unordered_map>
- 
-+
- namespace fst {
- 
- // Replace state tables have the form:
-diff --git a/src/include/fst/reverse.h b/src/include/fst/reverse.h
-index da5ca62..1b0e1c6 100644
---- a/src/include/fst/reverse.h
-+++ b/src/include/fst/reverse.h
-@@ -28,6 +28,7 @@
- #include <fst/cache.h>
- 
- 
-+
- namespace fst {
- 
- // Reverses an FST. The reversed result is written to an output mutable FST.
-diff --git a/src/include/fst/reweight.h b/src/include/fst/reweight.h
-index c95192e..a8206a4 100644
---- a/src/include/fst/reweight.h
-+++ b/src/include/fst/reweight.h
-@@ -29,6 +29,7 @@
- #include <fst/properties.h>
- 
- 
-+
- namespace fst {
- 
- enum ReweightType { REWEIGHT_TO_INITIAL, REWEIGHT_TO_FINAL };
-diff --git a/src/include/fst/rmepsilon.h b/src/include/fst/rmepsilon.h
-index 87ecd05..cb94e87 100644
---- a/src/include/fst/rmepsilon.h
-+++ b/src/include/fst/rmepsilon.h
-@@ -40,6 +40,7 @@
- 
- #include <unordered_map>
- 
-+
- namespace fst {
- 
- template <class Arc, class Queue>
-diff --git a/src/include/fst/rmfinalepsilon.h b/src/include/fst/rmfinalepsilon.h
-index ae1207c..5793699 100644
---- a/src/include/fst/rmfinalepsilon.h
-+++ b/src/include/fst/rmfinalepsilon.h
-@@ -29,6 +29,7 @@
- 
- #include <unordered_set>
- 
-+
- namespace fst {
- 
- // Removes final states that have epsilon-only input arcs.
 diff --git a/src/include/fst/script/info-impl.h b/src/include/fst/script/info-impl.h
 index 7e485c9..e0173c2 100644
 --- a/src/include/fst/script/info-impl.h
@@ -2685,171 +1828,14 @@ index 7e485c9..e0173c2 100644
  #include <fst/lookahead-matcher.h>
  #include <fst/matcher.h>
  #include <fst/queue.h>
-diff --git a/src/include/fst/set-weight.h b/src/include/fst/set-weight.h
-index 7d97c45..7af2789 100644
---- a/src/include/fst/set-weight.h
-+++ b/src/include/fst/set-weight.h
-@@ -34,6 +34,7 @@
- #include <string_view>
- 
- 
-+
- namespace fst {
- 
- inline constexpr int kSetEmpty = 0;         // Label for the empty set.
-diff --git a/src/include/fst/shortest-distance.h b/src/include/fst/shortest-distance.h
-index 249a006..532a504 100644
---- a/src/include/fst/shortest-distance.h
-+++ b/src/include/fst/shortest-distance.h
-@@ -33,6 +33,7 @@
- #include <fst/test-properties.h>
- 
- 
-+
- namespace fst {
- 
- // A representable float for shortest distance and shortest path algorithms.
-diff --git a/src/include/fst/shortest-path.h b/src/include/fst/shortest-path.h
-index 511f9f4..18993bb 100644
---- a/src/include/fst/shortest-path.h
-+++ b/src/include/fst/shortest-path.h
-@@ -35,6 +35,7 @@
- #include <fst/test-properties.h>
- 
- 
-+
- namespace fst {
- 
- template <class Arc, class Queue, class ArcFilter>
-diff --git a/src/include/fst/signed-log-weight.h b/src/include/fst/signed-log-weight.h
-index cb2e7c5..6b6bcfc 100644
---- a/src/include/fst/signed-log-weight.h
-+++ b/src/include/fst/signed-log-weight.h
-@@ -34,6 +34,7 @@
- #include <fst/product-weight.h>
- 
- 
-+
- namespace fst {
- template <class T>
- class SignedLogWeightTpl : public PairWeight<TropicalWeight, LogWeightTpl<T>> {
-diff --git a/src/include/fst/sparse-power-weight.h b/src/include/fst/sparse-power-weight.h
-index b61a32a..452cc58 100644
---- a/src/include/fst/sparse-power-weight.h
-+++ b/src/include/fst/sparse-power-weight.h
-@@ -30,6 +30,7 @@
- #include <fst/weight.h>
- 
- 
-+
- namespace fst {
- 
- // Sparse cartesian power semiring: W ^ n
-diff --git a/src/include/fst/sparse-tuple-weight.h b/src/include/fst/sparse-tuple-weight.h
-index ca8f3ba..a9c9470 100644
---- a/src/include/fst/sparse-tuple-weight.h
-+++ b/src/include/fst/sparse-tuple-weight.h
-@@ -38,6 +38,7 @@
- #include <fst/weight.h>
- 
- 
-+
- namespace fst {
- 
- template <class W, class K>
-diff --git a/src/include/fst/state-map.h b/src/include/fst/state-map.h
-index 8d2fc65..34a8cf6 100644
---- a/src/include/fst/state-map.h
-+++ b/src/include/fst/state-map.h
-@@ -34,6 +34,7 @@
- #include <fst/cache.h>
- #include <fst/mutable-fst.h>
- 
-+
- namespace fst {
- 
- // StateMapper Interface. The class determines how states are mapped; useful for
-diff --git a/src/include/fst/state-reachable.h b/src/include/fst/state-reachable.h
-index 98082f8..76a2670 100644
---- a/src/include/fst/state-reachable.h
-+++ b/src/include/fst/state-reachable.h
-@@ -32,6 +32,7 @@
- #include <fst/vector-fst.h>
- 
- 
-+
- namespace fst {
- 
- // Computes the (final) states reachable from a given state in an FST. After
-diff --git a/src/include/fst/state-table.h b/src/include/fst/state-table.h
-index f13d4c7..3f49ac5 100644
---- a/src/include/fst/state-table.h
-+++ b/src/include/fst/state-table.h
-@@ -31,6 +31,7 @@
- #include <fst/filter-state.h>
- 
- 
-+
- namespace fst {
- 
- // State tables determine the bijective mapping between state tuples (e.g., in
-diff --git a/src/include/fst/statesort.h b/src/include/fst/statesort.h
-index 99e3eb4..16788de 100644
---- a/src/include/fst/statesort.h
-+++ b/src/include/fst/statesort.h
-@@ -28,6 +28,7 @@
- #include <fst/mutable-fst.h>
- 
- 
-+
- namespace fst {
- 
- // Sorts the input states of an FST. order[i] gives the the state ID after
-diff --git a/src/include/fst/string-weight.h b/src/include/fst/string-weight.h
-index c1d976a..7c5b83d 100644
---- a/src/include/fst/string-weight.h
-+++ b/src/include/fst/string-weight.h
-@@ -32,6 +32,7 @@
- #include <string_view>
- 
- 
-+
- namespace fst {
- 
- inline constexpr int kStringInfinity = -1;     // Label for the infinite string.
-diff --git a/src/include/fst/string.h b/src/include/fst/string.h
-index 43dc994..6da083d 100644
---- a/src/include/fst/string.h
-+++ b/src/include/fst/string.h
-@@ -40,6 +40,7 @@
- #include <fst/compat.h>
- #include <string_view>
- 
-+
- DECLARE_string(fst_field_separator);
- 
- namespace fst {
-diff --git a/src/include/fst/symbol-table-ops.h b/src/include/fst/symbol-table-ops.h
-index c317cc6..614958a 100644
---- a/src/include/fst/symbol-table-ops.h
-+++ b/src/include/fst/symbol-table-ops.h
-@@ -28,6 +28,7 @@
- 
- #include <unordered_set>
- 
-+
- namespace fst {
- 
- // Returns a minimal symbol table containing only symbols referenced by the
 diff --git a/src/include/fst/symbol-table.h b/src/include/fst/symbol-table.h
-index 77728b5..36bddc1 100644
+index 77728b5..d8aad63 100644
 --- a/src/include/fst/symbol-table.h
 +++ b/src/include/fst/symbol-table.h
-@@ -42,6 +42,15 @@
+@@ -42,6 +42,14 @@
  #include <string_view>
  #include <fst/lock.h>
  
-+
 +template class std::allocator<int>;
 +template class std::vector<int>;
 +template class std::string;
@@ -2861,7 +1847,7 @@ index 77728b5..36bddc1 100644
  DECLARE_bool(fst_compat_symbols);
  
  namespace fst {
-@@ -152,6 +161,9 @@ class SymbolTableImplBase {
+@@ -152,6 +160,9 @@ class SymbolTableImplBase {
    virtual bool IsMutable() const = 0;
  };
  
@@ -2871,30 +1857,6 @@ index 77728b5..36bddc1 100644
  // Base class for SymbolTable implementations supporting Add/Remove.
  class MutableSymbolTableImpl : public SymbolTableImplBase {
   public:
-diff --git a/src/include/fst/synchronize.h b/src/include/fst/synchronize.h
-index c069255..e8d45cc 100644
---- a/src/include/fst/synchronize.h
-+++ b/src/include/fst/synchronize.h
-@@ -34,6 +34,7 @@
- #include <unordered_map>
- #include <unordered_set>
- 
-+
- namespace fst {
- 
- using SynchronizeFstOptions = CacheOptions;
-diff --git a/src/include/fst/test-properties.h b/src/include/fst/test-properties.h
-index 85f0941..9d1186f 100644
---- a/src/include/fst/test-properties.h
-+++ b/src/include/fst/test-properties.h
-@@ -29,6 +29,7 @@
- 
- #include <unordered_set>
- 
-+
- DECLARE_bool(fst_verify_properties);
- 
- namespace fst {
 diff --git a/src/include/fst/test/algo_test.h b/src/include/fst/test/algo_test.h
 index 009e2bb..846ee3f 100644
 --- a/src/include/fst/test/algo_test.h
@@ -2907,126 +1869,6 @@ index 009e2bb..846ee3f 100644
 +DECLARE_EXE_int32(repeat);  // defined in ./algo_test.cc
  
  namespace fst {
- 
-diff --git a/src/include/fst/topsort.h b/src/include/fst/topsort.h
-index 6adffce..c02de81 100644
---- a/src/include/fst/topsort.h
-+++ b/src/include/fst/topsort.h
-@@ -28,6 +28,7 @@
- #include <fst/statesort.h>
- 
- 
-+
- namespace fst {
- 
- // DFS visitor class to return topological ordering.
-diff --git a/src/include/fst/tuple-weight.h b/src/include/fst/tuple-weight.h
-index 45c2561..118266e 100644
---- a/src/include/fst/tuple-weight.h
-+++ b/src/include/fst/tuple-weight.h
-@@ -33,6 +33,7 @@
- #include <fst/weight.h>
- 
- 
-+
- namespace fst {
- 
- // n-tuple weight, element of the n-th Cartesian power of W.
-diff --git a/src/include/fst/union-find.h b/src/include/fst/union-find.h
-index 078a103..323ad0a 100644
---- a/src/include/fst/union-find.h
-+++ b/src/include/fst/union-find.h
-@@ -23,6 +23,7 @@
- 
- #include <vector>
- 
-+
- namespace fst {
- 
- // Union-Find algorithm for dense sets of non-negative integers.
-diff --git a/src/include/fst/union-weight.h b/src/include/fst/union-weight.h
-index b310df2..a83a503 100644
---- a/src/include/fst/union-weight.h
-+++ b/src/include/fst/union-weight.h
-@@ -34,6 +34,7 @@
- #include <fst/weight.h>
- 
- 
-+
- namespace fst {
- 
- // Example UnionWeightOptions for UnionWeight template below. The Merge
-diff --git a/src/include/fst/union.h b/src/include/fst/union.h
-index 88414bb..5e12da1 100644
---- a/src/include/fst/union.h
-+++ b/src/include/fst/union.h
-@@ -30,6 +30,7 @@
- #include <fst/rational.h>
- 
- 
-+
- namespace fst {
- 
- // Computes the union (sum) of two FSTs. This version writes the union to an
-diff --git a/src/include/fst/util.h b/src/include/fst/util.h
-index df539fd..4cc2b8b 100644
---- a/src/include/fst/util.h
-+++ b/src/include/fst/util.h
-@@ -46,6 +46,7 @@
- #include <optional>
- 
- 
-+
- // Utility for error handling.
- 
- DECLARE_bool(fst_error_fatal);
-diff --git a/src/include/fst/vector-fst.h b/src/include/fst/vector-fst.h
-index 1be840f..34e34cc 100644
---- a/src/include/fst/vector-fst.h
-+++ b/src/include/fst/vector-fst.h
-@@ -34,6 +34,7 @@
- #include <fst/mutable-fst.h>
- #include <fst/test-properties.h>
- 
-+
- namespace fst {
- 
- template <class A, class S>
-diff --git a/src/include/fst/verify.h b/src/include/fst/verify.h
-index 416d523..6d3b7bf 100644
---- a/src/include/fst/verify.h
-+++ b/src/include/fst/verify.h
-@@ -28,6 +28,7 @@
- #include <fst/test-properties.h>
- 
- 
-+
- namespace fst {
- 
- // Verifies that an Fst's contents are sane.
-diff --git a/src/include/fst/visit.h b/src/include/fst/visit.h
-index ad86b6e..12debdb 100644
---- a/src/include/fst/visit.h
-+++ b/src/include/fst/visit.h
-@@ -27,6 +27,7 @@
- #include <fst/mutable-fst.h>
- 
- 
-+
- namespace fst {
- 
- // Visitor Interface: class determining actions taken during a visit. If any of
-diff --git a/src/include/fst/weight.h b/src/include/fst/weight.h
-index a56868c..ee3e166 100644
---- a/src/include/fst/weight.h
-+++ b/src/include/fst/weight.h
-@@ -34,6 +34,7 @@
- #include <fst/util.h>
- 
- 
-+
- DECLARE_string(fst_weight_parentheses);
- DECLARE_string(fst_weight_separator);
  
 diff --git a/src/lib/CMakeLists.txt b/src/lib/CMakeLists.txt
 new file mode 100644
@@ -3093,18 +1935,6 @@ index f855422..8186ae8 100644
          istrm.seekg(pos + size, std::ios::beg);
          if (istrm) {
            VLOG(2) << "mmap'ed region of " << size << " at offset " << pos
-diff --git a/src/lib/properties.cc b/src/lib/properties.cc
-index 07460d2..898e419 100644
---- a/src/lib/properties.cc
-+++ b/src/lib/properties.cc
-@@ -27,6 +27,7 @@
- 
- #include <string_view>
- 
-+
- namespace fst {
- 
- // These functions determine the properties associated with the FST result of
 diff --git a/src/script/CMakeLists.txt b/src/script/CMakeLists.txt
 new file mode 100644
 index 0000000..e01fe6f
