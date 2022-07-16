@@ -1,4 +1,4 @@
-From 74c1b3ee5fb7546f8f07b4397c99f644f15b2235 Mon Sep 17 00:00:00 2001
+From 235a5e590e57fe80f33924888ac38b4bacaf1123 Mon Sep 17 00:00:00 2001
 From: Michael McAuliffe <michael.e.mcauliffe@gmail.com>
 Date: Sun, 10 Jul 2022 00:50:05 -0700
 Subject: [PATCH] Fix file closing on windows
@@ -7,16 +7,16 @@ Subject: [PATCH] Fix file closing on windows
  .gitignore                                    |  2 +
  CMakeLists.txt                                | 48 ++++++++++
  src/CMakeLists.txt                            | 17 ++++
- src/bin/CMakeLists.txt                        | 85 +++++++++++++++++
+ src/bin/CMakeLists.txt                        | 85 ++++++++++++++++++
  src/bin/fstarcsort-main.cc                    |  2 +-
  src/bin/fstclosure-main.cc                    |  2 +-
- src/bin/fstcompile-main.cc                    | 20 ++--
+ src/bin/fstcompile-main.cc                    | 20 ++---
  src/bin/fstcompose-main.cc                    |  4 +-
  src/bin/fstconvert-main.cc                    |  2 +-
  src/bin/fstdeterminize-main.cc                | 12 +--
  src/bin/fstdifference-main.cc                 |  4 +-
  src/bin/fstdisambiguate-main.cc               |  8 +-
- src/bin/fstdraw-main.cc                       | 34 +++----
+ src/bin/fstdraw-main.cc                       | 34 ++++----
  src/bin/fstencode-main.cc                     |  8 +-
  src/bin/fstepsnormalize-main.cc               |  2 +-
  src/bin/fstequal-main.cc                      |  2 +-
@@ -26,7 +26,7 @@ Subject: [PATCH] Fix file closing on windows
  src/bin/fstisomorphic-main.cc                 |  2 +-
  src/bin/fstmap-main.cc                        |  8 +-
  src/bin/fstminimize-main.cc                   |  4 +-
- src/bin/fstprint-main.cc                      | 20 ++--
+ src/bin/fstprint-main.cc                      | 20 ++---
  src/bin/fstproject-main.cc                    |  2 +-
  src/bin/fstprune-main.cc                      |  6 +-
  src/bin/fstpush-main.cc                       | 12 +--
@@ -35,28 +35,28 @@ Subject: [PATCH] Fix file closing on windows
  src/bin/fstreplace-main.cc                    |  8 +-
  src/bin/fstreverse-main.cc                    |  2 +-
  src/bin/fstreweight-main.cc                   |  2 +-
- src/bin/fstrmepsilon-main.cc                  | 10 +-
+ src/bin/fstrmepsilon-main.cc                  | 10 +--
  src/bin/fstshortestdistance-main.cc           |  8 +-
  src/bin/fstshortestpath-main.cc               | 12 +--
- src/bin/fstsymbols-main.cc                    | 20 ++--
+ src/bin/fstsymbols-main.cc                    | 20 ++---
  src/extensions/CMakeLists.txt                 | 43 +++++++++
- src/extensions/compact/CMakeLists.txt         | 92 +++++++++++++++++++
- src/extensions/compress/CMakeLists.txt        | 40 ++++++++
- src/extensions/const/CMakeLists.txt           | 38 ++++++++
- src/extensions/far/CMakeLists.txt             | 61 ++++++++++++
- src/extensions/linear/CMakeLists.txt          | 77 ++++++++++++++++
- src/extensions/lookahead/CMakeLists.txt       | 41 +++++++++
- src/extensions/mpdt/CMakeLists.txt            | 32 +++++++
- src/extensions/ngram/CMakeLists.txt           | 44 +++++++++
+ src/extensions/compact/CMakeLists.txt         | 87 +++++++++++++++++++
+ src/extensions/compress/CMakeLists.txt        | 42 +++++++++
+ src/extensions/const/CMakeLists.txt           | 33 +++++++
+ src/extensions/far/CMakeLists.txt             | 61 +++++++++++++
+ src/extensions/linear/CMakeLists.txt          | 69 +++++++++++++++
+ src/extensions/lookahead/CMakeLists.txt       | 36 ++++++++
+ src/extensions/mpdt/CMakeLists.txt            | 28 ++++++
+ src/extensions/ngram/CMakeLists.txt           | 38 ++++++++
  src/extensions/ngram/bitmap-index.cc          |  7 +-
  src/extensions/ngram/nthbit.cc                |  2 +-
- src/extensions/pdt/CMakeLists.txt             | 36 ++++++++
+ src/extensions/pdt/CMakeLists.txt             | 32 +++++++
  src/extensions/python/CMakeLists.txt          | 22 +++++
- src/extensions/special/CMakeLists.txt         | 59 ++++++++++++
+ src/extensions/special/CMakeLists.txt         | 59 +++++++++++++
  src/include/fst/compat.h                      | 22 +++++
  .../fst/extensions/far/compile-strings.h      |  3 -
  src/include/fst/extensions/far/create.h       |  1 -
- src/include/fst/extensions/far/far.h          | 10 ++
+ src/include/fst/extensions/far/far.h          | 10 +++
  .../fst/extensions/ngram/bitmap-index.h       |  2 +
  src/include/fst/extensions/ngram/nthbit.h     |  9 +-
  src/include/fst/flags.h                       | 22 +++--
@@ -66,10 +66,10 @@ Subject: [PATCH] Fix file closing on windows
  src/include/fst/symbol-table.h                | 11 +++
  src/include/fst/test/algo_test.h              |  2 +-
  src/lib/CMakeLists.txt                        | 41 +++++++++
- src/lib/mapped-file.cc                        |  5 +
- src/script/CMakeLists.txt                     | 76 +++++++++++++++
- src/test/CMakeLists.txt                       | 54 +++++++++++
- 65 files changed, 1123 insertions(+), 157 deletions(-)
+ src/lib/mapped-file.cc                        |  5 ++
+ src/script/CMakeLists.txt                     | 76 ++++++++++++++++
+ src/test/CMakeLists.txt                       | 54 ++++++++++++
+ 65 files changed, 1088 insertions(+), 157 deletions(-)
  create mode 100644 .gitignore
  create mode 100644 CMakeLists.txt
  create mode 100644 src/CMakeLists.txt
@@ -931,10 +931,10 @@ index 0000000..094ab74
 \ No newline at end of file
 diff --git a/src/extensions/compact/CMakeLists.txt b/src/extensions/compact/CMakeLists.txt
 new file mode 100644
-index 0000000..4ff4b6b
+index 0000000..6ac66d6
 --- /dev/null
 +++ b/src/extensions/compact/CMakeLists.txt
-@@ -0,0 +1,92 @@
+@@ -0,0 +1,87 @@
 +add_library(fstcompact
 +  compact8_acceptor-fst.cc 
 +  compact8_string-fst.cc 
@@ -956,7 +956,6 @@ index 0000000..4ff4b6b
 +target_link_libraries(fstcompact fst)
 +set_target_properties(fstcompact PROPERTIES 
 +  SOVERSION "${SOVERSION}"
-+  FOLDER compact
 +)
 +
 +install(TARGETS fstcompact 
@@ -969,16 +968,12 @@ index 0000000..4ff4b6b
 +    add_library(${ARGV})
 +    if (TARGET ${_name})
 +        target_link_libraries(${_name} fst)
-+        set_target_properties(${_name} PROPERTIES 
-+            WINDOWS_EXPORT_ALL_SYMBOLS true
-+            FOLDER compact/modules
-+        )
 +    endif()
 +
 +    #set_target_properties(${_name} PROPERTIES SOVERSION "1")
 +    install(TARGETS ${_name} 
-+	        LIBRARY DESTINATION lib
-+			ARCHIVE DESTINATION lib
++	        LIBRARY DESTINATION bin
++			ARCHIVE DESTINATION bin
 +            RUNTIME DESTINATION bin)
 +endfunction()
 +
@@ -1029,10 +1024,10 @@ index 0000000..4ff4b6b
 +
 diff --git a/src/extensions/compress/CMakeLists.txt b/src/extensions/compress/CMakeLists.txt
 new file mode 100644
-index 0000000..f205aaa
+index 0000000..965e8ec
 --- /dev/null
 +++ b/src/extensions/compress/CMakeLists.txt
-@@ -0,0 +1,40 @@
+@@ -0,0 +1,42 @@
 +file(GLOB HEADER_FILES ../../include/fst/extensions/compress/*.h)
 +
 +add_library(fstcompressscript
@@ -1041,6 +1036,7 @@ index 0000000..f205aaa
 + )
 +
 +target_link_libraries(fstcompressscript
++  fstscriptutils
 +  fstscript
 +  fst
 +  ${ZLIBS}
@@ -1061,6 +1057,7 @@ index 0000000..f205aaa
 +
 +  target_link_libraries(fstcompress
 +    fstcompressscript
++    fstscriptutils
 +    fstscript
 +    fst
 +    ${ZLIBS}
@@ -1076,23 +1073,19 @@ index 0000000..f205aaa
 \ No newline at end of file
 diff --git a/src/extensions/const/CMakeLists.txt b/src/extensions/const/CMakeLists.txt
 new file mode 100644
-index 0000000..61060b8
+index 0000000..35c1ce6
 --- /dev/null
 +++ b/src/extensions/const/CMakeLists.txt
-@@ -0,0 +1,38 @@
+@@ -0,0 +1,33 @@
 +function (add_module _name)
 +    add_library(${ARGV})
 +    if (TARGET ${_name})
 +        target_link_libraries(${_name} fst)
-+        set_target_properties(${_name} PROPERTIES 
-+            WINDOWS_EXPORT_ALL_SYMBOLS true
-+            FOLDER constant/modules
-+        )
 +    endif()
 +
 +    install(TARGETS ${_name}
-+    LIBRARY DESTINATION lib
-+    ARCHIVE DESTINATION lib
++    LIBRARY DESTINATION bin
++    ARCHIVE DESTINATION bin
 +    RUNTIME DESTINATION bin)
 +endfunction()
 +
@@ -1110,7 +1103,6 @@ index 0000000..61060b8
 +target_link_libraries(fstconst fst)
 +set_target_properties(fstconst PROPERTIES
 +  SOVERSION "${SOVERSION}"
-+  FOLDER constant
 +)
 +
 +install(TARGETS fstconst 
@@ -1188,10 +1180,10 @@ index 0000000..1e367b1
 +
 diff --git a/src/extensions/linear/CMakeLists.txt b/src/extensions/linear/CMakeLists.txt
 new file mode 100644
-index 0000000..77c56ae
+index 0000000..e302e1d
 --- /dev/null
 +++ b/src/extensions/linear/CMakeLists.txt
-@@ -0,0 +1,77 @@
+@@ -0,0 +1,69 @@
 +file(GLOB HEADER_FILES ../../include/fst/extensions/linear/*.h)
 +
 +
@@ -1207,11 +1199,10 @@ index 0000000..77c56ae
 +  )
 +  set_target_properties(fstlinearscript PROPERTIES 
 +    SOVERSION "${SOVERSION}"
-+    FOLDER linear
 +  )
 +  
 +  install(TARGETS fstlinearscript
-+  LIBRARY DESTINATION lib
++  LIBRARY DESTINATION bin
 +  ARCHIVE DESTINATION lib
 +  RUNTIME DESTINATION bin
 +  )
@@ -1242,9 +1233,6 @@ index 0000000..77c56ae
 +  install(TARGETS fstlinear fstloglinearapply
 +    RUNTIME DESTINATION bin
 +  )
-+  set_target_properties(fstlinear fstloglinearapply PROPERTIES
-+    FOLDER linear/bin
-+  )
 +endif(HAVE_BIN)
 +
 +
@@ -1252,15 +1240,11 @@ index 0000000..77c56ae
 +    add_library(${ARGV})
 +    if (TARGET ${_name})
 +        target_link_libraries(${_name} fst)
-+        set_target_properties(${_name} PROPERTIES 
-+            WINDOWS_EXPORT_ALL_SYMBOLS true
-+            FOLDER linear/modules
-+        )
 +    endif()
 +
 +    install(TARGETS ${_name}
-+    LIBRARY DESTINATION lib
-+    ARCHIVE DESTINATION lib
++    LIBRARY DESTINATION bin
++    ARCHIVE DESTINATION bin
 +    RUNTIME DESTINATION bin)
 +endfunction()
 +
@@ -1271,10 +1255,10 @@ index 0000000..77c56ae
 +  linear-classifier-fst.cc)
 diff --git a/src/extensions/lookahead/CMakeLists.txt b/src/extensions/lookahead/CMakeLists.txt
 new file mode 100644
-index 0000000..4abe5a3
+index 0000000..9b61057
 --- /dev/null
 +++ b/src/extensions/lookahead/CMakeLists.txt
-@@ -0,0 +1,41 @@
+@@ -0,0 +1,36 @@
 +add_library(fstlookahead
 +  arc_lookahead-fst.cc 
 +  ilabel_lookahead-fst.cc
@@ -1283,7 +1267,6 @@ index 0000000..4abe5a3
 +target_link_libraries(fstlookahead fst)
 +set_target_properties(fstlookahead PROPERTIES 
 +  SOVERSION "${SOVERSION}"
-+  FOLDER lookahead  
 +)
 +
 +install(TARGETS fstlookahead 
@@ -1297,14 +1280,10 @@ index 0000000..4abe5a3
 +    if (TARGET ${_name})
 +        target_link_libraries(${_name} fst)
 +    endif()
-+    set_target_properties(${_name} PROPERTIES 
-+        WINDOWS_EXPORT_ALL_SYMBOLS true
-+        FOLDER lookahead/modules
-+    )
 +
 +    install(TARGETS ${_name}
-+    LIBRARY DESTINATION lib
-+    ARCHIVE DESTINATION lib
++    LIBRARY DESTINATION bin
++    ARCHIVE DESTINATION bin
 +    RUNTIME DESTINATION bin)
 +endfunction()
 +  
@@ -1319,10 +1298,10 @@ index 0000000..4abe5a3
 \ No newline at end of file
 diff --git a/src/extensions/mpdt/CMakeLists.txt b/src/extensions/mpdt/CMakeLists.txt
 new file mode 100644
-index 0000000..54a06a1
+index 0000000..9880c45
 --- /dev/null
 +++ b/src/extensions/mpdt/CMakeLists.txt
-@@ -0,0 +1,32 @@
+@@ -0,0 +1,28 @@
 +file(GLOB HEADER_FILES ../../include/fst/extensions/mpdt/*.h)
 +
 +if(HAVE_SCRIPT)
@@ -1330,7 +1309,6 @@ index 0000000..54a06a1
 +  target_link_libraries(fstmpdtscript fstscript fstscriptutils fst)
 +  set_target_properties(fstmpdtscript PROPERTIES 
 +    SOVERSION "${SOVERSION}"
-+    FOLDER mpdt
 +  )
 +  install(TARGETS fstmpdtscript 
 +  LIBRARY DESTINATION lib
@@ -1344,9 +1322,6 @@ index 0000000..54a06a1
 +      add_executable(${ARGV})
 +      if (TARGET ${_name})
 +          target_link_libraries(${_name} fstmpdtscript fstpdtscript fstscriptutils fstscript fst ${CMAKE_DL_LIBS})
-+          set_target_properties(${_name} PROPERTIES
-+            FOLDER mpdt/bin
-+          )
 +      endif()
 +    install(TARGETS ${_name} RUNTIME DESTINATION bin)
 +  endfunction()
@@ -1358,10 +1333,10 @@ index 0000000..54a06a1
 \ No newline at end of file
 diff --git a/src/extensions/ngram/CMakeLists.txt b/src/extensions/ngram/CMakeLists.txt
 new file mode 100644
-index 0000000..f83f6fa
+index 0000000..2be5f3f
 --- /dev/null
 +++ b/src/extensions/ngram/CMakeLists.txt
-@@ -0,0 +1,44 @@
+@@ -0,0 +1,38 @@
 +file(GLOB HEADER_FILES ../../include/fst/extensions/ngram/*.h)
 +
 +add_library(fstngram
@@ -1377,7 +1352,6 @@ index 0000000..f83f6fa
 +
 +set_target_properties(fstngram PROPERTIES
 +  SOVERSION "${SOVERSION}"
-+  FOLDER ngram
 +)
 +
 +install(TARGETS fstngram 
@@ -1392,17 +1366,12 @@ index 0000000..f83f6fa
 +    nthbit.cc
 +)
 +
-+set_target_properties(ngram_fst PROPERTIES
-+    WINDOWS_EXPORT_ALL_SYMBOLS true
-+    FOLDER ngram/modules
-+)
-+
 +target_link_libraries(ngram_fst
 +    fst
 +)
 +
 +install(TARGETS ngram_fst
-+LIBRARY DESTINATION lib
++LIBRARY DESTINATION bin
 +ARCHIVE DESTINATION lib
 +RUNTIME DESTINATION bin
 +)
@@ -1461,10 +1430,10 @@ index fdbf304..a716ef3 100644
    uint32_t byte_popcount = nth_bit_bit_count[next_byte];
 diff --git a/src/extensions/pdt/CMakeLists.txt b/src/extensions/pdt/CMakeLists.txt
 new file mode 100644
-index 0000000..643b578
+index 0000000..01bdeb3
 --- /dev/null
 +++ b/src/extensions/pdt/CMakeLists.txt
-@@ -0,0 +1,36 @@
+@@ -0,0 +1,32 @@
 +file(GLOB HEADER_FILES ../../include/fst/extensions/pdt/*.h)
 +
 +if(HAVE_SCRIPT)
@@ -1472,7 +1441,6 @@ index 0000000..643b578
 +  target_link_libraries(fstpdtscript fstscript fstscriptutils fst)
 +  set_target_properties(fstpdtscript PROPERTIES 
 +    SOVERSION "${SOVERSION}"
-+    FOLDER pdt
 +  )
 +
 +  install(TARGETS fstpdtscript
@@ -1487,9 +1455,6 @@ index 0000000..643b578
 +      add_executable(${ARGV})
 +      if (TARGET ${_name})
 +          target_link_libraries(${_name} fstpdtscript fstscriptutils fstscript fst ${CMAKE_DL_LIBS})
-+          set_target_properties(${_name} PROPERTIES
-+            FOLDER pdt/bin
-+          )
 +      endif()
 +      install(TARGETS ${_name} RUNTIME DESTINATION bin)
 +  endfunction()
@@ -1533,7 +1498,7 @@ index 0000000..83b9a7f
 \ No newline at end of file
 diff --git a/src/extensions/special/CMakeLists.txt b/src/extensions/special/CMakeLists.txt
 new file mode 100644
-index 0000000..a7149a8
+index 0000000..b9296db
 --- /dev/null
 +++ b/src/extensions/special/CMakeLists.txt
 @@ -0,0 +1,59 @@
@@ -1554,6 +1519,7 @@ index 0000000..a7149a8
 +
 +  target_link_libraries(fstspecial-bin
 +    fstscript
++    fstscriptutils
 +    fst
 +    ${CMAKE_DL_LIBS}
 + )
@@ -1569,7 +1535,6 @@ index 0000000..a7149a8
 +
 +set_target_properties(fstspecial PROPERTIES
 +  SOVERSION "${SOVERSION}"
-+  FOLDER special
 +)
 +target_link_libraries(fstspecial
 +  fst
@@ -1588,8 +1553,8 @@ index 0000000..a7149a8
 +    endif()
 +
 +    install(TARGETS ${_name}
-+    LIBRARY DESTINATION lib
-+    ARCHIVE DESTINATION lib
++    LIBRARY DESTINATION bin
++    ARCHIVE DESTINATION bin
 +    RUNTIME DESTINATION bin)
 +endfunction()
 +

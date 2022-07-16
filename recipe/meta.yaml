@@ -65,7 +65,7 @@ test:
     {% for each_bin in fst_binaries %}
       # If behaving properly these will have return code 1.
       - {{ each_bin }} --helpshort >/dev/null || [[ $? == 1 ]]    # [unix]
-      - {{ each_bin }} --helpshort & if errorlevel 1 ( exit /b 0) # [win]
+      - {{ each_bin }} --helpshort & if errorlevel 1 ( exit /b 0)  else (exit /b 1) # [win]
     {% endfor %}
 
     # libraries:
