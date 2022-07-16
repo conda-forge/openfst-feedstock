@@ -1,0 +1,3254 @@
+From c7b0cf2808ce5800f3933809d210466d4d47d06f Mon Sep 17 00:00:00 2001
+From: Michael McAuliffe <michael.e.mcauliffe@gmail.com>
+Date: Sun, 10 Jul 2022 00:50:05 -0700
+Subject: [PATCH] Fix file closing on windows
+
+---
+ .vscode/settings.json                         | 63 +++++++++++++
+ CMakeLists.txt                                | 48 ++++++++++
+ src/CMakeLists.txt                            | 17 ++++
+ src/bin/CMakeLists.txt                        | 85 +++++++++++++++++
+ src/bin/fstarcsort-main.cc                    |  2 +-
+ src/bin/fstclosure-main.cc                    |  2 +-
+ src/bin/fstcompile-main.cc                    | 20 ++--
+ src/bin/fstcompose-main.cc                    |  4 +-
+ src/bin/fstconvert-main.cc                    |  2 +-
+ src/bin/fstdeterminize-main.cc                | 12 +--
+ src/bin/fstdifference-main.cc                 |  4 +-
+ src/bin/fstdisambiguate-main.cc               |  8 +-
+ src/bin/fstdraw-main.cc                       | 34 +++----
+ src/bin/fstencode-main.cc                     |  8 +-
+ src/bin/fstepsnormalize-main.cc               |  2 +-
+ src/bin/fstequal-main.cc                      |  2 +-
+ src/bin/fstequivalent-main.cc                 | 12 +--
+ src/bin/fstinfo-main.cc                       |  8 +-
+ src/bin/fstintersect-main.cc                  |  4 +-
+ src/bin/fstisomorphic-main.cc                 |  2 +-
+ src/bin/fstmap-main.cc                        |  8 +-
+ src/bin/fstminimize-main.cc                   |  4 +-
+ src/bin/fstprint-main.cc                      | 20 ++--
+ src/bin/fstproject-main.cc                    |  2 +-
+ src/bin/fstprune-main.cc                      |  6 +-
+ src/bin/fstpush-main.cc                       | 12 +--
+ src/bin/fstrandgen-main.cc                    | 12 +--
+ src/bin/fstrelabel-main.cc                    | 18 ++--
+ src/bin/fstreplace-main.cc                    |  8 +-
+ src/bin/fstreverse-main.cc                    |  2 +-
+ src/bin/fstreweight-main.cc                   |  2 +-
+ src/bin/fstrmepsilon-main.cc                  | 10 +-
+ src/bin/fstshortestdistance-main.cc           |  8 +-
+ src/bin/fstshortestpath-main.cc               | 12 +--
+ src/bin/fstsymbols-main.cc                    | 20 ++--
+ src/extensions/CMakeLists.txt                 | 43 +++++++++
+ src/extensions/compact/CMakeLists.txt         | 92 +++++++++++++++++++
+ src/extensions/compress/CMakeLists.txt        | 40 ++++++++
+ src/extensions/const/CMakeLists.txt           | 38 ++++++++
+ src/extensions/far/CMakeLists.txt             | 61 ++++++++++++
+ src/extensions/linear/CMakeLists.txt          | 77 ++++++++++++++++
+ src/extensions/lookahead/CMakeLists.txt       | 41 +++++++++
+ src/extensions/mpdt/CMakeLists.txt            | 32 +++++++
+ src/extensions/ngram/CMakeLists.txt           | 44 +++++++++
+ src/extensions/ngram/bitmap-index.cc          |  7 +-
+ src/extensions/ngram/nthbit.cc                |  2 +-
+ src/extensions/pdt/CMakeLists.txt             | 36 ++++++++
+ src/extensions/python/CMakeLists.txt          | 22 +++++
+ src/extensions/special/CMakeLists.txt         | 59 ++++++++++++
+ src/include/fst/compat.h                      | 22 +++++
+ src/include/fst/const-fst.h                   |  1 +
+ src/include/fst/determinize.h                 |  1 +
+ src/include/fst/dfs-visit.h                   |  1 +
+ src/include/fst/difference.h                  |  1 +
+ src/include/fst/disambiguate.h                |  1 +
+ src/include/fst/edit-fst.h                    |  1 +
+ src/include/fst/encode.h                      |  1 +
+ src/include/fst/epsnormalize.h                |  1 +
+ src/include/fst/equal.h                       |  1 +
+ src/include/fst/equivalent.h                  |  1 +
+ src/include/fst/error-weight.h                |  1 +
+ src/include/fst/expanded-fst.h                |  1 +
+ src/include/fst/expander-cache.h              |  1 +
+ src/include/fst/expectation-weight.h          |  1 +
+ .../fst/extensions/far/compile-strings.h      |  3 -
+ src/include/fst/extensions/far/create.h       |  1 -
+ src/include/fst/extensions/far/far.h          | 10 ++
+ .../fst/extensions/ngram/bitmap-index.h       |  2 +
+ src/include/fst/extensions/ngram/nthbit.h     |  9 +-
+ src/include/fst/factor-weight.h               |  1 +
+ src/include/fst/filter-state.h                |  1 +
+ src/include/fst/flags.h                       | 23 +++--
+ src/include/fst/float-weight.h                |  1 +
+ src/include/fst/fst-decl.h                    |  1 +
+ src/include/fst/fst.h                         |  1 +
+ src/include/fst/fstlib.h                      |  1 +
+ src/include/fst/generic-register.h            |  1 +
+ src/include/fst/heap.h                        |  1 +
+ src/include/fst/icu.h                         |  1 +
+ src/include/fst/intersect.h                   |  1 +
+ src/include/fst/interval-set.h                |  1 +
+ src/include/fst/invert.h                      |  1 +
+ src/include/fst/isomorphic.h                  |  1 +
+ src/include/fst/label-reachable.h             |  1 +
+ src/include/fst/lexicographic-weight.h        |  1 +
+ src/include/fst/lock.h                        |  2 +
+ src/include/fst/log.h                         |  1 +
+ src/include/fst/lookahead-filter.h            |  1 +
+ src/include/fst/lookahead-matcher.h           |  1 +
+ src/include/fst/mapped-file.h                 |  1 +
+ src/include/fst/matcher-fst.h                 |  1 +
+ src/include/fst/matcher.h                     |  1 +
+ src/include/fst/memory.h                      |  1 +
+ src/include/fst/minimize.h                    |  1 +
+ src/include/fst/mutable-fst.h                 |  1 +
+ src/include/fst/pair-weight.h                 |  1 +
+ src/include/fst/partition.h                   |  1 +
+ src/include/fst/power-weight-mappers.h        |  1 +
+ src/include/fst/power-weight.h                |  1 +
+ src/include/fst/product-weight.h              |  1 +
+ src/include/fst/project.h                     |  1 +
+ src/include/fst/properties.h                  |  3 +-
+ src/include/fst/prune.h                       |  1 +
+ src/include/fst/push.h                        |  1 +
+ src/include/fst/queue.h                       |  1 +
+ src/include/fst/randequivalent.h              |  1 +
+ src/include/fst/randgen.h                     |  1 +
+ src/include/fst/rational.h                    |  1 +
+ src/include/fst/register.h                    |  3 +-
+ src/include/fst/relabel.h                     |  1 +
+ src/include/fst/replace-util.h                |  1 +
+ src/include/fst/replace.h                     |  1 +
+ src/include/fst/reverse.h                     |  1 +
+ src/include/fst/reweight.h                    |  1 +
+ src/include/fst/rmepsilon.h                   |  1 +
+ src/include/fst/rmfinalepsilon.h              |  1 +
+ src/include/fst/script/info-impl.h            |  1 +
+ src/include/fst/set-weight.h                  |  1 +
+ src/include/fst/shortest-distance.h           |  1 +
+ src/include/fst/shortest-path.h               |  1 +
+ src/include/fst/signed-log-weight.h           |  1 +
+ src/include/fst/sparse-power-weight.h         |  1 +
+ src/include/fst/sparse-tuple-weight.h         |  1 +
+ src/include/fst/state-map.h                   |  1 +
+ src/include/fst/state-reachable.h             |  1 +
+ src/include/fst/state-table.h                 |  1 +
+ src/include/fst/statesort.h                   |  1 +
+ src/include/fst/string-weight.h               |  1 +
+ src/include/fst/string.h                      |  1 +
+ src/include/fst/symbol-table-ops.h            |  1 +
+ src/include/fst/symbol-table.h                | 12 +++
+ src/include/fst/synchronize.h                 |  1 +
+ src/include/fst/test-properties.h             |  1 +
+ src/include/fst/test/algo_test.h              |  2 +-
+ src/include/fst/topsort.h                     |  1 +
+ src/include/fst/tuple-weight.h                |  1 +
+ src/include/fst/union-find.h                  |  1 +
+ src/include/fst/union-weight.h                |  1 +
+ src/include/fst/union.h                       |  1 +
+ src/include/fst/util.h                        |  1 +
+ src/include/fst/vector-fst.h                  |  1 +
+ src/include/fst/verify.h                      |  1 +
+ src/include/fst/visit.h                       |  1 +
+ src/include/fst/weight.h                      |  1 +
+ src/lib/CMakeLists.txt                        | 41 +++++++++
+ src/lib/mapped-file.cc                        |  5 +
+ src/lib/properties.cc                         |  1 +
+ src/script/CMakeLists.txt                     | 76 +++++++++++++++
+ src/test/CMakeLists.txt                       | 54 +++++++++++
+ 149 files changed, 1272 insertions(+), 157 deletions(-)
+ create mode 100644 .vscode/settings.json
+ create mode 100644 CMakeLists.txt
+ create mode 100644 src/CMakeLists.txt
+ create mode 100644 src/bin/CMakeLists.txt
+ create mode 100644 src/extensions/CMakeLists.txt
+ create mode 100644 src/extensions/compact/CMakeLists.txt
+ create mode 100644 src/extensions/compress/CMakeLists.txt
+ create mode 100644 src/extensions/const/CMakeLists.txt
+ create mode 100644 src/extensions/far/CMakeLists.txt
+ create mode 100644 src/extensions/linear/CMakeLists.txt
+ create mode 100644 src/extensions/lookahead/CMakeLists.txt
+ create mode 100644 src/extensions/mpdt/CMakeLists.txt
+ create mode 100644 src/extensions/ngram/CMakeLists.txt
+ create mode 100644 src/extensions/pdt/CMakeLists.txt
+ create mode 100644 src/extensions/python/CMakeLists.txt
+ create mode 100644 src/extensions/special/CMakeLists.txt
+ create mode 100644 src/lib/CMakeLists.txt
+ create mode 100644 src/script/CMakeLists.txt
+ create mode 100644 src/test/CMakeLists.txt
+
+diff --git a/.vscode/settings.json b/.vscode/settings.json
+new file mode 100644
+index 0000000..0997d6a
+--- /dev/null
++++ b/.vscode/settings.json
+@@ -0,0 +1,63 @@
++{
++    "files.associations": {
++        "*.dict": "tsv",
++        "string_view": "cpp",
++        "*.inc": "cpp",
++        "array": "cpp",
++        "atomic": "cpp",
++        "bit": "cpp",
++        "*.tcc": "cpp",
++        "cctype": "cpp",
++        "charconv": "cpp",
++        "chrono": "cpp",
++        "clocale": "cpp",
++        "cmath": "cpp",
++        "condition_variable": "cpp",
++        "cstdarg": "cpp",
++        "cstddef": "cpp",
++        "cstdint": "cpp",
++        "cstdio": "cpp",
++        "cstdlib": "cpp",
++        "cstring": "cpp",
++        "ctime": "cpp",
++        "cwchar": "cpp",
++        "cwctype": "cpp",
++        "deque": "cpp",
++        "forward_list": "cpp",
++        "list": "cpp",
++        "map": "cpp",
++        "set": "cpp",
++        "unordered_map": "cpp",
++        "unordered_set": "cpp",
++        "vector": "cpp",
++        "exception": "cpp",
++        "algorithm": "cpp",
++        "functional": "cpp",
++        "iterator": "cpp",
++        "memory": "cpp",
++        "memory_resource": "cpp",
++        "numeric": "cpp",
++        "optional": "cpp",
++        "random": "cpp",
++        "ratio": "cpp",
++        "string": "cpp",
++        "system_error": "cpp",
++        "tuple": "cpp",
++        "type_traits": "cpp",
++        "utility": "cpp",
++        "fstream": "cpp",
++        "initializer_list": "cpp",
++        "iomanip": "cpp",
++        "iosfwd": "cpp",
++        "iostream": "cpp",
++        "istream": "cpp",
++        "limits": "cpp",
++        "new": "cpp",
++        "ostream": "cpp",
++        "shared_mutex": "cpp",
++        "sstream": "cpp",
++        "stdexcept": "cpp",
++        "streambuf": "cpp",
++        "typeinfo": "cpp"
++    }
++}
+\ No newline at end of file
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+new file mode 100644
+index 0000000..aae4dc0
+--- /dev/null
++++ b/CMakeLists.txt
+@@ -0,0 +1,48 @@
++project(openfst)
++cmake_minimum_required(VERSION 3.18)
++include(CTest)
++find_package(ICU COMPONENTS data i18n io  test tu uc)
++if (ICU_FOUND)
++  include_directories(${ICU_INCLUDE_DIRS})
++  set(LIBS ${LIBS} ${ICU_LIBRARIES})
++endif (ICU_FOUND)
++
++include(GenerateExportHeader)
++set(CMAKE_MACOSX_RPATH 1)
++set(CMAKE_CXX_STANDARD 17)
++
++set(CMAKE_POSITION_INDEPENDENT_CODE ON)
++if (MSVC)
++    find_package(dlfcn-win32 REQUIRED)
++    set(CMAKE_DL_LIBS dlfcn-win32::dl)
++    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
++    add_definitions(-DWIN32_LEAN_AND_MEAN)
++    add_definitions(-DNOMINMAX)
++    add_definitions(-D_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS)
++    add_definitions(-D_USE_MATH_DEFINES)
++    add_compile_options(/permissive- /FS /wd4819 /EHsc /bigobj)
++
++    # some warnings related with fst
++    add_compile_options(/wd4018 /wd4244 /wd4267 /wd4291 /wd4305)
++endif (MSVC)
++option(BUILD_SHARED_LIBS "Build shared libraries" ON)
++
++set(SOVERSION "25")
++
++
++option(HAVE_BIN          "Build the fst binaries" ON)
++option(HAVE_SCRIPT       "Build the fstscript" ON)
++option(HAVE_COMPACT      "Build compact" ON)
++option(HAVE_COMPRESS "Build compress" ON)
++option(HAVE_CONST   "Build const" ON)
++option(HAVE_FAR  "Build far" ON)
++option(HAVE_GRM "Build grm" ON)
++option(HAVE_PDT "Build pdt" ON)
++option(HAVE_MPDT "Build mpdt" ON)
++option(HAVE_LINEAR "Build linear" ON)
++option(HAVE_LOOKAHEAD "Build lookahead" ON)
++option(HAVE_NGRAM "Build ngram" ON)
++option(HAVE_PYTHON "Build python" OFF)
++option(HAVE_SPECIAL "Build special" ON)
++
++add_subdirectory(src)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+new file mode 100644
+index 0000000..2729d99
+--- /dev/null
++++ b/src/CMakeLists.txt
+@@ -0,0 +1,17 @@
++#-DHAVE_CONFIG_H -I./../include -fno-exceptions -funsigned-char -std=c++11 -MT symbol-table.lo -MD -MP -MF .deps/symbol-table.Tpo -c symbol-table.cc  -fno-common -DPIC -o .libs/symbol-table.o
++
++include_directories(./include/)
++install(DIRECTORY include/ DESTINATION include/
++        FILES_MATCHING PATTERN "*.h")
++
++add_subdirectory(lib)
++add_subdirectory(script)
++
++if(HAVE_BIN)
++  add_subdirectory(bin)
++endif(HAVE_BIN)
++
++add_subdirectory(extensions)
++
++enable_testing()
++add_subdirectory(test)
+\ No newline at end of file
+diff --git a/src/bin/CMakeLists.txt b/src/bin/CMakeLists.txt
+new file mode 100644
+index 0000000..e960377
+--- /dev/null
++++ b/src/bin/CMakeLists.txt
+@@ -0,0 +1,85 @@
++function (add_executable2 _name)
++    add_executable(${ARGV})
++    if (TARGET ${_name})
++        target_link_libraries(${_name} fstscriptutils fstscript fst ${CMAKE_DL_LIBS})
++        set_target_properties(${_name} PROPERTIES FOLDER bin)
++    endif()
++
++    install(TARGETS ${_name} RUNTIME DESTINATION bin)
++endfunction()
++
++include_directories(../include ../script/)
++
++add_executable2(fstarcsort fstarcsort-main.cc fstarcsort.cc)
++
++add_executable2(fstclosure fstclosure-main.cc fstclosure.cc)
++
++add_executable2(fstcompile  fstcompile-main.cc fstcompile.cc)
++
++add_executable2(fstcompose fstcompose-main.cc fstcompose.cc)
++
++add_executable2(fstconcat fstconcat-main.cc fstconcat.cc)
++
++add_executable2(fstconnect fstconnect-main.cc fstconnect.cc)
++
++add_executable2(fstconvert fstconvert-main.cc fstconvert.cc)
++
++add_executable2(fstdeterminize fstdeterminize-main.cc fstdeterminize.cc)
++
++add_executable2(fstdifference fstdifference-main.cc fstdifference.cc)
++
++add_executable2(fstdisambiguate fstdisambiguate-main.cc fstdisambiguate.cc)
++
++add_executable2(fstdraw fstdraw-main.cc fstdraw.cc)
++
++add_executable2(fstencode fstencode-main.cc fstencode.cc)
++
++add_executable2(fstepsnormalize fstepsnormalize-main.cc fstepsnormalize.cc)
++
++add_executable2(fstequal fstequal-main.cc fstequal.cc)
++
++add_executable2(fstequivalent fstequivalent-main.cc fstequivalent.cc)
++
++add_executable2(fstinfo fstinfo-main.cc fstinfo.cc)
++
++add_executable2(fstintersect fstintersect-main.cc fstintersect.cc)
++
++add_executable2(fstinvert fstinvert-main.cc fstinvert.cc)
++
++add_executable2(fstisomorphic fstisomorphic-main.cc fstisomorphic.cc)
++
++add_executable2(fstmap fstmap-main.cc fstmap.cc)
++
++add_executable2(fstminimize fstminimize-main.cc fstminimize.cc)
++
++add_executable2(fstprint fstprint-main.cc fstprint.cc)
++
++add_executable2(fstproject fstproject-main.cc fstproject.cc)
++
++add_executable2(fstprune fstprune-main.cc fstprune.cc)
++
++add_executable2(fstpush fstpush-main.cc fstpush.cc)
++
++add_executable2(fstrandgen fstrandgen-main.cc fstrandgen.cc)
++
++add_executable2(fstrelabel fstrelabel-main.cc fstrelabel.cc)
++
++add_executable2(fstreplace fstreplace-main.cc fstreplace.cc)
++
++add_executable2(fstreverse fstreverse-main.cc fstreverse.cc)
++
++add_executable2(fstreweight fstreweight-main.cc fstreweight.cc)
++
++add_executable2(fstrmepsilon fstrmepsilon-main.cc fstrmepsilon.cc)
++
++add_executable2(fstshortestdistance fstshortestdistance-main.cc fstshortestdistance.cc)
++
++add_executable2(fstshortestpath fstshortestpath-main.cc fstshortestpath.cc)
++
++add_executable2(fstsymbols fstsymbols-main.cc fstsymbols.cc)
++
++add_executable2(fstsynchronize fstsynchronize-main.cc fstsynchronize.cc)
++
++add_executable2(fsttopsort fsttopsort-main.cc fsttopsort.cc)
++
++add_executable2(fstunion fstunion-main.cc fstunion.cc)
+\ No newline at end of file
+diff --git a/src/bin/fstarcsort-main.cc b/src/bin/fstarcsort-main.cc
+index 99f931d..e12e72b 100644
+--- a/src/bin/fstarcsort-main.cc
++++ b/src/bin/fstarcsort-main.cc
+@@ -26,7 +26,7 @@
+ #include <fst/script/arcsort.h>
+ #include <fst/script/getters.h>
+ 
+-DECLARE_string(sort_type);
++DECLARE_EXE_string(sort_type);
+ 
+ int fstarcsort_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstclosure-main.cc b/src/bin/fstclosure-main.cc
+index 5fb199a..3799384 100644
+--- a/src/bin/fstclosure-main.cc
++++ b/src/bin/fstclosure-main.cc
+@@ -25,7 +25,7 @@
+ #include <fst/script/closure.h>
+ #include <fst/script/getters.h>
+ 
+-DECLARE_string(closure_type);
++DECLARE_EXE_string(closure_type);
+ 
+ int fstclosure_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstcompile-main.cc b/src/bin/fstcompile-main.cc
+index 2adb8ae..da27527 100644
+--- a/src/bin/fstcompile-main.cc
++++ b/src/bin/fstcompile-main.cc
+@@ -28,16 +28,16 @@
+ #include <fstream>
+ #include <fst/script/compile.h>
+ 
+-DECLARE_bool(acceptor);
+-DECLARE_string(arc_type);
+-DECLARE_string(fst_type);
+-DECLARE_string(isymbols);
+-DECLARE_string(osymbols);
+-DECLARE_string(ssymbols);
+-DECLARE_bool(keep_isymbols);
+-DECLARE_bool(keep_osymbols);
+-DECLARE_bool(keep_state_numbering);
+-DECLARE_bool(allow_negative_labels);
++DECLARE_EXE_bool(acceptor);
++DECLARE_EXE_string(arc_type);
++DECLARE_EXE_string(fst_type);
++DECLARE_EXE_string(isymbols);
++DECLARE_EXE_string(osymbols);
++DECLARE_EXE_string(ssymbols);
++DECLARE_EXE_bool(keep_isymbols);
++DECLARE_EXE_bool(keep_osymbols);
++DECLARE_EXE_bool(keep_state_numbering);
++DECLARE_EXE_bool(allow_negative_labels);
+ 
+ int fstcompile_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstcompose-main.cc b/src/bin/fstcompose-main.cc
+index d7ceddf..2196aee 100644
+--- a/src/bin/fstcompose-main.cc
++++ b/src/bin/fstcompose-main.cc
+@@ -26,8 +26,8 @@
+ #include <fst/script/compose.h>
+ #include <fst/script/getters.h>
+ 
+-DECLARE_string(compose_filter);
+-DECLARE_bool(connect);
++DECLARE_EXE_string(compose_filter);
++DECLARE_EXE_bool(connect);
+ 
+ int fstcompose_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstconvert-main.cc b/src/bin/fstconvert-main.cc
+index b271446..a2dff35 100644
+--- a/src/bin/fstconvert-main.cc
++++ b/src/bin/fstconvert-main.cc
+@@ -24,7 +24,7 @@
+ #include <fst/flags.h>
+ #include <fst/script/convert.h>
+ 
+-DECLARE_string(fst_type);
++DECLARE_EXE_string(fst_type);
+ 
+ int fstconvert_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstdeterminize-main.cc b/src/bin/fstdeterminize-main.cc
+index 91a940a..65749c5 100644
+--- a/src/bin/fstdeterminize-main.cc
++++ b/src/bin/fstdeterminize-main.cc
+@@ -25,12 +25,12 @@
+ #include <fst/script/determinize.h>
+ #include <fst/script/getters.h>
+ 
+-DECLARE_double(delta);
+-DECLARE_string(weight);
+-DECLARE_int64(nstate);
+-DECLARE_int64(subsequential_label);
+-DECLARE_string(det_type);
+-DECLARE_bool(increment_subsequential_label);
++DECLARE_EXE_double(delta);
++DECLARE_EXE_string(weight);
++DECLARE_EXE_int64(nstate);
++DECLARE_EXE_int64(subsequential_label);
++DECLARE_EXE_string(det_type);
++DECLARE_EXE_bool(increment_subsequential_label);
+ 
+ int fstdeterminize_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstdifference-main.cc b/src/bin/fstdifference-main.cc
+index 52c56c9..d498849 100644
+--- a/src/bin/fstdifference-main.cc
++++ b/src/bin/fstdifference-main.cc
+@@ -26,8 +26,8 @@
+ #include <fst/script/difference.h>
+ #include <fst/script/getters.h>
+ 
+-DECLARE_string(compose_filter);
+-DECLARE_bool(connect);
++DECLARE_EXE_string(compose_filter);
++DECLARE_EXE_bool(connect);
+ 
+ int fstdifference_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstdisambiguate-main.cc b/src/bin/fstdisambiguate-main.cc
+index fda569a..47d3921 100644
+--- a/src/bin/fstdisambiguate-main.cc
++++ b/src/bin/fstdisambiguate-main.cc
+@@ -24,10 +24,10 @@
+ #include <fst/flags.h>
+ #include <fst/script/disambiguate.h>
+ 
+-DECLARE_double(delta);
+-DECLARE_int64(nstate);
+-DECLARE_string(weight);
+-DECLARE_int64(subsequential_label);
++DECLARE_EXE_double(delta);
++DECLARE_EXE_int64(nstate);
++DECLARE_EXE_string(weight);
++DECLARE_EXE_int64(subsequential_label);
+ 
+ int fstdisambiguate_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstdraw-main.cc b/src/bin/fstdraw-main.cc
+index 75b11d8..e2ea042 100644
+--- a/src/bin/fstdraw-main.cc
++++ b/src/bin/fstdraw-main.cc
+@@ -28,23 +28,23 @@
+ #include <fstream>
+ #include <fst/script/draw.h>
+ 
+-DECLARE_bool(acceptor);
+-DECLARE_string(isymbols);
+-DECLARE_string(osymbols);
+-DECLARE_string(ssymbols);
+-DECLARE_bool(numeric);
+-DECLARE_int32(precision);
+-DECLARE_string(float_format);
+-DECLARE_bool(show_weight_one);
+-DECLARE_string(title);
+-DECLARE_bool(portrait);
+-DECLARE_bool(vertical);
+-DECLARE_int32(fontsize);
+-DECLARE_double(height);
+-DECLARE_double(width);
+-DECLARE_double(nodesep);
+-DECLARE_double(ranksep);
+-DECLARE_bool(allow_negative_labels);
++DECLARE_EXE_bool(acceptor);
++DECLARE_EXE_string(isymbols);
++DECLARE_EXE_string(osymbols);
++DECLARE_EXE_string(ssymbols);
++DECLARE_EXE_bool(numeric);
++DECLARE_EXE_int32(precision);
++DECLARE_EXE_string(float_format);
++DECLARE_EXE_bool(show_weight_one);
++DECLARE_EXE_string(title);
++DECLARE_EXE_bool(portrait);
++DECLARE_EXE_bool(vertical);
++DECLARE_EXE_int32(fontsize);
++DECLARE_EXE_double(height);
++DECLARE_EXE_double(width);
++DECLARE_EXE_double(nodesep);
++DECLARE_EXE_double(ranksep);
++DECLARE_EXE_bool(allow_negative_labels);
+ 
+ int fstdraw_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstencode-main.cc b/src/bin/fstencode-main.cc
+index 8680df4..11761f4 100644
+--- a/src/bin/fstencode-main.cc
++++ b/src/bin/fstencode-main.cc
+@@ -26,10 +26,10 @@
+ #include <fst/script/encode.h>
+ #include <fst/script/getters.h>
+ 
+-DECLARE_bool(decode);
+-DECLARE_bool(encode_labels);
+-DECLARE_bool(encode_weights);
+-DECLARE_bool(encode_reuse);
++DECLARE_EXE_bool(decode);
++DECLARE_EXE_bool(encode_labels);
++DECLARE_EXE_bool(encode_weights);
++DECLARE_EXE_bool(encode_reuse);
+ 
+ int fstencode_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstepsnormalize-main.cc b/src/bin/fstepsnormalize-main.cc
+index b9ad4ec..fe93605 100644
+--- a/src/bin/fstepsnormalize-main.cc
++++ b/src/bin/fstepsnormalize-main.cc
+@@ -25,7 +25,7 @@
+ #include <fst/script/epsnormalize.h>
+ #include <fst/script/getters.h>
+ 
+-DECLARE_string(eps_norm_type);
++DECLARE_EXE_string(eps_norm_type);
+ 
+ int fstepsnormalize_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstequal-main.cc b/src/bin/fstequal-main.cc
+index 000bed6..d9fcdd5 100644
+--- a/src/bin/fstequal-main.cc
++++ b/src/bin/fstequal-main.cc
+@@ -25,7 +25,7 @@
+ #include <fst/log.h>
+ #include <fst/script/equal.h>
+ 
+-DECLARE_double(delta);
++DECLARE_EXE_double(delta);
+ 
+ int fstequal_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstequivalent-main.cc b/src/bin/fstequivalent-main.cc
+index b0159d4..3e4f879 100644
+--- a/src/bin/fstequivalent-main.cc
++++ b/src/bin/fstequivalent-main.cc
+@@ -27,12 +27,12 @@
+ #include <fst/script/getters.h>
+ #include <fst/script/randequivalent.h>
+ 
+-DECLARE_double(delta);
+-DECLARE_bool(random);
+-DECLARE_int32(max_length);
+-DECLARE_int32(npath);
+-DECLARE_uint64(seed);
+-DECLARE_string(select);
++DECLARE_EXE_double(delta);
++DECLARE_EXE_bool(random);
++DECLARE_EXE_int32(max_length);
++DECLARE_EXE_int32(npath);
++DECLARE_EXE_uint64(seed);
++DECLARE_EXE_string(select);
+ 
+ int fstequivalent_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstinfo-main.cc b/src/bin/fstinfo-main.cc
+index 6e39640..44e6d70 100644
+--- a/src/bin/fstinfo-main.cc
++++ b/src/bin/fstinfo-main.cc
+@@ -29,10 +29,10 @@
+ #include <fst/script/getters.h>
+ #include <fst/script/info.h>
+ 
+-DECLARE_string(arc_filter);
+-DECLARE_string(info_type);
+-DECLARE_bool(test_properties);
+-DECLARE_bool(fst_verify);
++DECLARE_EXE_string(arc_filter);
++DECLARE_EXE_string(info_type);
++DECLARE_EXE_bool(test_properties);
++DECLARE_EXE_bool(fst_verify);
+ 
+ namespace {
+ // Prints info using only the header of the FST with path `in_name`.
+diff --git a/src/bin/fstintersect-main.cc b/src/bin/fstintersect-main.cc
+index fe18ad0..e089d31 100644
+--- a/src/bin/fstintersect-main.cc
++++ b/src/bin/fstintersect-main.cc
+@@ -26,8 +26,8 @@
+ #include <fst/script/getters.h>
+ #include <fst/script/intersect.h>
+ 
+-DECLARE_string(compose_filter);
+-DECLARE_bool(connect);
++DECLARE_EXE_string(compose_filter);
++DECLARE_EXE_bool(connect);
+ 
+ int fstintersect_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstisomorphic-main.cc b/src/bin/fstisomorphic-main.cc
+index b4751b2..076209c 100644
+--- a/src/bin/fstisomorphic-main.cc
++++ b/src/bin/fstisomorphic-main.cc
+@@ -27,7 +27,7 @@
+ #include <fst/log.h>
+ #include <fst/script/isomorphic.h>
+ 
+-DECLARE_double(delta);
++DECLARE_EXE_double(delta);
+ 
+ int fstisomorphic_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstmap-main.cc b/src/bin/fstmap-main.cc
+index a1eb028..38dda1f 100644
+--- a/src/bin/fstmap-main.cc
++++ b/src/bin/fstmap-main.cc
+@@ -26,10 +26,10 @@
+ #include <fst/script/getters.h>
+ #include <fst/script/map.h>
+ 
+-DECLARE_double(delta);
+-DECLARE_string(map_type);
+-DECLARE_double(power);
+-DECLARE_string(weight);
++DECLARE_EXE_double(delta);
++DECLARE_EXE_string(map_type);
++DECLARE_EXE_double(power);
++DECLARE_EXE_string(weight);
+ 
+ int fstmap_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstminimize-main.cc b/src/bin/fstminimize-main.cc
+index f6e14c1..fc53524 100644
+--- a/src/bin/fstminimize-main.cc
++++ b/src/bin/fstminimize-main.cc
+@@ -25,8 +25,8 @@
+ #include <fst/log.h>
+ #include <fst/script/minimize.h>
+ 
+-DECLARE_double(delta);
+-DECLARE_bool(allow_nondet);
++DECLARE_EXE_double(delta);
++DECLARE_EXE_bool(allow_nondet);
+ 
+ int fstminimize_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstprint-main.cc b/src/bin/fstprint-main.cc
+index cb24ce4..32d0c0e 100644
+--- a/src/bin/fstprint-main.cc
++++ b/src/bin/fstprint-main.cc
+@@ -28,16 +28,16 @@
+ #include <fstream>
+ #include <fst/script/print.h>
+ 
+-DECLARE_bool(acceptor);
+-DECLARE_string(isymbols);
+-DECLARE_string(osymbols);
+-DECLARE_string(ssymbols);
+-DECLARE_bool(numeric);
+-DECLARE_string(save_isymbols);
+-DECLARE_string(save_osymbols);
+-DECLARE_bool(show_weight_one);
+-DECLARE_bool(allow_negative_labels);
+-DECLARE_string(missing_symbol);
++DECLARE_EXE_bool(acceptor);
++DECLARE_EXE_string(isymbols);
++DECLARE_EXE_string(osymbols);
++DECLARE_EXE_string(ssymbols);
++DECLARE_EXE_bool(numeric);
++DECLARE_EXE_string(save_isymbols);
++DECLARE_EXE_string(save_osymbols);
++DECLARE_EXE_bool(show_weight_one);
++DECLARE_EXE_bool(allow_negative_labels);
++DECLARE_EXE_string(missing_symbol);
+ 
+ int fstprint_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstproject-main.cc b/src/bin/fstproject-main.cc
+index 4399b2d..e3919f1 100644
+--- a/src/bin/fstproject-main.cc
++++ b/src/bin/fstproject-main.cc
+@@ -25,7 +25,7 @@
+ #include <fst/script/getters.h>
+ #include <fst/script/project.h>
+ 
+-DECLARE_string(project_type);
++DECLARE_EXE_string(project_type);
+ 
+ int fstproject_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstprune-main.cc b/src/bin/fstprune-main.cc
+index 191803f..9af918b 100644
+--- a/src/bin/fstprune-main.cc
++++ b/src/bin/fstprune-main.cc
+@@ -24,9 +24,9 @@
+ #include <fst/flags.h>
+ #include <fst/script/prune.h>
+ 
+-DECLARE_double(delta);
+-DECLARE_int64(nstate);
+-DECLARE_string(weight);
++DECLARE_EXE_double(delta);
++DECLARE_EXE_int64(nstate);
++DECLARE_EXE_string(weight);
+ 
+ int fstprune_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstpush-main.cc b/src/bin/fstpush-main.cc
+index db813ab..53511ae 100644
+--- a/src/bin/fstpush-main.cc
++++ b/src/bin/fstpush-main.cc
+@@ -26,12 +26,12 @@
+ #include <fst/script/getters.h>
+ #include <fst/script/push.h>
+ 
+-DECLARE_double(delta);
+-DECLARE_bool(push_weights);
+-DECLARE_bool(push_labels);
+-DECLARE_bool(remove_total_weight);
+-DECLARE_bool(remove_common_affix);
+-DECLARE_string(reweight_type);
++DECLARE_EXE_double(delta);
++DECLARE_EXE_bool(push_weights);
++DECLARE_EXE_bool(push_labels);
++DECLARE_EXE_bool(remove_total_weight);
++DECLARE_EXE_bool(remove_common_affix);
++DECLARE_EXE_string(reweight_type);
+ 
+ int fstpush_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstrandgen-main.cc b/src/bin/fstrandgen-main.cc
+index cff6c36..f3d3325 100644
+--- a/src/bin/fstrandgen-main.cc
++++ b/src/bin/fstrandgen-main.cc
+@@ -26,12 +26,12 @@
+ #include <fst/script/getters.h>
+ #include <fst/script/randgen.h>
+ 
+-DECLARE_int32(max_length);
+-DECLARE_int32(npath);
+-DECLARE_uint64(seed);
+-DECLARE_string(select);
+-DECLARE_bool(weighted);
+-DECLARE_bool(remove_total_weight);
++DECLARE_EXE_int32(max_length);
++DECLARE_EXE_int32(npath);
++DECLARE_EXE_uint64(seed);
++DECLARE_EXE_string(select);
++DECLARE_EXE_bool(weighted);
++DECLARE_EXE_bool(remove_total_weight);
+ 
+ int fstrandgen_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstrelabel-main.cc b/src/bin/fstrelabel-main.cc
+index 22c9b75..226cae7 100644
+--- a/src/bin/fstrelabel-main.cc
++++ b/src/bin/fstrelabel-main.cc
+@@ -29,15 +29,15 @@
+ #include <fst/script/relabel.h>
+ #include <fst/script/weight-class.h>
+ 
+-DECLARE_string(isymbols);
+-DECLARE_string(osymbols);
+-DECLARE_string(relabel_isymbols);
+-DECLARE_string(relabel_osymbols);
+-DECLARE_string(relabel_ipairs);
+-DECLARE_string(relabel_opairs);
+-DECLARE_string(unknown_isymbol);
+-DECLARE_string(unknown_osymbol);
+-DECLARE_bool(allow_negative_labels);
++DECLARE_EXE_string(isymbols);
++DECLARE_EXE_string(osymbols);
++DECLARE_EXE_string(relabel_isymbols);
++DECLARE_EXE_string(relabel_osymbols);
++DECLARE_EXE_string(relabel_ipairs);
++DECLARE_EXE_string(relabel_opairs);
++DECLARE_EXE_string(unknown_isymbol);
++DECLARE_EXE_string(unknown_osymbol);
++DECLARE_EXE_bool(allow_negative_labels);
+ 
+ int fstrelabel_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstreplace-main.cc b/src/bin/fstreplace-main.cc
+index 5676e1c..bb9e396 100644
+--- a/src/bin/fstreplace-main.cc
++++ b/src/bin/fstreplace-main.cc
+@@ -29,10 +29,10 @@
+ #include <fst/script/getters.h>
+ #include <fst/script/replace.h>
+ 
+-DECLARE_string(call_arc_labeling);
+-DECLARE_string(return_arc_labeling);
+-DECLARE_int64(return_label);
+-DECLARE_bool(epsilon_on_replace);
++DECLARE_EXE_string(call_arc_labeling);
++DECLARE_EXE_string(return_arc_labeling);
++DECLARE_EXE_int64(return_label);
++DECLARE_EXE_bool(epsilon_on_replace);
+ 
+ int fstreplace_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstreverse-main.cc b/src/bin/fstreverse-main.cc
+index 41570f9..f5a51f4 100644
+--- a/src/bin/fstreverse-main.cc
++++ b/src/bin/fstreverse-main.cc
+@@ -25,7 +25,7 @@
+ #include <fst/script/fst-class.h>
+ #include <fst/script/reverse.h>
+ 
+-DECLARE_bool(require_superinitial);
++DECLARE_EXE_bool(require_superinitial);
+ 
+ int fstreverse_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstreweight-main.cc b/src/bin/fstreweight-main.cc
+index 5638b54..82f6dfa 100644
+--- a/src/bin/fstreweight-main.cc
++++ b/src/bin/fstreweight-main.cc
+@@ -27,7 +27,7 @@
+ #include <fst/script/reweight.h>
+ #include <fst/script/text-io.h>
+ 
+-DECLARE_string(reweight_type);
++DECLARE_EXE_string(reweight_type);
+ 
+ int fstreweight_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstrmepsilon-main.cc b/src/bin/fstrmepsilon-main.cc
+index 6bbb9f2..c8758f4 100644
+--- a/src/bin/fstrmepsilon-main.cc
++++ b/src/bin/fstrmepsilon-main.cc
+@@ -26,11 +26,11 @@
+ #include <fst/script/getters.h>
+ #include <fst/script/rmepsilon.h>
+ 
+-DECLARE_bool(connect);
+-DECLARE_double(delta);
+-DECLARE_int64(nstate);
+-DECLARE_string(queue_type);
+-DECLARE_string(weight);
++DECLARE_EXE_bool(connect);
++DECLARE_EXE_double(delta);
++DECLARE_EXE_int64(nstate);
++DECLARE_EXE_string(queue_type);
++DECLARE_EXE_string(weight);
+ 
+ int fstrmepsilon_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstshortestdistance-main.cc b/src/bin/fstshortestdistance-main.cc
+index f505137..83924c8 100644
+--- a/src/bin/fstshortestdistance-main.cc
++++ b/src/bin/fstshortestdistance-main.cc
+@@ -29,10 +29,10 @@
+ #include <fst/script/shortest-distance.h>
+ #include <fst/script/text-io.h>
+ 
+-DECLARE_bool(reverse);
+-DECLARE_double(delta);
+-DECLARE_int64(nstate);
+-DECLARE_string(queue_type);
++DECLARE_EXE_bool(reverse);
++DECLARE_EXE_double(delta);
++DECLARE_EXE_int64(nstate);
++DECLARE_EXE_string(queue_type);
+ 
+ int fstshortestdistance_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstshortestpath-main.cc b/src/bin/fstshortestpath-main.cc
+index 65adf65..2a0fd15 100644
+--- a/src/bin/fstshortestpath-main.cc
++++ b/src/bin/fstshortestpath-main.cc
+@@ -27,12 +27,12 @@
+ #include <fst/script/getters.h>
+ #include <fst/script/shortest-path.h>
+ 
+-DECLARE_double(delta);
+-DECLARE_int32(nshortest);
+-DECLARE_int64(nstate);
+-DECLARE_string(queue_type);
+-DECLARE_bool(unique);
+-DECLARE_string(weight);
++DECLARE_EXE_double(delta);
++DECLARE_EXE_int32(nshortest);
++DECLARE_EXE_int64(nstate);
++DECLARE_EXE_string(queue_type);
++DECLARE_EXE_bool(unique);
++DECLARE_EXE_string(weight);
+ 
+ int fstshortestpath_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/bin/fstsymbols-main.cc b/src/bin/fstsymbols-main.cc
+index 483f0f9..9fb1b0b 100644
+--- a/src/bin/fstsymbols-main.cc
++++ b/src/bin/fstsymbols-main.cc
+@@ -30,16 +30,16 @@
+ #include <fst/script/fst-class.h>
+ #include <fst/script/verify.h>
+ 
+-DECLARE_string(isymbols);
+-DECLARE_string(osymbols);
+-DECLARE_bool(clear_isymbols);
+-DECLARE_bool(clear_osymbols);
+-DECLARE_string(relabel_ipairs);
+-DECLARE_string(relabel_opairs);
+-DECLARE_string(save_isymbols);
+-DECLARE_string(save_osymbols);
+-DECLARE_bool(allow_negative_labels);
+-DECLARE_bool(verify);
++DECLARE_EXE_string(isymbols);
++DECLARE_EXE_string(osymbols);
++DECLARE_EXE_bool(clear_isymbols);
++DECLARE_EXE_bool(clear_osymbols);
++DECLARE_EXE_string(relabel_ipairs);
++DECLARE_EXE_string(relabel_opairs);
++DECLARE_EXE_string(save_isymbols);
++DECLARE_EXE_string(save_osymbols);
++DECLARE_EXE_bool(allow_negative_labels);
++DECLARE_EXE_bool(verify);
+ 
+ int fstsymbols_main(int argc, char **argv) {
+   namespace s = fst::script;
+diff --git a/src/extensions/CMakeLists.txt b/src/extensions/CMakeLists.txt
+new file mode 100644
+index 0000000..094ab74
+--- /dev/null
++++ b/src/extensions/CMakeLists.txt
+@@ -0,0 +1,43 @@
++if(HAVE_COMPACT)
++  add_subdirectory(compact)
++endif(HAVE_COMPACT)
++
++if(HAVE_COMPRESS)
++  add_subdirectory(compress)
++endif(HAVE_COMPRESS)
++
++if(HAVE_CONST)
++  add_subdirectory(const)
++endif(HAVE_CONST)
++
++if(HAVE_FAR OR HAVE_GRM)
++  add_subdirectory(far)
++endif(HAVE_FAR OR HAVE_GRM)
++
++if(HAVE_LINEAR)
++  add_subdirectory(linear)
++endif(HAVE_LINEAR)
++
++if(HAVE_LOOKAHEAD)
++  add_subdirectory(lookahead)
++endif(HAVE_LOOKAHEAD)
++
++if(HAVE_MPDT OR HAVE_GRM)
++  add_subdirectory(mpdt)
++endif(HAVE_MPDT OR HAVE_GRM)
++
++if(HAVE_NGRAM)
++  add_subdirectory(ngram)
++endif(HAVE_NGRAM)
++
++if(HAVE_PYTHON)
++  add_subdirectory(python)
++endif(HAVE_PYTHON)
++
++if(HAVE_PDT OR HAVE_MPDT OR HAVE_GRM)
++  add_subdirectory(pdt)
++endif(HAVE_PDT OR HAVE_MPDT OR HAVE_GRM)
++
++if(HAVE_SPECIAL)
++  add_subdirectory(special)
++endif(HAVE_SPECIAL)
+\ No newline at end of file
+diff --git a/src/extensions/compact/CMakeLists.txt b/src/extensions/compact/CMakeLists.txt
+new file mode 100644
+index 0000000..4ff4b6b
+--- /dev/null
++++ b/src/extensions/compact/CMakeLists.txt
+@@ -0,0 +1,92 @@
++add_library(fstcompact
++  compact8_acceptor-fst.cc 
++  compact8_string-fst.cc 
++  compact8_unweighted-fst.cc 
++  compact8_unweighted_acceptor-fst.cc 
++  compact8_weighted_string-fst.cc 
++  compact16_acceptor-fst.cc 
++  compact16_string-fst.cc 
++  compact16_unweighted-fst.cc 
++  compact16_unweighted_acceptor-fst.cc 
++  compact16_weighted_string-fst.cc 
++  compact64_acceptor-fst.cc 
++  compact64_string-fst.cc 
++  compact64_unweighted-fst.cc 
++  compact64_unweighted_acceptor-fst.cc 
++  compact64_weighted_string-fst.cc
++)
++
++target_link_libraries(fstcompact fst)
++set_target_properties(fstcompact PROPERTIES 
++  SOVERSION "${SOVERSION}"
++  FOLDER compact
++)
++
++install(TARGETS fstcompact 
++	        LIBRARY DESTINATION lib
++			ARCHIVE DESTINATION lib
++            RUNTIME DESTINATION bin
++)
++
++function (add_module _name)
++    add_library(${ARGV})
++    if (TARGET ${_name})
++        target_link_libraries(${_name} fst)
++        set_target_properties(${_name} PROPERTIES 
++            WINDOWS_EXPORT_ALL_SYMBOLS true
++            FOLDER compact/modules
++        )
++    endif()
++
++    #set_target_properties(${_name} PROPERTIES SOVERSION "1")
++    install(TARGETS ${_name} 
++	        LIBRARY DESTINATION lib
++			ARCHIVE DESTINATION lib
++            RUNTIME DESTINATION bin)
++endfunction()
++
++add_module(compact8_acceptor-fst MODULE
++  compact8_acceptor-fst.cc)
++ 
++add_module(compact8_string-fst MODULE
++  compact8_string-fst.cc)
++ 
++add_module(compact8_unweighted-fst MODULE
++  compact8_unweighted-fst.cc)
++ 
++add_module(compact8_unweighted_acceptor-fst MODULE
++  compact8_unweighted_acceptor-fst.cc)
++ 
++add_module(compact8_weighted_string-fst MODULE
++  compact8_weighted_string-fst.cc)
++ 
++add_module(compact16_acceptor-fst MODULE
++  compact16_acceptor-fst.cc)
++ 
++add_module(compact16_string-fst MODULE
++  compact16_string-fst.cc)
++ 
++add_module(compact16_unweighted-fst MODULE
++  compact16_unweighted-fst.cc)
++ 
++add_module(compact16_unweighted_acceptor-fst MODULE
++  compact16_unweighted_acceptor-fst.cc)
++ 
++add_module(compact16_weighted_string-fst MODULE
++  compact16_weighted_string-fst.cc)
++ 
++add_module(compact64_acceptor-fst MODULE
++  compact64_acceptor-fst.cc)
++ 
++add_module(compact64_string-fst MODULE
++  compact64_string-fst.cc)
++ 
++add_module(compact64_unweighted-fst MODULE
++  compact64_unweighted-fst.cc)
++ 
++add_module(compact64_unweighted_acceptor-fst MODULE
++  compact64_unweighted_acceptor-fst.cc)
++ 
++add_module(compact64_weighted_string-fst MODULE
++  compact64_weighted_string-fst.cc)
++
+diff --git a/src/extensions/compress/CMakeLists.txt b/src/extensions/compress/CMakeLists.txt
+new file mode 100644
+index 0000000..f205aaa
+--- /dev/null
++++ b/src/extensions/compress/CMakeLists.txt
+@@ -0,0 +1,40 @@
++file(GLOB HEADER_FILES ../../include/fst/extensions/compress/*.h)
++
++add_library(fstcompressscript
++  compressscript.cc
++  ${HEADER_FILES}
++ )
++
++target_link_libraries(fstcompressscript
++  fstscript
++  fst
++  ${ZLIBS}
++)
++set_target_properties(fstcompressscript PROPERTIES
++  SOVERSION "${SOVERSION}"
++)
++install(TARGETS fstcompressscript
++  LIBRARY DESTINATION lib
++  ARCHIVE DESTINATION lib
++  RUNTIME DESTINATION bin
++ )
++
++if(HAVE_BIN)
++  add_executable(fstcompress
++    fstcompress.cc
++    fstcompress-main.cc)
++
++  target_link_libraries(fstcompress
++    fstcompressscript
++    fstscript
++    fst
++    ${ZLIBS}
++    ${CMAKE_DL_LIBS}
++   )
++
++  install(TARGETS fstcompress
++	        LIBRARY DESTINATION lib
++			ARCHIVE DESTINATION lib
++            RUNTIME DESTINATION bin
++		)
++endif(HAVE_BIN)
+\ No newline at end of file
+diff --git a/src/extensions/const/CMakeLists.txt b/src/extensions/const/CMakeLists.txt
+new file mode 100644
+index 0000000..61060b8
+--- /dev/null
++++ b/src/extensions/const/CMakeLists.txt
+@@ -0,0 +1,38 @@
++function (add_module _name)
++    add_library(${ARGV})
++    if (TARGET ${_name})
++        target_link_libraries(${_name} fst)
++        set_target_properties(${_name} PROPERTIES 
++            WINDOWS_EXPORT_ALL_SYMBOLS true
++            FOLDER constant/modules
++        )
++    endif()
++
++    install(TARGETS ${_name}
++    LIBRARY DESTINATION lib
++    ARCHIVE DESTINATION lib
++    RUNTIME DESTINATION bin)
++endfunction()
++
++
++add_module(const8-fst MODULE const8-fst.cc)
++
++add_module(const16-fst MODULE const16-fst.cc)
++
++add_module(const64-fst MODULE const64-fst.cc)
++
++add_library(fstconst 
++  const8-fst.cc 
++  const16-fst.cc 
++  const64-fst.cc)
++target_link_libraries(fstconst fst)
++set_target_properties(fstconst PROPERTIES
++  SOVERSION "${SOVERSION}"
++  FOLDER constant
++)
++
++install(TARGETS fstconst 
++  LIBRARY DESTINATION lib
++  ARCHIVE DESTINATION lib
++  RUNTIME DESTINATION bin
++ )
+\ No newline at end of file
+diff --git a/src/extensions/far/CMakeLists.txt b/src/extensions/far/CMakeLists.txt
+new file mode 100644
+index 0000000..1e367b1
+--- /dev/null
++++ b/src/extensions/far/CMakeLists.txt
+@@ -0,0 +1,61 @@
++file(GLOB HEADER_FILES ../../include/fst/extensions/far/*.h)
++
++add_library(fstfar
++  sttable.cc
++  stlist.cc
++  ${HEADER_FILES}
++)
++target_link_libraries(fstfar fst)
++set_target_properties(fstfar PROPERTIES 
++  SOVERSION "${SOVERSION}"
++  FOLDER far
++)
++
++install(TARGETS fstfar
++LIBRARY DESTINATION lib
++ARCHIVE DESTINATION lib
++RUNTIME DESTINATION bin
++)
++
++if(HAVE_SCRIPT)
++  add_library(fstfarscript
++    compile-strings.cc 
++    far-class.cc 
++    farscript.cc
++    getters.cc 
++    script-impl.cc
++  )
++  target_link_libraries(fstfarscript fstfar fstscript fstscriptutils fst ${CMAKE_DL_LIBS})
++  set_target_properties(fstfarscript PROPERTIES 
++    SOVERSION "${SOVERSION}"
++    FOLDER far
++  )
++
++  install(TARGETS fstfarscript
++  LIBRARY DESTINATION lib
++  ARCHIVE DESTINATION lib
++  RUNTIME DESTINATION bin
++  )
++endif(HAVE_SCRIPT)
++
++if(HAVE_BIN)
++  function (add_executable2 _name)
++      add_executable(${ARGV})
++      if (TARGET ${_name})
++          target_link_libraries(${_name} fstfarscript fstscriptutils fstscript fst ${CMAKE_DL_LIBS})
++          set_target_properties(${_name} PROPERTIES FOLDER far/bin)
++      endif()
++      install(TARGETS ${_name} RUNTIME DESTINATION bin)
++  endfunction()
++
++  add_executable2(farcompilestrings farcompilestrings.cc farcompilestrings-main.cc)
++  add_executable2(farcreate  farcreate.cc farcreate-main.cc)
++  add_executable2(farconvert  farconvert.cc farconvert-main.cc)
++  add_executable2(farencode  farencode.cc farencode-main.cc)
++  add_executable2(farequal  farequal.cc farequal-main.cc)
++  add_executable2(farextract  farextract.cc farextract-main.cc)
++  add_executable2(farinfo  farinfo.cc farinfo-main.cc)
++  add_executable2(farisomorphic  farisomorphic.cc  farisomorphic-main.cc)
++  add_executable2(farprintstrings  farprintstrings.cc farprintstrings-main.cc)
++endif(HAVE_BIN)
++
+diff --git a/src/extensions/linear/CMakeLists.txt b/src/extensions/linear/CMakeLists.txt
+new file mode 100644
+index 0000000..77c56ae
+--- /dev/null
++++ b/src/extensions/linear/CMakeLists.txt
+@@ -0,0 +1,77 @@
++file(GLOB HEADER_FILES ../../include/fst/extensions/linear/*.h)
++
++
++if(HAVE_SCRIPT)
++  add_library(fstlinearscript
++    linearscript.cc
++    ${HEADER_FILES}
++  )
++  target_link_libraries(fstlinearscript
++    fstscript
++    fstscriptutils
++    fst
++  )
++  set_target_properties(fstlinearscript PROPERTIES 
++    SOVERSION "${SOVERSION}"
++    FOLDER linear
++  )
++  
++  install(TARGETS fstlinearscript
++  LIBRARY DESTINATION lib
++  ARCHIVE DESTINATION lib
++  RUNTIME DESTINATION bin
++  )
++endif(HAVE_SCRIPT)
++
++if(HAVE_BIN)
++  add_executable(fstlinear
++    fstlinear.cc 
++    fstlinear-main.cc)
++  target_link_libraries(fstlinear
++    fstlinearscript
++    fstscriptutils
++    fstscript 
++    fst
++    ${CMAKE_DL_LIBS}
++ )
++
++  add_executable(fstloglinearapply
++    fstloglinearapply.cc 
++    fstloglinearapply-main.cc)
++  target_link_libraries(fstloglinearapply
++    fstlinearscript
++    fstscriptutils
++    fstscript 
++    fst
++    ${CMAKE_DL_LIBS}
++  )
++  install(TARGETS fstlinear fstloglinearapply
++    RUNTIME DESTINATION bin
++  )
++  set_target_properties(fstlinear fstloglinearapply PROPERTIES
++    FOLDER linear/bin
++  )
++endif(HAVE_BIN)
++
++
++function (add_module _name)
++    add_library(${ARGV})
++    if (TARGET ${_name})
++        target_link_libraries(${_name} fst)
++        set_target_properties(${_name} PROPERTIES 
++            WINDOWS_EXPORT_ALL_SYMBOLS true
++            FOLDER linear/modules
++        )
++    endif()
++
++    install(TARGETS ${_name}
++    LIBRARY DESTINATION lib
++    ARCHIVE DESTINATION lib
++    RUNTIME DESTINATION bin)
++endfunction()
++
++add_module(linear-tagger-fst MODULE
++  linear-tagger-fst.cc)
++
++add_module(linear-classifier-fst MODULE
++  linear-classifier-fst.cc)
+diff --git a/src/extensions/lookahead/CMakeLists.txt b/src/extensions/lookahead/CMakeLists.txt
+new file mode 100644
+index 0000000..4abe5a3
+--- /dev/null
++++ b/src/extensions/lookahead/CMakeLists.txt
+@@ -0,0 +1,41 @@
++add_library(fstlookahead
++  arc_lookahead-fst.cc 
++  ilabel_lookahead-fst.cc
++  olabel_lookahead-fst.cc
++)
++target_link_libraries(fstlookahead fst)
++set_target_properties(fstlookahead PROPERTIES 
++  SOVERSION "${SOVERSION}"
++  FOLDER lookahead  
++)
++
++install(TARGETS fstlookahead 
++LIBRARY DESTINATION lib
++ARCHIVE DESTINATION lib
++RUNTIME DESTINATION bin
++)
++  
++function (add_module _name)
++    add_library(${ARGV})
++    if (TARGET ${_name})
++        target_link_libraries(${_name} fst)
++    endif()
++    set_target_properties(${_name} PROPERTIES 
++        WINDOWS_EXPORT_ALL_SYMBOLS true
++        FOLDER lookahead/modules
++    )
++
++    install(TARGETS ${_name}
++    LIBRARY DESTINATION lib
++    ARCHIVE DESTINATION lib
++    RUNTIME DESTINATION bin)
++endfunction()
++  
++add_module(arc_lookahead-fst MODULE
++  arc_lookahead-fst.cc)
++ 
++add_module(ilabel_lookahead-fst MODULE
++  ilabel_lookahead-fst.cc)
++
++add_module(olabel_lookahead-fst MODULE
++  olabel_lookahead-fst.cc)
+\ No newline at end of file
+diff --git a/src/extensions/mpdt/CMakeLists.txt b/src/extensions/mpdt/CMakeLists.txt
+new file mode 100644
+index 0000000..54a06a1
+--- /dev/null
++++ b/src/extensions/mpdt/CMakeLists.txt
+@@ -0,0 +1,32 @@
++file(GLOB HEADER_FILES ../../include/fst/extensions/mpdt/*.h)
++
++if(HAVE_SCRIPT)
++  add_library(fstmpdtscript mpdtscript.cc ${HEADER_FILES})
++  target_link_libraries(fstmpdtscript fstscript fstscriptutils fst)
++  set_target_properties(fstmpdtscript PROPERTIES 
++    SOVERSION "${SOVERSION}"
++    FOLDER mpdt
++  )
++  install(TARGETS fstmpdtscript 
++  LIBRARY DESTINATION lib
++  ARCHIVE DESTINATION lib
++  RUNTIME DESTINATION bin
++  )
++endif(HAVE_SCRIPT)
++
++if(HAVE_BIN)
++  function (add_executable2 _name)
++      add_executable(${ARGV})
++      if (TARGET ${_name})
++          target_link_libraries(${_name} fstmpdtscript fstpdtscript fstscriptutils fstscript fst ${CMAKE_DL_LIBS})
++          set_target_properties(${_name} PROPERTIES
++            FOLDER mpdt/bin
++          )
++      endif()
++    install(TARGETS ${_name} RUNTIME DESTINATION bin)
++  endfunction()
++  add_executable2(mpdtcompose  mpdtcompose.cc mpdtcompose-main.cc)
++  add_executable2(mpdtexpand  mpdtexpand.cc mpdtexpand-main.cc)
++  add_executable2(mpdtinfo  mpdtinfo.cc mpdtinfo-main.cc)
++  add_executable2(mpdtreverse  mpdtreverse.cc mpdtreverse-main.cc)
++endif(HAVE_BIN)
+\ No newline at end of file
+diff --git a/src/extensions/ngram/CMakeLists.txt b/src/extensions/ngram/CMakeLists.txt
+new file mode 100644
+index 0000000..f83f6fa
+--- /dev/null
++++ b/src/extensions/ngram/CMakeLists.txt
+@@ -0,0 +1,44 @@
++file(GLOB HEADER_FILES ../../include/fst/extensions/ngram/*.h)
++
++add_library(fstngram
++    bitmap-index.cc 
++    ngram-fst.cc 
++    nthbit.cc
++    ${HEADER_FILES}
++)
++
++target_link_libraries(fstngram
++    fst
++)
++
++set_target_properties(fstngram PROPERTIES
++  SOVERSION "${SOVERSION}"
++  FOLDER ngram
++)
++
++install(TARGETS fstngram 
++LIBRARY DESTINATION lib
++ARCHIVE DESTINATION lib
++RUNTIME DESTINATION bin
++)
++
++add_library(ngram_fst MODULE
++    bitmap-index.cc 
++    ngram-fst.cc 
++    nthbit.cc
++)
++
++set_target_properties(ngram_fst PROPERTIES
++    WINDOWS_EXPORT_ALL_SYMBOLS true
++    FOLDER ngram/modules
++)
++
++target_link_libraries(ngram_fst
++    fst
++)
++
++install(TARGETS ngram_fst
++LIBRARY DESTINATION lib
++ARCHIVE DESTINATION lib
++RUNTIME DESTINATION bin
++)
+\ No newline at end of file
+diff --git a/src/extensions/ngram/bitmap-index.cc b/src/extensions/ngram/bitmap-index.cc
+index 2d11dc5..0d68c57 100644
+--- a/src/extensions/ngram/bitmap-index.cc
++++ b/src/extensions/ngram/bitmap-index.cc
+@@ -21,6 +21,7 @@
+ #include <cstdint>
+ #include <iterator>
+ 
++#include <fst/compat.h>
+ #include <fst/log.h>
+ #include <fst/extensions/ngram/nthbit.h>
+ 
+@@ -43,7 +44,7 @@ size_t BitmapIndex::Rank1(size_t end) const {
+   // this depend on whether there's a popcnt instruction?
+   if (bit_index == 0) return sum;  // Entire answer is in the index.
+   const uint64_t mask = (uint64_t{1} << bit_index) - 1;
+-  return sum + __builtin_popcountll(bits_[end_word] & mask);
++  return sum + popcountll(bits_[end_word] & mask);
+ }
+ 
+ size_t BitmapIndex::Select1(size_t bit_index) const {
+@@ -201,7 +202,7 @@ std::pair<size_t, size_t> BitmapIndex::Select0s(size_t bit_index) const {
+   // If this is 0, then the next zero is not in the same word.
+   if (masked_inv_word != 0) {
+     // We can't ctz on 0, but we already checked that.
+-    const int next_nth = __builtin_ctzll(masked_inv_word);
++    const int next_nth = ctzll(masked_inv_word);
+     return {kStorageBitSize * word_index + nth,
+             kStorageBitSize * word_index + next_nth};
+   } else {
+@@ -306,7 +307,7 @@ void BitmapIndex::BuildIndex(const uint64_t* bits, size_t num_bits,
+ 
+     // We can assume that the last word has zeros in the high bits.
+     const uint64_t word = bits[word_index];
+-    const int word_ones_count = __builtin_popcountll(word);
++    const int word_ones_count = popcountll(word);
+     const uint32_t bit_offset = kStorageBitSize * word_index;
+ 
+     if (enable_select_0_index) {
+diff --git a/src/extensions/ngram/nthbit.cc b/src/extensions/ngram/nthbit.cc
+index fdbf304..a716ef3 100644
+--- a/src/extensions/ngram/nthbit.cc
++++ b/src/extensions/ngram/nthbit.cc
+@@ -235,7 +235,7 @@ static const uint8_t nth_bit_bit_pos[8][256] = {
+ uint32_t nth_bit(const uint64_t v, uint32_t r) {
+   DCHECK_NE(v, 0);
+   DCHECK_LE(0, r);
+-  DCHECK_LT(r, __builtin_popcountll(v));
++  DCHECK_LT(r, popcountll(v));
+ 
+   uint32_t next_byte = v & 255;
+   uint32_t byte_popcount = nth_bit_bit_count[next_byte];
+diff --git a/src/extensions/pdt/CMakeLists.txt b/src/extensions/pdt/CMakeLists.txt
+new file mode 100644
+index 0000000..643b578
+--- /dev/null
++++ b/src/extensions/pdt/CMakeLists.txt
+@@ -0,0 +1,36 @@
++file(GLOB HEADER_FILES ../../include/fst/extensions/pdt/*.h)
++
++if(HAVE_SCRIPT)
++  add_library(fstpdtscript getters.cc pdtscript.cc ${HEADER_FILES})
++  target_link_libraries(fstpdtscript fstscript fstscriptutils fst)
++  set_target_properties(fstpdtscript PROPERTIES 
++    SOVERSION "${SOVERSION}"
++    FOLDER pdt
++  )
++
++  install(TARGETS fstpdtscript
++  LIBRARY DESTINATION lib
++  ARCHIVE DESTINATION lib
++  RUNTIME DESTINATION bin
++  )
++endif(HAVE_SCRIPT)
++
++if(HAVE_BIN)
++  function (add_executable2 _name)
++      add_executable(${ARGV})
++      if (TARGET ${_name})
++          target_link_libraries(${_name} fstpdtscript fstscriptutils fstscript fst ${CMAKE_DL_LIBS})
++          set_target_properties(${_name} PROPERTIES
++            FOLDER pdt/bin
++          )
++      endif()
++      install(TARGETS ${_name} RUNTIME DESTINATION bin)
++  endfunction()
++
++  add_executable2(pdtcompose  pdtcompose.cc pdtcompose-main.cc)
++  add_executable2(pdtexpand  pdtexpand.cc pdtexpand-main.cc)
++  add_executable2(pdtinfo  pdtinfo.cc pdtinfo-main.cc)
++  add_executable2(pdtreplace  pdtreplace.cc pdtreplace-main.cc)
++  add_executable2(pdtreverse  pdtreverse.cc pdtreverse-main.cc)
++  add_executable2(pdtshortestpath  pdtshortestpath.cc pdtshortestpath-main.cc)
++endif(HAVE_BIN)
+\ No newline at end of file
+diff --git a/src/extensions/python/CMakeLists.txt b/src/extensions/python/CMakeLists.txt
+new file mode 100644
+index 0000000..83b9a7f
+--- /dev/null
++++ b/src/extensions/python/CMakeLists.txt
+@@ -0,0 +1,22 @@
++
++add_library(pywrapfst
++    pywrapfst.cpp
++)
++
++target_link_libraries(pywrapfst
++    fst
++    fstfarscript
++    fstfar
++    fstscript
++)
++
++set_target_properties(pywrapfst PROPERTIES
++  SOVERSION "${SOVERSION}"
++  FOLDER python
++)
++
++install(TARGETS pywrapfst 
++	LIBRARY DESTINATION lib
++	ARCHIVE DESTINATION lib
++	RUNTIME DESTINATION lib
++)
+\ No newline at end of file
+diff --git a/src/extensions/special/CMakeLists.txt b/src/extensions/special/CMakeLists.txt
+new file mode 100644
+index 0000000..a7149a8
+--- /dev/null
++++ b/src/extensions/special/CMakeLists.txt
+@@ -0,0 +1,59 @@
++file(GLOB HEADER_FILES ../../include/fst/extensions/special/*.h)
++
++if(HAVE_BIN)
++  add_executable(fstspecial-bin
++    ../../bin/fstconvert.cc 
++    ../../bin/fstconvert-main.cc
++    phi-fst.cc
++    rho-fst.cc
++    sigma-fst.cc
++  )
++
++  set_target_properties(fstspecial-bin PROPERTIES 
++    OUTPUT_NAME fstspecial
++  )
++
++  target_link_libraries(fstspecial-bin
++    fstscript
++    fst
++    ${CMAKE_DL_LIBS}
++ )
++endif(HAVE_BIN)
++
++
++add_library(fstspecial
++  phi-fst.cc
++  rho-fst.cc
++  sigma-fst.cc
++  ${HEADER_FILES}
++)
++
++set_target_properties(fstspecial PROPERTIES
++  SOVERSION "${SOVERSION}"
++  FOLDER special
++)
++target_link_libraries(fstspecial
++  fst
++)
++
++install(TARGETS fstspecial fstspecial-bin
++LIBRARY DESTINATION lib
++ARCHIVE DESTINATION lib
++RUNTIME DESTINATION bin
++)
++
++function (add_module _name)
++    add_library(${ARGV})
++    if (TARGET ${_name})
++        target_link_libraries(${_name} fst)
++    endif()
++
++    install(TARGETS ${_name}
++    LIBRARY DESTINATION lib
++    ARCHIVE DESTINATION lib
++    RUNTIME DESTINATION bin)
++endfunction()
++
++add_module(phi-fst MODULE phi-fst.cc)
++add_module(rho-fst MODULE rho-fst.cc)
++add_module(sigma-fst MODULE sigma-fst.cc)
+\ No newline at end of file
+diff --git a/src/include/fst/compat.h b/src/include/fst/compat.h
+index b7f2087..98c4e73 100644
+--- a/src/include/fst/compat.h
++++ b/src/include/fst/compat.h
+@@ -42,6 +42,28 @@
+ 
+ void FailedNewHandler();
+ 
++#ifdef _WIN32
++
++inline uint64_t ctzll(uint64_t input_int) {
++  return  _tzcnt_u64(input_int);
++}
++
++inline uint64_t popcountll(uint64_t input_int) {
++  return  __popcnt64(input_int);
++}
++
++#else
++
++inline uint64_t ctzll(uint64_t input_int) {
++  return  __builtin_ctzll(input_int);
++}
++
++inline uint64_t popcountll(uint64_t input_int) {
++  return  __builtin_popcountll(input_int);
++}
++
++#endif
++
+ namespace fst {
+ 
+ // Downcasting.
+diff --git a/src/include/fst/const-fst.h b/src/include/fst/const-fst.h
+index 134470e..40a344b 100644
+--- a/src/include/fst/const-fst.h
++++ b/src/include/fst/const-fst.h
+@@ -34,6 +34,7 @@
+ #include <fst/test-properties.h>
+ #include <fst/util.h>
+ 
++
+ namespace fst {
+ 
+ template <class A, class Unsigned>
+diff --git a/src/include/fst/determinize.h b/src/include/fst/determinize.h
+index 47b688f..0fa0be7 100644
+--- a/src/include/fst/determinize.h
++++ b/src/include/fst/determinize.h
+@@ -41,6 +41,7 @@
+ #include <fst/prune.h>
+ #include <fst/test-properties.h>
+ 
++
+ namespace fst {
+ 
+ // Common divisors are used in determinization to compute transition weights.
+diff --git a/src/include/fst/dfs-visit.h b/src/include/fst/dfs-visit.h
+index 3e12843..a1f708c 100644
+--- a/src/include/fst/dfs-visit.h
++++ b/src/include/fst/dfs-visit.h
+@@ -29,6 +29,7 @@
+ #include <fst/fst.h>
+ 
+ 
++
+ namespace fst {
+ 
+ // Visitor Interface: class determining actions taken during a depth-first
+diff --git a/src/include/fst/difference.h b/src/include/fst/difference.h
+index ef0e32e..e0d8138 100644
+--- a/src/include/fst/difference.h
++++ b/src/include/fst/difference.h
+@@ -28,6 +28,7 @@
+ #include <fst/compose.h>
+ 
+ 
++
+ namespace fst {
+ 
+ template <class Arc, class M = Matcher<Fst<Arc>>,
+diff --git a/src/include/fst/disambiguate.h b/src/include/fst/disambiguate.h
+index 1eac382..d3a6bff 100644
+--- a/src/include/fst/disambiguate.h
++++ b/src/include/fst/disambiguate.h
+@@ -41,6 +41,7 @@
+ #include <fst/union-find.h>
+ #include <fst/verify.h>
+ 
++
+ namespace fst {
+ 
+ template <class Arc>
+diff --git a/src/include/fst/edit-fst.h b/src/include/fst/edit-fst.h
+index b9d9009..898164c 100644
+--- a/src/include/fst/edit-fst.h
++++ b/src/include/fst/edit-fst.h
+@@ -49,6 +49,7 @@
+ 
+ #include <unordered_map>
+ 
++
+ namespace fst {
+ namespace internal {
+ 
+diff --git a/src/include/fst/encode.h b/src/include/fst/encode.h
+index 62f7c09..7ea7e20 100644
+--- a/src/include/fst/encode.h
++++ b/src/include/fst/encode.h
+@@ -36,6 +36,7 @@
+ #include <fst/util.h>
+ #include <unordered_map>
+ 
++
+ namespace fst {
+ 
+ enum EncodeType { ENCODE = 1, DECODE = 2 };
+diff --git a/src/include/fst/epsnormalize.h b/src/include/fst/epsnormalize.h
+index a7d1895..3deb1cd 100644
+--- a/src/include/fst/epsnormalize.h
++++ b/src/include/fst/epsnormalize.h
+@@ -27,6 +27,7 @@
+ #include <fst/rmepsilon.h>
+ 
+ 
++
+ namespace fst {
+ 
+ enum EpsNormalizeType { EPS_NORM_INPUT, EPS_NORM_OUTPUT };
+diff --git a/src/include/fst/equal.h b/src/include/fst/equal.h
+index 2057b8f..e3f92e6 100644
+--- a/src/include/fst/equal.h
++++ b/src/include/fst/equal.h
+@@ -28,6 +28,7 @@
+ #include <fst/test-properties.h>
+ 
+ 
++
+ namespace fst {
+ 
+ inline constexpr uint8_t kEqualFsts = 0x01;
+diff --git a/src/include/fst/equivalent.h b/src/include/fst/equivalent.h
+index d64dc3c..4f7d52b 100644
+--- a/src/include/fst/equivalent.h
++++ b/src/include/fst/equivalent.h
+@@ -34,6 +34,7 @@
+ #include <unordered_map>
+ 
+ 
++
+ namespace fst {
+ namespace internal {
+ 
+diff --git a/src/include/fst/error-weight.h b/src/include/fst/error-weight.h
+index bc99b39..451166f 100644
+--- a/src/include/fst/error-weight.h
++++ b/src/include/fst/error-weight.h
+@@ -21,6 +21,7 @@
+ 
+ #include <fst/util.h>
+ 
++
+ namespace fst {
+ 
+ // A Weight that can never be instantiated. This is not a semi-ring.
+diff --git a/src/include/fst/expanded-fst.h b/src/include/fst/expanded-fst.h
+index 24a21c5..580eafc 100644
+--- a/src/include/fst/expanded-fst.h
++++ b/src/include/fst/expanded-fst.h
+@@ -33,6 +33,7 @@
+ #include <fst/fst.h>
+ 
+ 
++
+ namespace fst {
+ 
+ // A generic FST plus state count.
+diff --git a/src/include/fst/expander-cache.h b/src/include/fst/expander-cache.h
+index b17f3d6..9c1aab9 100644
+--- a/src/include/fst/expander-cache.h
++++ b/src/include/fst/expander-cache.h
+@@ -53,6 +53,7 @@
+ #include <unordered_map>
+ #include <unordered_map>
+ 
++
+ namespace fst {
+ 
+ // Stateful allocators can't be used without careful handling in threaded
+diff --git a/src/include/fst/expectation-weight.h b/src/include/fst/expectation-weight.h
+index 16202a9..baacd46 100644
+--- a/src/include/fst/expectation-weight.h
++++ b/src/include/fst/expectation-weight.h
+@@ -48,6 +48,7 @@
+ #include <fst/pair-weight.h>
+ 
+ 
++
+ namespace fst {
+ 
+ // W1 is usually a probability weight like LogWeight.
+diff --git a/src/include/fst/extensions/far/compile-strings.h b/src/include/fst/extensions/far/compile-strings.h
+index f5d1e06..0f66b96 100644
+--- a/src/include/fst/extensions/far/compile-strings.h
++++ b/src/include/fst/extensions/far/compile-strings.h
+@@ -17,9 +17,6 @@
+ 
+ #ifndef FST_EXTENSIONS_FAR_COMPILE_STRINGS_H_
+ #define FST_EXTENSIONS_FAR_COMPILE_STRINGS_H_
+-
+-#include <libgen.h>
+-
+ #include <cstdint>
+ #include <fstream>
+ #include <istream>
+diff --git a/src/include/fst/extensions/far/create.h b/src/include/fst/extensions/far/create.h
+index 4874d4e..22cbb18 100644
+--- a/src/include/fst/extensions/far/create.h
++++ b/src/include/fst/extensions/far/create.h
+@@ -20,7 +20,6 @@
+ #ifndef FST_EXTENSIONS_FAR_CREATE_H_
+ #define FST_EXTENSIONS_FAR_CREATE_H_
+ 
+-#include <libgen.h>
+ 
+ #include <cstdint>
+ #include <sstream>
+diff --git a/src/include/fst/extensions/far/far.h b/src/include/fst/extensions/far/far.h
+index c1d3ae3..f8e65bd 100644
+--- a/src/include/fst/extensions/far/far.h
++++ b/src/include/fst/extensions/far/far.h
+@@ -36,6 +36,16 @@
+ #include <fst/vector-fst.h>
+ #include <string_view>
+ 
++#ifdef _WIN32
++
++inline std::string basename(std::string const & path)
++{
++  return path.substr(path.find_last_of("/\\") + 1);
++}
++#else
++#include <libgen.h>
++#endif
++
+ namespace fst {
+ 
+ enum class FarEntryType { LINE, FILE };
+diff --git a/src/include/fst/extensions/ngram/bitmap-index.h b/src/include/fst/extensions/ngram/bitmap-index.h
+index 26e8498..734ef4a 100644
+--- a/src/include/fst/extensions/ngram/bitmap-index.h
++++ b/src/include/fst/extensions/ngram/bitmap-index.h
+@@ -86,6 +86,8 @@
+ //
+ // The select indices have 6.25% overhead together.
+ 
++
++
+ namespace fst {
+ 
+ class BitmapIndex {
+diff --git a/src/include/fst/extensions/ngram/nthbit.h b/src/include/fst/extensions/ngram/nthbit.h
+index 13018f2..c5165f6 100644
+--- a/src/include/fst/extensions/ngram/nthbit.h
++++ b/src/include/fst/extensions/ngram/nthbit.h
+@@ -24,6 +24,7 @@
+ #include <arm_neon.h>
+ #endif
+ 
++#include <fst/compat.h>
+ #include <fst/log.h>
+ 
+ #if defined(__BMI2__)  // Intel Bit Manipulation Instruction Set 2
+@@ -37,12 +38,12 @@ namespace fst {
+ inline uint32_t nth_bit(uint64_t v, uint32_t r) {
+   DCHECK_NE(v, 0);
+   DCHECK_LE(0, r);
+-  DCHECK_LT(r, __builtin_popcountll(v));
++  DCHECK_LT(r, popcountll(v));
+ 
+   // PDEP example from https://stackoverflow.com/a/27453505
+   // __builtin_ctzll is UB for 0, but the conditions above ensure that can't
+   // happen.
+-  return __builtin_ctzll(_pdep_u64(uint64_t{1} << r, v));
++  return popcountll(_pdep_u64(uint64_t{1} << r, v));
+ }
+ }  // namespace fst
+ 
+@@ -77,7 +78,7 @@ inline uint32_t nth_bit(const uint64_t v, const uint32_t r) {
+ 
+   DCHECK_NE(v, 0);
+   DCHECK_LE(0, r);
+-  DCHECK_LT(r, __builtin_popcountll(v));
++  DCHECK_LT(r, popcountll(v));
+ 
+ #if defined(__aarch64__)
+   // Use the ARM64 CNT instruction to compute a byte-wise popcount.
+@@ -104,7 +105,7 @@ inline uint32_t nth_bit(const uint64_t v, const uint32_t r) {
+   // The first bit set is the high bit in the byte, so
+   // num_trailing_zeros == 8 * byte_nr + 7 and the byte number is the
+   // number of trailing zeros divided by 8.
+-  const int byte_nr = __builtin_ctzll(b) >> 3;
++  const int byte_nr = ctzll(b) >> 3;
+   const int shift = byte_nr << 3;
+   // The top byte contains the whole-word popcount; we never need that.
+   byte_sums <<= 8;
+diff --git a/src/include/fst/factor-weight.h b/src/include/fst/factor-weight.h
+index 6ad6d3c..651b7ca 100644
+--- a/src/include/fst/factor-weight.h
++++ b/src/include/fst/factor-weight.h
+@@ -33,6 +33,7 @@
+ 
+ #include <unordered_map>
+ 
++
+ namespace fst {
+ 
+ inline constexpr uint8_t kFactorFinalWeights = 0x01;
+diff --git a/src/include/fst/filter-state.h b/src/include/fst/filter-state.h
+index 5984bc8..adddef2 100644
+--- a/src/include/fst/filter-state.h
++++ b/src/include/fst/filter-state.h
+@@ -29,6 +29,7 @@
+ #include <fst/matcher.h>
+ 
+ 
++
+ namespace fst {
+ 
+ // The filter state interface represents the state of a (e.g., composition)
+diff --git a/src/include/fst/flags.h b/src/include/fst/flags.h
+index 9c419ce..8be9059 100644
+--- a/src/include/fst/flags.h
++++ b/src/include/fst/flags.h
+@@ -31,6 +31,8 @@
+ #include <utility>
+ 
+ #include <fst/lock.h>
++#include <fst/fst_Export.h>
++
+ 
+ // FLAGS USAGE:
+ //
+@@ -49,12 +51,19 @@
+ //
+ // ShowUsage() can be used to print out command and flag usage.
+ 
+-#define DECLARE_bool(name) extern bool FST_FLAGS_ ## name
+-#define DECLARE_string(name) extern std::string FST_FLAGS_##name
+-#define DECLARE_int32(name) extern int32_t FST_FLAGS_##name
+-#define DECLARE_int64(name) extern int64_t FST_FLAGS_##name
+-#define DECLARE_uint64(name) extern uint64_t FST_FLAGS_##name
+-#define DECLARE_double(name) extern double FST_FLAGS_ ## name
++#define DECLARE_bool(name) extern bool fst_EXPORT FST_FLAGS_ ## name
++#define DECLARE_string(name) extern std::string fst_EXPORT FST_FLAGS_##name
++#define DECLARE_int32(name) extern int32_t fst_EXPORT FST_FLAGS_##name
++#define DECLARE_int64(name) extern int64_t fst_EXPORT FST_FLAGS_##name
++#define DECLARE_uint64(name) extern uint64_t fst_EXPORT FST_FLAGS_##name
++#define DECLARE_double(name) extern double fst_EXPORT FST_FLAGS_ ## name
++
++#define DECLARE_EXE_bool(name) extern bool FST_FLAGS_ ## name
++#define DECLARE_EXE_string(name) extern std::string FST_FLAGS_##name
++#define DECLARE_EXE_int32(name) extern int32_t FST_FLAGS_##name
++#define DECLARE_EXE_int64(name) extern int64_t FST_FLAGS_##name
++#define DECLARE_EXE_uint64(name) extern uint64_t FST_FLAGS_##name
++#define DECLARE_EXE_double(name) extern double FST_FLAGS_ ## name
+ 
+ template <typename T>
+ struct FlagDescription {
+@@ -202,7 +211,7 @@ class FlagRegisterer {
+ 
+ #define DEFINE_bool(name, value, doc) DEFINE_VAR(bool, name, value, doc)
+ #define DEFINE_string(name, value, doc) \
+-  DEFINE_VAR(std::string, name, value, doc)
++ DEFINE_VAR(std::string, name, value, doc)
+ #define DEFINE_int32(name, value, doc) DEFINE_VAR(int32_t, name, value, doc)
+ #define DEFINE_int64(name, value, doc) DEFINE_VAR(int64_t, name, value, doc)
+ #define DEFINE_uint64(name, value, doc) DEFINE_VAR(uint64_t, name, value, doc)
+diff --git a/src/include/fst/float-weight.h b/src/include/fst/float-weight.h
+index 38b7d48..b6ed565 100644
+--- a/src/include/fst/float-weight.h
++++ b/src/include/fst/float-weight.h
+@@ -37,6 +37,7 @@
+ #include <fst/compat.h>
+ #include <string_view>
+ 
++
+ namespace fst {
+ 
+ namespace internal {
+diff --git a/src/include/fst/fst-decl.h b/src/include/fst/fst-decl.h
+index 0a0f679..1a7e0a2 100644
+--- a/src/include/fst/fst-decl.h
++++ b/src/include/fst/fst-decl.h
+@@ -27,6 +27,7 @@
+ 
+ #include <fst/windows_defs.inc>
+ 
++
+ namespace fst {
+ 
+ // Symbol table and iterator.
+diff --git a/src/include/fst/fst.h b/src/include/fst/fst.h
+index 80d1150..0c3d347 100644
+--- a/src/include/fst/fst.h
++++ b/src/include/fst/fst.h
+@@ -47,6 +47,7 @@
+ #include <string_view>
+ 
+ 
++
+ DECLARE_bool(fst_align);
+ 
+ namespace fst {
+diff --git a/src/include/fst/fstlib.h b/src/include/fst/fstlib.h
+index 820719e..da17dc9 100644
+--- a/src/include/fst/fstlib.h
++++ b/src/include/fst/fstlib.h
+@@ -140,4 +140,5 @@
+ #include <fst/util.h>
+ 
+ 
++
+ #endif  // FST_FSTLIB_H_
+diff --git a/src/include/fst/generic-register.h b/src/include/fst/generic-register.h
+index 765ebce..a8d202e 100644
+--- a/src/include/fst/generic-register.h
++++ b/src/include/fst/generic-register.h
+@@ -31,6 +31,7 @@
+ 
+ #include <fst/log.h>
+ 
++
+ // Generic class representing a globally-stored correspondence between
+ // objects of KeyType and EntryType.
+ //
+diff --git a/src/include/fst/heap.h b/src/include/fst/heap.h
+index 19dfc9d..3c56b65 100644
+--- a/src/include/fst/heap.h
++++ b/src/include/fst/heap.h
+@@ -28,6 +28,7 @@
+ #include <fst/compat.h>
+ #include <fst/log.h>
+ 
++
+ namespace fst {
+ 
+ // A templated heap implementation that supports in-place update of values.
+diff --git a/src/include/fst/icu.h b/src/include/fst/icu.h
+index 925855e..e7e48e2 100644
+--- a/src/include/fst/icu.h
++++ b/src/include/fst/icu.h
+@@ -31,6 +31,7 @@
+ #include <fst/log.h>
+ #include <string_view>
+ 
++
+ namespace fst {
+ 
+ // Trivial function to copy bytestrings into vectors of labels, truncating
+diff --git a/src/include/fst/intersect.h b/src/include/fst/intersect.h
+index 8d7b196..53d2619 100644
+--- a/src/include/fst/intersect.h
++++ b/src/include/fst/intersect.h
+@@ -29,6 +29,7 @@
+ #include <fst/compose.h>
+ 
+ 
++
+ namespace fst {
+ 
+ using IntersectOptions = ComposeOptions;
+diff --git a/src/include/fst/interval-set.h b/src/include/fst/interval-set.h
+index b4eb2db..40860c7 100644
+--- a/src/include/fst/interval-set.h
++++ b/src/include/fst/interval-set.h
+@@ -29,6 +29,7 @@
+ #include <fst/util.h>
+ 
+ 
++
+ namespace fst {
+ 
+ // Half-open integral interval [a, b) of signed integers of type T.
+diff --git a/src/include/fst/invert.h b/src/include/fst/invert.h
+index a6d87ff..273eec6 100644
+--- a/src/include/fst/invert.h
++++ b/src/include/fst/invert.h
+@@ -27,6 +27,7 @@
+ #include <fst/mutable-fst.h>
+ 
+ 
++
+ namespace fst {
+ 
+ // Mapper to implement inversion of an arc.
+diff --git a/src/include/fst/isomorphic.h b/src/include/fst/isomorphic.h
+index 2edae3b..a5ce8b5 100644
+--- a/src/include/fst/isomorphic.h
++++ b/src/include/fst/isomorphic.h
+@@ -33,6 +33,7 @@
+ #include <fst/fst.h>
+ 
+ 
++
+ namespace fst {
+ namespace internal {
+ 
+diff --git a/src/include/fst/label-reachable.h b/src/include/fst/label-reachable.h
+index 267e75a..c38683f 100644
+--- a/src/include/fst/label-reachable.h
++++ b/src/include/fst/label-reachable.h
+@@ -36,6 +36,7 @@
+ 
+ #include <unordered_map>
+ 
++
+ namespace fst {
+ 
+ // Stores shareable data for label reachable class copies.
+diff --git a/src/include/fst/lexicographic-weight.h b/src/include/fst/lexicographic-weight.h
+index 4bacffb..d276166 100644
+--- a/src/include/fst/lexicographic-weight.h
++++ b/src/include/fst/lexicographic-weight.h
+@@ -37,6 +37,7 @@
+ #include <fst/weight.h>
+ 
+ 
++
+ namespace fst {
+ 
+ template <class W1, class W2>
+diff --git a/src/include/fst/lock.h b/src/include/fst/lock.h
+index aeb36e6..cd429b7 100644
+--- a/src/include/fst/lock.h
++++ b/src/include/fst/lock.h
+@@ -20,6 +20,7 @@
+ #ifndef FST_LOCK_H_
+ #define FST_LOCK_H_
+ 
++
+ #ifdef OPENFST_HAS_ABSL
+ 
+ namespace fst {
+@@ -34,6 +35,7 @@ using ReaderMutexLock;
+ 
+ #include <shared_mutex>  // NOLINT(build/c++14)
+ 
++
+ namespace fst {
+ 
+ class Mutex {
+diff --git a/src/include/fst/log.h b/src/include/fst/log.h
+index 66be8ae..f25e574 100644
+--- a/src/include/fst/log.h
++++ b/src/include/fst/log.h
+@@ -27,6 +27,7 @@
+ 
+ #include <fst/flags.h>
+ 
++
+ DECLARE_int32(v);
+ 
+ class LogMessage {
+diff --git a/src/include/fst/lookahead-filter.h b/src/include/fst/lookahead-filter.h
+index e87784c..916ff59 100644
+--- a/src/include/fst/lookahead-filter.h
++++ b/src/include/fst/lookahead-filter.h
+@@ -31,6 +31,7 @@
+ #include <fst/lookahead-matcher.h>
+ 
+ 
++
+ namespace fst {
+ 
+ // Identifies and verifies the capabilities of the matcher to be used for
+diff --git a/src/include/fst/lookahead-matcher.h b/src/include/fst/lookahead-matcher.h
+index 52399e2..a286652 100644
+--- a/src/include/fst/lookahead-matcher.h
++++ b/src/include/fst/lookahead-matcher.h
+@@ -35,6 +35,7 @@
+ #include <fst/label-reachable.h>
+ #include <fst/matcher.h>
+ 
++
+ DECLARE_string(save_relabel_ipairs);
+ DECLARE_string(save_relabel_opairs);
+ 
+diff --git a/src/include/fst/mapped-file.h b/src/include/fst/mapped-file.h
+index 18a478f..57928ac 100644
+--- a/src/include/fst/mapped-file.h
++++ b/src/include/fst/mapped-file.h
+@@ -29,6 +29,7 @@
+ 
+ #include <fst/flags.h>
+ 
++
+ namespace fst {
+ 
+ // A memory region is a simple abstraction for allocated memory or data from
+diff --git a/src/include/fst/matcher-fst.h b/src/include/fst/matcher-fst.h
+index 36b78bb..a39de1c 100644
+--- a/src/include/fst/matcher-fst.h
++++ b/src/include/fst/matcher-fst.h
+@@ -30,6 +30,7 @@
+ #include <fst/lookahead-matcher.h>
+ 
+ 
++
+ namespace fst {
+ 
+ // Writeable matchers have the same interface as Matchers (as defined in
+diff --git a/src/include/fst/matcher.h b/src/include/fst/matcher.h
+index d8ba619..903f020 100644
+--- a/src/include/fst/matcher.h
++++ b/src/include/fst/matcher.h
+@@ -33,6 +33,7 @@
+ #include <unordered_map>
+ #include <optional>
+ 
++
+ namespace fst {
+ 
+ // Matchers find and iterate through requested labels at FST states. In the
+diff --git a/src/include/fst/memory.h b/src/include/fst/memory.h
+index 7299c53..958a388 100644
+--- a/src/include/fst/memory.h
++++ b/src/include/fst/memory.h
+@@ -29,6 +29,7 @@
+ #include <fst/log.h>
+ #include <fstream>
+ 
++
+ namespace fst {
+ 
+ // Default block allocation size.
+diff --git a/src/include/fst/minimize.h b/src/include/fst/minimize.h
+index 53d06af..098d25c 100644
+--- a/src/include/fst/minimize.h
++++ b/src/include/fst/minimize.h
+@@ -47,6 +47,7 @@
+ #include <fst/weight.h>
+ #include <unordered_map>
+ 
++
+ namespace fst {
+ namespace internal {
+ 
+diff --git a/src/include/fst/mutable-fst.h b/src/include/fst/mutable-fst.h
+index 1adb88d..08cf6cd 100644
+--- a/src/include/fst/mutable-fst.h
++++ b/src/include/fst/mutable-fst.h
+@@ -38,6 +38,7 @@
+ #include <string_view>
+ 
+ 
++
+ namespace fst {
+ 
+ template <class Arc>
+diff --git a/src/include/fst/pair-weight.h b/src/include/fst/pair-weight.h
+index 13333c4..a03177d 100644
+--- a/src/include/fst/pair-weight.h
++++ b/src/include/fst/pair-weight.h
+@@ -33,6 +33,7 @@
+ #include <fst/weight.h>
+ 
+ 
++
+ namespace fst {
+ 
+ template <class W1, class W2>
+diff --git a/src/include/fst/partition.h b/src/include/fst/partition.h
+index 5893931..a75910e 100644
+--- a/src/include/fst/partition.h
++++ b/src/include/fst/partition.h
+@@ -28,6 +28,7 @@
+ #include <fst/queue.h>
+ 
+ 
++
+ namespace fst {
+ namespace internal {
+ 
+diff --git a/src/include/fst/power-weight-mappers.h b/src/include/fst/power-weight-mappers.h
+index 36fe15d..a66f289 100644
+--- a/src/include/fst/power-weight-mappers.h
++++ b/src/include/fst/power-weight-mappers.h
+@@ -20,6 +20,7 @@
+ #ifndef FST_POWER_WEIGHT_MAPPERS_H_
+ #define FST_POWER_WEIGHT_MAPPERS_H_
+ 
++
+ namespace fst {
+ 
+ // Converts FromWeight to ToPowerWeight (with one component).
+diff --git a/src/include/fst/power-weight.h b/src/include/fst/power-weight.h
+index 6749045..d5a629e 100644
+--- a/src/include/fst/power-weight.h
++++ b/src/include/fst/power-weight.h
+@@ -29,6 +29,7 @@
+ #include <fst/weight.h>
+ 
+ 
++
+ namespace fst {
+ 
+ // Cartesian power semiring: W ^ n
+diff --git a/src/include/fst/product-weight.h b/src/include/fst/product-weight.h
+index e91ebf0..f1c71f6 100644
+--- a/src/include/fst/product-weight.h
++++ b/src/include/fst/product-weight.h
+@@ -30,6 +30,7 @@
+ #include <fst/weight.h>
+ 
+ 
++
+ namespace fst {
+ 
+ // Product semiring: W1 * W2.
+diff --git a/src/include/fst/project.h b/src/include/fst/project.h
+index 1b07683..911ace2 100644
+--- a/src/include/fst/project.h
++++ b/src/include/fst/project.h
+@@ -26,6 +26,7 @@
+ #include <fst/arc-map.h>
+ #include <fst/mutable-fst.h>
+ 
++
+ namespace fst {
+ 
+ // This specifies whether to project on input or output.
+diff --git a/src/include/fst/properties.h b/src/include/fst/properties.h
+index c7a110d..99d26fd 100644
+--- a/src/include/fst/properties.h
++++ b/src/include/fst/properties.h
+@@ -28,6 +28,7 @@
+ #include <fst/compat.h>
+ #include <fst/log.h>
+ #include <string_view>
++#include <fst/fst_Export.h>
+ 
+ namespace fst {
+ 
+@@ -491,7 +492,7 @@ uint64_t AddArcProperties(uint64_t inprops, typename Arc::StateId s,
+ 
+ namespace internal {
+ 
+-extern const std::string_view PropertyNames[];
++extern const std::string_view fst_EXPORT PropertyNames[];
+ 
+ // For a binary property, the bit is always returned set. For a trinary (i.e.,
+ // two-bit) property, both bits are returned set iff either corresponding input
+diff --git a/src/include/fst/prune.h b/src/include/fst/prune.h
+index 7c8a45e..3412072 100644
+--- a/src/include/fst/prune.h
++++ b/src/include/fst/prune.h
+@@ -31,6 +31,7 @@
+ #include <fst/shortest-distance.h>
+ 
+ 
++
+ namespace fst {
+ namespace internal {
+ 
+diff --git a/src/include/fst/push.h b/src/include/fst/push.h
+index 3037249..426ab22 100644
+--- a/src/include/fst/push.h
++++ b/src/include/fst/push.h
+@@ -33,6 +33,7 @@
+ #include <fst/shortest-distance.h>
+ 
+ 
++
+ namespace fst {
+ 
+ // Computes the total weight (sum of the weights of all accepting paths) from
+diff --git a/src/include/fst/queue.h b/src/include/fst/queue.h
+index d71b92b..1fe36e4 100644
+--- a/src/include/fst/queue.h
++++ b/src/include/fst/queue.h
+@@ -35,6 +35,7 @@
+ #include <fst/topsort.h>
+ #include <fst/weight.h>
+ 
++
+ namespace fst {
+ 
+ // The Queue interface is:
+diff --git a/src/include/fst/randequivalent.h b/src/include/fst/randequivalent.h
+index 9562b1d..52e7449 100644
+--- a/src/include/fst/randequivalent.h
++++ b/src/include/fst/randequivalent.h
+@@ -35,6 +35,7 @@
+ #include <fst/weight.h>
+ 
+ 
++
+ namespace fst {
+ 
+ // Test if two FSTs are stochastically equivalent by randomly generating
+diff --git a/src/include/fst/randgen.h b/src/include/fst/randgen.h
+index d847d7e..af7ed99 100644
+--- a/src/include/fst/randgen.h
++++ b/src/include/fst/randgen.h
+@@ -47,6 +47,7 @@
+ 
+ #include <vector>
+ 
++
+ namespace fst {
+ 
+ // The RandGenFst class is roughly similar to ArcMapFst in that it takes two
+diff --git a/src/include/fst/rational.h b/src/include/fst/rational.h
+index 3bfa521..4d07acf 100644
+--- a/src/include/fst/rational.h
++++ b/src/include/fst/rational.h
+@@ -31,6 +31,7 @@
+ #include <fst/replace.h>
+ #include <fst/test-properties.h>
+ 
++
+ namespace fst {
+ 
+ using RationalFstOptions = CacheOptions;
+diff --git a/src/include/fst/register.h b/src/include/fst/register.h
+index af1b360..8cf6571 100644
+--- a/src/include/fst/register.h
++++ b/src/include/fst/register.h
+@@ -32,6 +32,7 @@
+ #include <fst/log.h>
+ #include <string_view>
+ 
++
+ namespace fst {
+ 
+ template <class Arc>
+@@ -83,7 +84,7 @@ class FstRegister : public GenericRegister<std::string, FstRegisterEntry<Arc>,
+ // The type must have a default constructor and a copy constructor from
+ // Fst<Arc>.
+ template <class FST>
+-class FstRegisterer : public GenericRegisterer<FstRegister<typename FST::Arc>> {
++class  FstRegisterer : public GenericRegisterer<FstRegister<typename FST::Arc>> {
+  public:
+   using Arc = typename FST::Arc;
+   using Entry = typename FstRegister<Arc>::Entry;
+diff --git a/src/include/fst/relabel.h b/src/include/fst/relabel.h
+index fcc7876..bcdead6 100644
+--- a/src/include/fst/relabel.h
++++ b/src/include/fst/relabel.h
+@@ -32,6 +32,7 @@
+ 
+ #include <unordered_map>
+ 
++
+ namespace fst {
+ 
+ // Relabels either the input labels or output labels. The old to
+diff --git a/src/include/fst/replace-util.h b/src/include/fst/replace-util.h
+index 0c3e72b..a5c857c 100644
+--- a/src/include/fst/replace-util.h
++++ b/src/include/fst/replace-util.h
+@@ -35,6 +35,7 @@
+ #include <unordered_map>
+ #include <unordered_set>
+ 
++
+ namespace fst {
+ 
+ // This specifies what labels to output on the call or return arc. Note that
+diff --git a/src/include/fst/replace.h b/src/include/fst/replace.h
+index af78630..c18802c 100644
+--- a/src/include/fst/replace.h
++++ b/src/include/fst/replace.h
+@@ -39,6 +39,7 @@
+ 
+ #include <unordered_map>
+ 
++
+ namespace fst {
+ 
+ // Replace state tables have the form:
+diff --git a/src/include/fst/reverse.h b/src/include/fst/reverse.h
+index da5ca62..1b0e1c6 100644
+--- a/src/include/fst/reverse.h
++++ b/src/include/fst/reverse.h
+@@ -28,6 +28,7 @@
+ #include <fst/cache.h>
+ 
+ 
++
+ namespace fst {
+ 
+ // Reverses an FST. The reversed result is written to an output mutable FST.
+diff --git a/src/include/fst/reweight.h b/src/include/fst/reweight.h
+index c95192e..a8206a4 100644
+--- a/src/include/fst/reweight.h
++++ b/src/include/fst/reweight.h
+@@ -29,6 +29,7 @@
+ #include <fst/properties.h>
+ 
+ 
++
+ namespace fst {
+ 
+ enum ReweightType { REWEIGHT_TO_INITIAL, REWEIGHT_TO_FINAL };
+diff --git a/src/include/fst/rmepsilon.h b/src/include/fst/rmepsilon.h
+index 87ecd05..cb94e87 100644
+--- a/src/include/fst/rmepsilon.h
++++ b/src/include/fst/rmepsilon.h
+@@ -40,6 +40,7 @@
+ 
+ #include <unordered_map>
+ 
++
+ namespace fst {
+ 
+ template <class Arc, class Queue>
+diff --git a/src/include/fst/rmfinalepsilon.h b/src/include/fst/rmfinalepsilon.h
+index ae1207c..5793699 100644
+--- a/src/include/fst/rmfinalepsilon.h
++++ b/src/include/fst/rmfinalepsilon.h
+@@ -29,6 +29,7 @@
+ 
+ #include <unordered_set>
+ 
++
+ namespace fst {
+ 
+ // Removes final states that have epsilon-only input arcs.
+diff --git a/src/include/fst/script/info-impl.h b/src/include/fst/script/info-impl.h
+index 7e485c9..e0173c2 100644
+--- a/src/include/fst/script/info-impl.h
++++ b/src/include/fst/script/info-impl.h
+@@ -29,6 +29,7 @@
+ #include <fst/connect.h>
+ #include <fst/dfs-visit.h>
+ #include <fst/fst.h>
++#include <fst/properties.h>
+ #include <fst/lookahead-matcher.h>
+ #include <fst/matcher.h>
+ #include <fst/queue.h>
+diff --git a/src/include/fst/set-weight.h b/src/include/fst/set-weight.h
+index 7d97c45..7af2789 100644
+--- a/src/include/fst/set-weight.h
++++ b/src/include/fst/set-weight.h
+@@ -34,6 +34,7 @@
+ #include <string_view>
+ 
+ 
++
+ namespace fst {
+ 
+ inline constexpr int kSetEmpty = 0;         // Label for the empty set.
+diff --git a/src/include/fst/shortest-distance.h b/src/include/fst/shortest-distance.h
+index 249a006..532a504 100644
+--- a/src/include/fst/shortest-distance.h
++++ b/src/include/fst/shortest-distance.h
+@@ -33,6 +33,7 @@
+ #include <fst/test-properties.h>
+ 
+ 
++
+ namespace fst {
+ 
+ // A representable float for shortest distance and shortest path algorithms.
+diff --git a/src/include/fst/shortest-path.h b/src/include/fst/shortest-path.h
+index 511f9f4..18993bb 100644
+--- a/src/include/fst/shortest-path.h
++++ b/src/include/fst/shortest-path.h
+@@ -35,6 +35,7 @@
+ #include <fst/test-properties.h>
+ 
+ 
++
+ namespace fst {
+ 
+ template <class Arc, class Queue, class ArcFilter>
+diff --git a/src/include/fst/signed-log-weight.h b/src/include/fst/signed-log-weight.h
+index cb2e7c5..6b6bcfc 100644
+--- a/src/include/fst/signed-log-weight.h
++++ b/src/include/fst/signed-log-weight.h
+@@ -34,6 +34,7 @@
+ #include <fst/product-weight.h>
+ 
+ 
++
+ namespace fst {
+ template <class T>
+ class SignedLogWeightTpl : public PairWeight<TropicalWeight, LogWeightTpl<T>> {
+diff --git a/src/include/fst/sparse-power-weight.h b/src/include/fst/sparse-power-weight.h
+index b61a32a..452cc58 100644
+--- a/src/include/fst/sparse-power-weight.h
++++ b/src/include/fst/sparse-power-weight.h
+@@ -30,6 +30,7 @@
+ #include <fst/weight.h>
+ 
+ 
++
+ namespace fst {
+ 
+ // Sparse cartesian power semiring: W ^ n
+diff --git a/src/include/fst/sparse-tuple-weight.h b/src/include/fst/sparse-tuple-weight.h
+index ca8f3ba..a9c9470 100644
+--- a/src/include/fst/sparse-tuple-weight.h
++++ b/src/include/fst/sparse-tuple-weight.h
+@@ -38,6 +38,7 @@
+ #include <fst/weight.h>
+ 
+ 
++
+ namespace fst {
+ 
+ template <class W, class K>
+diff --git a/src/include/fst/state-map.h b/src/include/fst/state-map.h
+index 8d2fc65..34a8cf6 100644
+--- a/src/include/fst/state-map.h
++++ b/src/include/fst/state-map.h
+@@ -34,6 +34,7 @@
+ #include <fst/cache.h>
+ #include <fst/mutable-fst.h>
+ 
++
+ namespace fst {
+ 
+ // StateMapper Interface. The class determines how states are mapped; useful for
+diff --git a/src/include/fst/state-reachable.h b/src/include/fst/state-reachable.h
+index 98082f8..76a2670 100644
+--- a/src/include/fst/state-reachable.h
++++ b/src/include/fst/state-reachable.h
+@@ -32,6 +32,7 @@
+ #include <fst/vector-fst.h>
+ 
+ 
++
+ namespace fst {
+ 
+ // Computes the (final) states reachable from a given state in an FST. After
+diff --git a/src/include/fst/state-table.h b/src/include/fst/state-table.h
+index f13d4c7..3f49ac5 100644
+--- a/src/include/fst/state-table.h
++++ b/src/include/fst/state-table.h
+@@ -31,6 +31,7 @@
+ #include <fst/filter-state.h>
+ 
+ 
++
+ namespace fst {
+ 
+ // State tables determine the bijective mapping between state tuples (e.g., in
+diff --git a/src/include/fst/statesort.h b/src/include/fst/statesort.h
+index 99e3eb4..16788de 100644
+--- a/src/include/fst/statesort.h
++++ b/src/include/fst/statesort.h
+@@ -28,6 +28,7 @@
+ #include <fst/mutable-fst.h>
+ 
+ 
++
+ namespace fst {
+ 
+ // Sorts the input states of an FST. order[i] gives the the state ID after
+diff --git a/src/include/fst/string-weight.h b/src/include/fst/string-weight.h
+index c1d976a..7c5b83d 100644
+--- a/src/include/fst/string-weight.h
++++ b/src/include/fst/string-weight.h
+@@ -32,6 +32,7 @@
+ #include <string_view>
+ 
+ 
++
+ namespace fst {
+ 
+ inline constexpr int kStringInfinity = -1;     // Label for the infinite string.
+diff --git a/src/include/fst/string.h b/src/include/fst/string.h
+index 43dc994..6da083d 100644
+--- a/src/include/fst/string.h
++++ b/src/include/fst/string.h
+@@ -40,6 +40,7 @@
+ #include <fst/compat.h>
+ #include <string_view>
+ 
++
+ DECLARE_string(fst_field_separator);
+ 
+ namespace fst {
+diff --git a/src/include/fst/symbol-table-ops.h b/src/include/fst/symbol-table-ops.h
+index c317cc6..614958a 100644
+--- a/src/include/fst/symbol-table-ops.h
++++ b/src/include/fst/symbol-table-ops.h
+@@ -28,6 +28,7 @@
+ 
+ #include <unordered_set>
+ 
++
+ namespace fst {
+ 
+ // Returns a minimal symbol table containing only symbols referenced by the
+diff --git a/src/include/fst/symbol-table.h b/src/include/fst/symbol-table.h
+index 77728b5..36bddc1 100644
+--- a/src/include/fst/symbol-table.h
++++ b/src/include/fst/symbol-table.h
+@@ -42,6 +42,15 @@
+ #include <string_view>
+ #include <fst/lock.h>
+ 
++
++template class std::allocator<int>;
++template class std::vector<int>;
++template class std::string;
++template class std::vector<std::string>;
++template class std::basic_string<char>;
++template class std::vector<int64_t>;
++template class std::map<int64_t, int64_t>;
++
+ DECLARE_bool(fst_compat_symbols);
+ 
+ namespace fst {
+@@ -152,6 +161,9 @@ class SymbolTableImplBase {
+   virtual bool IsMutable() const = 0;
+ };
+ 
++
++template class std::shared_ptr<internal::SymbolTableImplBase>;
++
+ // Base class for SymbolTable implementations supporting Add/Remove.
+ class MutableSymbolTableImpl : public SymbolTableImplBase {
+  public:
+diff --git a/src/include/fst/synchronize.h b/src/include/fst/synchronize.h
+index c069255..e8d45cc 100644
+--- a/src/include/fst/synchronize.h
++++ b/src/include/fst/synchronize.h
+@@ -34,6 +34,7 @@
+ #include <unordered_map>
+ #include <unordered_set>
+ 
++
+ namespace fst {
+ 
+ using SynchronizeFstOptions = CacheOptions;
+diff --git a/src/include/fst/test-properties.h b/src/include/fst/test-properties.h
+index 85f0941..9d1186f 100644
+--- a/src/include/fst/test-properties.h
++++ b/src/include/fst/test-properties.h
+@@ -29,6 +29,7 @@
+ 
+ #include <unordered_set>
+ 
++
+ DECLARE_bool(fst_verify_properties);
+ 
+ namespace fst {
+diff --git a/src/include/fst/test/algo_test.h b/src/include/fst/test/algo_test.h
+index 009e2bb..846ee3f 100644
+--- a/src/include/fst/test/algo_test.h
++++ b/src/include/fst/test/algo_test.h
+@@ -30,7 +30,7 @@
+ #include <fst/weight.h>
+ #include <fst/test/rand-fst.h>
+ 
+-DECLARE_int32(repeat);  // defined in ./algo_test.cc
++DECLARE_EXE_int32(repeat);  // defined in ./algo_test.cc
+ 
+ namespace fst {
+ 
+diff --git a/src/include/fst/topsort.h b/src/include/fst/topsort.h
+index 6adffce..c02de81 100644
+--- a/src/include/fst/topsort.h
++++ b/src/include/fst/topsort.h
+@@ -28,6 +28,7 @@
+ #include <fst/statesort.h>
+ 
+ 
++
+ namespace fst {
+ 
+ // DFS visitor class to return topological ordering.
+diff --git a/src/include/fst/tuple-weight.h b/src/include/fst/tuple-weight.h
+index 45c2561..118266e 100644
+--- a/src/include/fst/tuple-weight.h
++++ b/src/include/fst/tuple-weight.h
+@@ -33,6 +33,7 @@
+ #include <fst/weight.h>
+ 
+ 
++
+ namespace fst {
+ 
+ // n-tuple weight, element of the n-th Cartesian power of W.
+diff --git a/src/include/fst/union-find.h b/src/include/fst/union-find.h
+index 078a103..323ad0a 100644
+--- a/src/include/fst/union-find.h
++++ b/src/include/fst/union-find.h
+@@ -23,6 +23,7 @@
+ 
+ #include <vector>
+ 
++
+ namespace fst {
+ 
+ // Union-Find algorithm for dense sets of non-negative integers.
+diff --git a/src/include/fst/union-weight.h b/src/include/fst/union-weight.h
+index b310df2..a83a503 100644
+--- a/src/include/fst/union-weight.h
++++ b/src/include/fst/union-weight.h
+@@ -34,6 +34,7 @@
+ #include <fst/weight.h>
+ 
+ 
++
+ namespace fst {
+ 
+ // Example UnionWeightOptions for UnionWeight template below. The Merge
+diff --git a/src/include/fst/union.h b/src/include/fst/union.h
+index 88414bb..5e12da1 100644
+--- a/src/include/fst/union.h
++++ b/src/include/fst/union.h
+@@ -30,6 +30,7 @@
+ #include <fst/rational.h>
+ 
+ 
++
+ namespace fst {
+ 
+ // Computes the union (sum) of two FSTs. This version writes the union to an
+diff --git a/src/include/fst/util.h b/src/include/fst/util.h
+index df539fd..4cc2b8b 100644
+--- a/src/include/fst/util.h
++++ b/src/include/fst/util.h
+@@ -46,6 +46,7 @@
+ #include <optional>
+ 
+ 
++
+ // Utility for error handling.
+ 
+ DECLARE_bool(fst_error_fatal);
+diff --git a/src/include/fst/vector-fst.h b/src/include/fst/vector-fst.h
+index 1be840f..34e34cc 100644
+--- a/src/include/fst/vector-fst.h
++++ b/src/include/fst/vector-fst.h
+@@ -34,6 +34,7 @@
+ #include <fst/mutable-fst.h>
+ #include <fst/test-properties.h>
+ 
++
+ namespace fst {
+ 
+ template <class A, class S>
+diff --git a/src/include/fst/verify.h b/src/include/fst/verify.h
+index 416d523..6d3b7bf 100644
+--- a/src/include/fst/verify.h
++++ b/src/include/fst/verify.h
+@@ -28,6 +28,7 @@
+ #include <fst/test-properties.h>
+ 
+ 
++
+ namespace fst {
+ 
+ // Verifies that an Fst's contents are sane.
+diff --git a/src/include/fst/visit.h b/src/include/fst/visit.h
+index ad86b6e..12debdb 100644
+--- a/src/include/fst/visit.h
++++ b/src/include/fst/visit.h
+@@ -27,6 +27,7 @@
+ #include <fst/mutable-fst.h>
+ 
+ 
++
+ namespace fst {
+ 
+ // Visitor Interface: class determining actions taken during a visit. If any of
+diff --git a/src/include/fst/weight.h b/src/include/fst/weight.h
+index a56868c..ee3e166 100644
+--- a/src/include/fst/weight.h
++++ b/src/include/fst/weight.h
+@@ -34,6 +34,7 @@
+ #include <fst/util.h>
+ 
+ 
++
+ DECLARE_string(fst_weight_parentheses);
+ DECLARE_string(fst_weight_separator);
+ 
+diff --git a/src/lib/CMakeLists.txt b/src/lib/CMakeLists.txt
+new file mode 100644
+index 0000000..ef22ce8
+--- /dev/null
++++ b/src/lib/CMakeLists.txt
+@@ -0,0 +1,41 @@
++
++
++add_library(fst
++  SHARED
++  compat.cc
++  encode.cc
++  flags.cc
++  fst-types.cc
++  fst.cc
++  mapped-file.cc
++  properties.cc
++  symbol-table.cc
++  symbol-table-ops.cc
++  util.cc
++  weight.cc
++)
++GENERATE_EXPORT_HEADER( fst
++             BASE_NAME fst
++             EXPORT_MACRO_NAME fst_EXPORT
++             EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/fst/fst_Export.h
++             STATIC_DEFINE fst_BUILT_AS_STATIC
++)
++set_target_properties(fst PROPERTIES
++  SOVERSION "${SOVERSION}"
++)
++target_include_directories(fst PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
++                           $<INSTALL_INTERFACE:include>)
++target_include_directories(fst PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
++                           $<INSTALL_INTERFACE:include>)
++target_link_libraries(fst ${CMAKE_DL_LIBS})
++
++
++
++install(TARGETS fst
++LIBRARY DESTINATION lib
++ARCHIVE DESTINATION lib
++RUNTIME DESTINATION bin
++  )
++install(FILES
++${CMAKE_BINARY_DIR}/include/fst/fst_Export.h DESTINATION include/fst
++)
+\ No newline at end of file
+diff --git a/src/lib/mapped-file.cc b/src/lib/mapped-file.cc
+index f855422..8186ae8 100644
+--- a/src/lib/mapped-file.cc
++++ b/src/lib/mapped-file.cc
+@@ -86,7 +86,12 @@ MappedFile *MappedFile::Map(std::istream &istrm, bool memorymap,
+ #endif
+     if (fd != -1) {
+       std::unique_ptr<MappedFile> mmf(MapFromFileDescriptor(fd, pos, size));
++      
++#ifdef _WIN32
++      if (_close(fd) == 0 && mmf != nullptr) {
++#else
+       if (close(fd) == 0 && mmf != nullptr) {
++#endif
+         istrm.seekg(pos + size, std::ios::beg);
+         if (istrm) {
+           VLOG(2) << "mmap'ed region of " << size << " at offset " << pos
+diff --git a/src/lib/properties.cc b/src/lib/properties.cc
+index 07460d2..898e419 100644
+--- a/src/lib/properties.cc
++++ b/src/lib/properties.cc
+@@ -27,6 +27,7 @@
+ 
+ #include <string_view>
+ 
++
+ namespace fst {
+ 
+ // These functions determine the properties associated with the FST result of
+diff --git a/src/script/CMakeLists.txt b/src/script/CMakeLists.txt
+new file mode 100644
+index 0000000..e01fe6f
+--- /dev/null
++++ b/src/script/CMakeLists.txt
+@@ -0,0 +1,76 @@
++
++
++add_library(fstscriptutils
++  SHARED
++  arciterator-class.cc
++  stateiterator-class.cc
++  weight-class.cc
++  draw.cc
++  getters.cc
++  print.cc
++  text-io.cc
++  arcsort.cc
++  closure.cc
++  fst-class.cc
++  info.cc
++  info-impl.cc
++  verify.cc
++  map.cc
++  compile.cc
++  compose.cc
++  concat.cc
++  connect.cc
++  convert.cc
++  randequivalent.cc
++  randgen.cc
++  topsort.cc
++  union.cc
++  equal.cc
++  equivalent.cc
++  intersect.cc
++  invert.cc
++  encode.cc
++  decode.cc
++  encodemapper-class.cc
++)
++target_link_libraries(fstscriptutils PUBLIC fst)
++target_include_directories(fstscriptutils PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
++                           $<INSTALL_INTERFACE:include>)
++
++set_target_properties(fstscriptutils PROPERTIES
++  SOVERSION "${SOVERSION}"
++)
++install(TARGETS fstscriptutils
++  LIBRARY DESTINATION lib
++  ARCHIVE DESTINATION lib
++  RUNTIME DESTINATION bin)
++
++add_library(fstscript
++  determinize.cc
++  difference.cc
++  disambiguate.cc
++  epsnormalize.cc
++  isomorphic.cc
++  minimize.cc
++  project.cc
++  prune.cc
++  push.cc
++  relabel.cc
++  replace.cc
++  reverse.cc
++  reweight.cc
++  rmepsilon.cc
++  shortest-distance.cc
++  shortest-path.cc
++  synchronize.cc
++)
++target_link_libraries(fstscript PUBLIC fst fstscriptutils)
++target_include_directories(fstscriptutils PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
++                           $<INSTALL_INTERFACE:include>)
++set_target_properties(fstscript PROPERTIES
++  SOVERSION "${SOVERSION}"
++)
++install(TARGETS fstscript
++  LIBRARY DESTINATION lib
++  ARCHIVE DESTINATION lib
++  RUNTIME DESTINATION bin)
+\ No newline at end of file
+diff --git a/src/test/CMakeLists.txt b/src/test/CMakeLists.txt
+new file mode 100644
+index 0000000..eaac896
+--- /dev/null
++++ b/src/test/CMakeLists.txt
+@@ -0,0 +1,54 @@
++add_executable(fst_test
++        fst_test.cc
++        ../include/fst/test/fst_test.h
++        )
++target_link_libraries(fst_test fst ${CMAKE_DL_LIBS})
++set_target_properties(fst_test PROPERTIES FOLDER test)
++add_test(NAME fst_test-test COMMAND fst_test)
++
++add_executable(weight_test
++        weight_test.cc
++        ../include/fst/test/weight-tester.h
++        )
++target_link_libraries(weight_test fst ${CMAKE_DL_LIBS})
++set_target_properties(weight_test PROPERTIES FOLDER test)
++add_test(NAME weight_test-test COMMAND weight_test)
++
++add_executable(algo_test_log algo_test.cc ../include/fst/test/algo_test.h ../include/fst/test/rand-fst.h)
++target_link_libraries(algo_test_log fst ${CMAKE_DL_LIBS})
++target_compile_definitions(algo_test_log
++        PRIVATE TEST_LOG=1)
++set_target_properties(algo_test_log PROPERTIES FOLDER test)
++add_test(NAME algo_test_log-test COMMAND algo_test_log)
++
++
++add_executable(algo_test_tropical algo_test.cc ../include/fst/test/algo_test.h ../include/fst/test/rand-fst.h)
++target_link_libraries(algo_test_tropical fst ${CMAKE_DL_LIBS})
++target_compile_definitions(algo_test_tropical
++        PRIVATE TEST_TROPICAL=1)
++set_target_properties(algo_test_tropical PROPERTIES FOLDER test)
++add_test(NAME algo_test_tropical-test COMMAND algo_test_tropical)
++
++
++add_executable(algo_test_minmax algo_test.cc ../include/fst/test/algo_test.h ../include/fst/test/rand-fst.h)
++target_link_libraries(algo_test_minmax fst ${CMAKE_DL_LIBS})
++target_compile_definitions(algo_test_minmax
++        PRIVATE TEST_MINMAX=1)
++set_target_properties(algo_test_minmax PROPERTIES FOLDER test)
++add_test(NAME algo_test_minmax-test COMMAND algo_test_minmax)
++
++
++add_executable(algo_test_lexicographic algo_test.cc ../include/fst/test/algo_test.h ../include/fst/test/rand-fst.h)
++target_link_libraries(algo_test_lexicographic fst ${CMAKE_DL_LIBS})
++target_compile_definitions(algo_test_lexicographic
++        PRIVATE TEST_LEXICOGRAPHIC=1)
++set_target_properties(algo_test_lexicographic PROPERTIES FOLDER test)
++add_test(NAME algo_test_lexicographic-test COMMAND algo_test_lexicographic)
++
++
++add_executable(algo_test_power algo_test.cc ../include/fst/test/algo_test.h ../include/fst/test/rand-fst.h)
++target_link_libraries(algo_test_power fst ${CMAKE_DL_LIBS})
++target_compile_definitions(algo_test_power
++        PRIVATE TEST_POWER=1)
++set_target_properties(algo_test_power PROPERTIES FOLDER test)
++add_test(NAME algo_test_power-test COMMAND algo_test_power)
+\ No newline at end of file
+-- 
+2.35.3
+

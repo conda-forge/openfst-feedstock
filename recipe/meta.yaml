@@ -11,6 +11,7 @@ source:
     - patches/0001-Remove-float-equality-check-in-cross-compiling.patch  # [build_platform != target_platform]
     - patches/0002-add-missing-header.patch
     - patches/0003-add-no-undefined-to-some-LDFLAGS.patch                # [win]
+    - patches/0004-Fix-file-closing-on-windows.patch                # [win]
 
 build:
   number: 1
@@ -24,9 +25,14 @@ requirements:
     - {{ compiler('cxx') }}
     - make                   # [unix]
     - gnuconfig              # [unix]
-    - autotools_clang_conda  # [win]
+    - cmake  # [win]
+    - ninja  # [win]
+    - m2-patch  # [win]
   host:
     - dlfcn-win32            # [win]
+    - icu
+  run:
+    - ucrt     # [win]
 
 {% set fst_binaries = [
     "farcompilestrings", "farconvert", "farcreate", "farencode", "farequal", "farextract",
@@ -59,7 +65,7 @@ test:
     {% for each_bin in fst_binaries %}
       # If behaving properly these will have return code 1.
       - {{ each_bin }} --helpshort >/dev/null || [[ $? == 1 ]]    # [unix]
-      - {{ each_bin }} --helpshort                                # [win]
+      - {{ each_bin }} --helpshort & if errorlevel 1 ( exit /b 0) # [win]
     {% endfor %}
 
     # libraries:
