@@ -11,7 +11,7 @@ source:
     - patches/0001-Remove-float-equality-check-in-cross-compiling.patch  # [build_platform != target_platform]
     - patches/0002-add-missing-header.patch
     - patches/0003-add-no-undefined-to-some-LDFLAGS.patch                # [win]
-    - patches/0004-Fix-file-closing-on-windows.patch                # [win]
+    - patches/0004-Fix-file-closing-on-windows.patch                     # [win]
 
 build:
   number: 1
@@ -23,16 +23,16 @@ build:
 requirements:
   build:
     - {{ compiler('cxx') }}
-    - make                   # [unix]
-    - gnuconfig              # [unix]
-    - cmake  # [win]
-    - ninja  # [win]
-    - m2-patch  # [win]
+    - make         # [unix]
+    - gnuconfig    # [unix]
+    - cmake        # [win]
+    - ninja        # [win]
+    - m2-patch     # [win]
   host:
-    - dlfcn-win32            # [win]
+    - dlfcn-win32  # [win]
     - icu
   run:
-    - ucrt     # [win]
+    - ucrt         # [win]
 
 {% set fst_binaries = [
     "farcompilestrings", "farconvert", "farcreate", "farencode", "farequal", "farextract",
@@ -64,8 +64,8 @@ test:
     # binaries:
     {% for each_bin in fst_binaries %}
       # If behaving properly these will have return code 1.
-      - {{ each_bin }} --helpshort >/dev/null || [[ $? == 1 ]]    # [unix]
-      - {{ each_bin }} --helpshort & if errorlevel 1 ( exit /b 0)  else (exit /b 1) # [win]
+      - {{ each_bin }} --helpshort >/dev/null || [[ $? == 1 ]]                      # [unix]
+      - {{ each_bin }} --helpshort & if errorlevel 1 ( exit /b 0) else (exit /b 1)  # [win]
     {% endfor %}
 
     # libraries:
