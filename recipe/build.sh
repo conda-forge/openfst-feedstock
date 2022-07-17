@@ -25,7 +25,7 @@ fi
    ${OPENFST_CROSS_COMPILATION_CONFIGURE_OPTS}
 
 if [[ "$CONDA_BUILD_CROSS_COMPILATION" != "1" ]]; then
-  make -j"${CPU_COUNT}" check
+  make -j"${CPU_COUNT}" check || (cat src/test/test-suite.log && exit 1)
 fi
 
 make -j"${CPU_COUNT}" install
