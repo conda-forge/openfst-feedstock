@@ -24,7 +24,7 @@ fi
    --enable-special \
    ${OPENFST_CROSS_COMPILATION_CONFIGURE_OPTS}
 
-if [[ "$CONDA_BUILD_CROSS_COMPILATION" != "1" ]]; then
+if [[ "$CONDA_BUILD_CROSS_COMPILATION" != "1" && "$SHLIB_EXT" != '.dylib' ]]; then
   make -j"${CPU_COUNT}" check || (cat src/test/test-suite.log && exit 1)
 fi
 
