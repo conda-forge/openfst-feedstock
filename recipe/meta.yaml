@@ -30,7 +30,6 @@ requirements:
     - m2-patch     # [win]
   host:
     - dlfcn-win32  # [win]
-    - icu  # [win]
   run:
     - ucrt         # [win]
 

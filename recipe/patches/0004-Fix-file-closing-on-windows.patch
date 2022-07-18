@@ -1,11 +1,11 @@
-From 235a5e590e57fe80f33924888ac38b4bacaf1123 Mon Sep 17 00:00:00 2001
+From 6f6b6781e6b63a3a4ed16e17a5e5ab525782bb6a Mon Sep 17 00:00:00 2001
 From: Michael McAuliffe <michael.e.mcauliffe@gmail.com>
 Date: Sun, 10 Jul 2022 00:50:05 -0700
 Subject: [PATCH] Fix file closing on windows
 
 ---
  .gitignore                                    |  2 +
- CMakeLists.txt                                | 48 ++++++++++
+ CMakeLists.txt                                | 43 +++++++++
  src/CMakeLists.txt                            | 17 ++++
  src/bin/CMakeLists.txt                        | 85 ++++++++++++++++++
  src/bin/fstarcsort-main.cc                    |  2 +-
@@ -69,7 +69,7 @@ Subject: [PATCH] Fix file closing on windows
  src/lib/mapped-file.cc                        |  5 ++
  src/script/CMakeLists.txt                     | 76 ++++++++++++++++
  src/test/CMakeLists.txt                       | 54 ++++++++++++
- 65 files changed, 1088 insertions(+), 157 deletions(-)
+ 65 files changed, 1083 insertions(+), 157 deletions(-)
  create mode 100644 .gitignore
  create mode 100644 CMakeLists.txt
  create mode 100644 src/CMakeLists.txt
@@ -100,18 +100,13 @@ index 0000000..687f872
 +
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 new file mode 100644
-index 0000000..aae4dc0
+index 0000000..40234cd
 --- /dev/null
 +++ b/CMakeLists.txt
-@@ -0,0 +1,48 @@
+@@ -0,0 +1,43 @@
 +project(openfst)
 +cmake_minimum_required(VERSION 3.18)
 +include(CTest)
-+find_package(ICU COMPONENTS data i18n io  test tu uc)
-+if (ICU_FOUND)
-+  include_directories(${ICU_INCLUDE_DIRS})
-+  set(LIBS ${LIBS} ${ICU_LIBRARIES})
-+endif (ICU_FOUND)
 +
 +include(GenerateExportHeader)
 +set(CMAKE_MACOSX_RPATH 1)
