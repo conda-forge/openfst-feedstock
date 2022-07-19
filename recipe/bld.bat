@@ -13,7 +13,7 @@ cmake -GNinja ^
     ..
 if %ERRORLEVEL% neq 0 exit 1
 
-cmake --build . --verbose --config Release -- -v -j 1
+cmake --build . --verbose --config Release -- -v -j %CPU_COUNT%
 if %ERRORLEVEL% neq 0 exit 1
 
 cmake --install . --verbose --config Release
