@@ -11,7 +11,7 @@ source:
     - patches/0001-Remove-float-equality-check-in-cross-compiling.patch  # [build_platform != target_platform]
     - patches/0002-add-missing-header.patch
     - patches/0003-add-no-undefined-to-some-LDFLAGS.patch                # [win]
-    - patches/0004-Fix-file-closing-on-windows.patch                     # [win]
+    - patches/0004-Fix-file-closing-on-windows.patch                     # [not linux]
 
 build:
   number: 2
@@ -23,10 +23,10 @@ build:
 requirements:
   build:
     - {{ compiler('cxx') }}
-    - make         # [unix]
-    - gnuconfig    # [unix]
-    - cmake        # [win]
-    - ninja        # [win]
+    - make         # [linux]
+    - gnuconfig    # [linux]
+    - cmake        # [not linux]
+    - ninja        # [not linux]
     - m2-patch     # [win]
   host:
     - dlfcn-win32  # [win]

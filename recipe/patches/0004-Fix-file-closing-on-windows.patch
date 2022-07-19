@@ -1,75 +1,75 @@
-From 6f6b6781e6b63a3a4ed16e17a5e5ab525782bb6a Mon Sep 17 00:00:00 2001
+From fa4e2370eb9c6b61834114644ad17c3339cd224a Mon Sep 17 00:00:00 2001
 From: Michael McAuliffe <michael.e.mcauliffe@gmail.com>
 Date: Sun, 10 Jul 2022 00:50:05 -0700
 Subject: [PATCH] Fix file closing on windows
 
 ---
- .gitignore                                    |  2 +
- CMakeLists.txt                                | 43 +++++++++
- src/CMakeLists.txt                            | 17 ++++
- src/bin/CMakeLists.txt                        | 85 ++++++++++++++++++
- src/bin/fstarcsort-main.cc                    |  2 +-
- src/bin/fstclosure-main.cc                    |  2 +-
- src/bin/fstcompile-main.cc                    | 20 ++---
- src/bin/fstcompose-main.cc                    |  4 +-
- src/bin/fstconvert-main.cc                    |  2 +-
- src/bin/fstdeterminize-main.cc                | 12 +--
- src/bin/fstdifference-main.cc                 |  4 +-
- src/bin/fstdisambiguate-main.cc               |  8 +-
- src/bin/fstdraw-main.cc                       | 34 ++++----
- src/bin/fstencode-main.cc                     |  8 +-
- src/bin/fstepsnormalize-main.cc               |  2 +-
- src/bin/fstequal-main.cc                      |  2 +-
- src/bin/fstequivalent-main.cc                 | 12 +--
- src/bin/fstinfo-main.cc                       |  8 +-
- src/bin/fstintersect-main.cc                  |  4 +-
- src/bin/fstisomorphic-main.cc                 |  2 +-
- src/bin/fstmap-main.cc                        |  8 +-
- src/bin/fstminimize-main.cc                   |  4 +-
- src/bin/fstprint-main.cc                      | 20 ++---
- src/bin/fstproject-main.cc                    |  2 +-
- src/bin/fstprune-main.cc                      |  6 +-
- src/bin/fstpush-main.cc                       | 12 +--
- src/bin/fstrandgen-main.cc                    | 12 +--
- src/bin/fstrelabel-main.cc                    | 18 ++--
- src/bin/fstreplace-main.cc                    |  8 +-
- src/bin/fstreverse-main.cc                    |  2 +-
- src/bin/fstreweight-main.cc                   |  2 +-
- src/bin/fstrmepsilon-main.cc                  | 10 +--
- src/bin/fstshortestdistance-main.cc           |  8 +-
- src/bin/fstshortestpath-main.cc               | 12 +--
- src/bin/fstsymbols-main.cc                    | 20 ++---
- src/extensions/CMakeLists.txt                 | 43 +++++++++
- src/extensions/compact/CMakeLists.txt         | 87 +++++++++++++++++++
- src/extensions/compress/CMakeLists.txt        | 42 +++++++++
- src/extensions/const/CMakeLists.txt           | 33 +++++++
- src/extensions/far/CMakeLists.txt             | 61 +++++++++++++
- src/extensions/linear/CMakeLists.txt          | 69 +++++++++++++++
- src/extensions/lookahead/CMakeLists.txt       | 36 ++++++++
- src/extensions/mpdt/CMakeLists.txt            | 28 ++++++
- src/extensions/ngram/CMakeLists.txt           | 38 ++++++++
- src/extensions/ngram/bitmap-index.cc          |  7 +-
- src/extensions/ngram/nthbit.cc                |  2 +-
- src/extensions/pdt/CMakeLists.txt             | 32 +++++++
- src/extensions/python/CMakeLists.txt          | 22 +++++
- src/extensions/special/CMakeLists.txt         | 59 +++++++++++++
- src/include/fst/compat.h                      | 22 +++++
- .../fst/extensions/far/compile-strings.h      |  3 -
- src/include/fst/extensions/far/create.h       |  1 -
- src/include/fst/extensions/far/far.h          | 10 +++
- .../fst/extensions/ngram/bitmap-index.h       |  2 +
- src/include/fst/extensions/ngram/nthbit.h     |  9 +-
- src/include/fst/flags.h                       | 22 +++--
- src/include/fst/properties.h                  |  3 +-
- src/include/fst/register.h                    |  2 +-
- src/include/fst/script/info-impl.h            |  1 +
- src/include/fst/symbol-table.h                | 11 +++
- src/include/fst/test/algo_test.h              |  2 +-
- src/lib/CMakeLists.txt                        | 41 +++++++++
- src/lib/mapped-file.cc                        |  5 ++
- src/script/CMakeLists.txt                     | 76 ++++++++++++++++
- src/test/CMakeLists.txt                       | 54 ++++++++++++
- 65 files changed, 1083 insertions(+), 157 deletions(-)
+ .gitignore                                    |   2 +
+ CMakeLists.txt                                |  43 ++++++++
+ src/CMakeLists.txt                            |  19 ++++
+ src/bin/CMakeLists.txt                        |  89 +++++++++++++++
+ src/bin/fstarcsort-main.cc                    |   2 +-
+ src/bin/fstclosure-main.cc                    |   2 +-
+ src/bin/fstcompile-main.cc                    |  20 ++--
+ src/bin/fstcompose-main.cc                    |   4 +-
+ src/bin/fstconvert-main.cc                    |   2 +-
+ src/bin/fstdeterminize-main.cc                |  12 +--
+ src/bin/fstdifference-main.cc                 |   4 +-
+ src/bin/fstdisambiguate-main.cc               |   8 +-
+ src/bin/fstdraw-main.cc                       |  34 +++---
+ src/bin/fstencode-main.cc                     |   8 +-
+ src/bin/fstepsnormalize-main.cc               |   2 +-
+ src/bin/fstequal-main.cc                      |   2 +-
+ src/bin/fstequivalent-main.cc                 |  12 +--
+ src/bin/fstinfo-main.cc                       |   8 +-
+ src/bin/fstintersect-main.cc                  |   4 +-
+ src/bin/fstisomorphic-main.cc                 |   2 +-
+ src/bin/fstmap-main.cc                        |   8 +-
+ src/bin/fstminimize-main.cc                   |   4 +-
+ src/bin/fstprint-main.cc                      |  20 ++--
+ src/bin/fstproject-main.cc                    |   2 +-
+ src/bin/fstprune-main.cc                      |   6 +-
+ src/bin/fstpush-main.cc                       |  12 +--
+ src/bin/fstrandgen-main.cc                    |  12 +--
+ src/bin/fstrelabel-main.cc                    |  18 ++--
+ src/bin/fstreplace-main.cc                    |   8 +-
+ src/bin/fstreverse-main.cc                    |   2 +-
+ src/bin/fstreweight-main.cc                   |   2 +-
+ src/bin/fstrmepsilon-main.cc                  |  10 +-
+ src/bin/fstshortestdistance-main.cc           |   8 +-
+ src/bin/fstshortestpath-main.cc               |  12 +--
+ src/bin/fstsymbols-main.cc                    |  20 ++--
+ src/extensions/CMakeLists.txt                 |  43 ++++++++
+ src/extensions/compact/CMakeLists.txt         |  87 +++++++++++++++
+ src/extensions/compress/CMakeLists.txt        |  55 ++++++++++
+ src/extensions/const/CMakeLists.txt           |  33 ++++++
+ src/extensions/far/CMakeLists.txt             |  69 ++++++++++++
+ src/extensions/linear/CMakeLists.txt          | 101 ++++++++++++++++++
+ src/extensions/lookahead/CMakeLists.txt       |  36 +++++++
+ src/extensions/mpdt/CMakeLists.txt            |  36 +++++++
+ src/extensions/ngram/CMakeLists.txt           |  38 +++++++
+ src/extensions/ngram/bitmap-index.cc          |   7 +-
+ src/extensions/ngram/nthbit.cc                |   2 +-
+ src/extensions/pdt/CMakeLists.txt             |  41 +++++++
+ src/extensions/python/CMakeLists.txt          |  22 ++++
+ src/extensions/special/CMakeLists.txt         |  72 +++++++++++++
+ src/include/fst/compat.h                      |  22 ++++
+ .../fst/extensions/far/compile-strings.h      |   3 -
+ src/include/fst/extensions/far/create.h       |   1 -
+ src/include/fst/extensions/far/far.h          |  10 ++
+ .../fst/extensions/ngram/bitmap-index.h       |   2 +
+ src/include/fst/extensions/ngram/nthbit.h     |   9 +-
+ src/include/fst/flags.h                       |  22 ++--
+ src/include/fst/properties.h                  |   3 +-
+ src/include/fst/register.h                    |   2 +-
+ src/include/fst/script/info-impl.h            |   1 +
+ src/include/fst/symbol-table.h                |  11 ++
+ src/include/fst/test/algo_test.h              |   2 +-
+ src/lib/CMakeLists.txt                        |  45 ++++++++
+ src/lib/mapped-file.cc                        |   5 +
+ src/script/CMakeLists.txt                     |  81 ++++++++++++++
+ src/test/CMakeLists.txt                       |  54 ++++++++++
+ 65 files changed, 1181 insertions(+), 157 deletions(-)
  create mode 100644 .gitignore
  create mode 100644 CMakeLists.txt
  create mode 100644 src/CMakeLists.txt
@@ -149,10 +149,10 @@ index 0000000..40234cd
 +add_subdirectory(src)
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
 new file mode 100644
-index 0000000..2729d99
+index 0000000..2212db0
 --- /dev/null
 +++ b/src/CMakeLists.txt
-@@ -0,0 +1,17 @@
+@@ -0,0 +1,19 @@
 +#-DHAVE_CONFIG_H -I./../include -fno-exceptions -funsigned-char -std=c++11 -MT symbol-table.lo -MD -MP -MF .deps/symbol-table.Tpo -c symbol-table.cc  -fno-common -DPIC -o .libs/symbol-table.o
 +
 +include_directories(./include/)
@@ -168,19 +168,25 @@ index 0000000..2729d99
 +
 +add_subdirectory(extensions)
 +
++if (not $ENV{CONDA_BUILD_CROSS_COMPILATION})
 +enable_testing()
 +add_subdirectory(test)
++endif()
 \ No newline at end of file
 diff --git a/src/bin/CMakeLists.txt b/src/bin/CMakeLists.txt
 new file mode 100644
-index 0000000..e960377
+index 0000000..58d46a6
 --- /dev/null
 +++ b/src/bin/CMakeLists.txt
-@@ -0,0 +1,85 @@
+@@ -0,0 +1,89 @@
 +function (add_executable2 _name)
 +    add_executable(${ARGV})
 +    if (TARGET ${_name})
-+        target_link_libraries(${_name} fstscriptutils fstscript fst ${CMAKE_DL_LIBS})
++        if (MSVC)
++            target_link_libraries(${_name} fstscriptutils fstscript fst ${CMAKE_DL_LIBS})
++        else()
++            target_link_libraries(${_name} fstscript fst ${CMAKE_DL_LIBS})
++        endif()
 +        set_target_properties(${_name} PROPERTIES FOLDER bin)
 +    endif()
 +
@@ -1019,23 +1025,28 @@ index 0000000..6ac66d6
 +
 diff --git a/src/extensions/compress/CMakeLists.txt b/src/extensions/compress/CMakeLists.txt
 new file mode 100644
-index 0000000..965e8ec
+index 0000000..a4ecd30
 --- /dev/null
 +++ b/src/extensions/compress/CMakeLists.txt
-@@ -0,0 +1,42 @@
+@@ -0,0 +1,55 @@
 +file(GLOB HEADER_FILES ../../include/fst/extensions/compress/*.h)
 +
 +add_library(fstcompressscript
 +  compressscript.cc
 +  ${HEADER_FILES}
 + )
-+
-+target_link_libraries(fstcompressscript
-+  fstscriptutils
-+  fstscript
-+  fst
-+  ${ZLIBS}
-+)
++if (MSVC)
++  target_link_libraries(fstcompressscript
++    fstscriptutils
++    fstscript
++    fst
++  )
++else()
++  target_link_libraries(fstcompressscript
++    fstscript
++    fst
++  )
++endif()
 +set_target_properties(fstcompressscript PROPERTIES
 +  SOVERSION "${SOVERSION}"
 +)
@@ -1050,14 +1061,22 @@ index 0000000..965e8ec
 +    fstcompress.cc
 +    fstcompress-main.cc)
 +
-+  target_link_libraries(fstcompress
-+    fstcompressscript
-+    fstscriptutils
-+    fstscript
-+    fst
-+    ${ZLIBS}
-+    ${CMAKE_DL_LIBS}
-+   )
++    if (MSVC)
++      target_link_libraries(fstcompress
++        fstcompressscript
++        fstscriptutils
++        fstscript
++        fst
++        ${CMAKE_DL_LIBS}
++      )
++    else()
++      target_link_libraries(fstcompress
++        fstcompressscript
++        fstscript
++        fst
++        ${CMAKE_DL_LIBS}
++      )
++    endif()
 +
 +  install(TARGETS fstcompress
 +	        LIBRARY DESTINATION lib
@@ -1108,10 +1127,10 @@ index 0000000..35c1ce6
 \ No newline at end of file
 diff --git a/src/extensions/far/CMakeLists.txt b/src/extensions/far/CMakeLists.txt
 new file mode 100644
-index 0000000..1e367b1
+index 0000000..f73d6a6
 --- /dev/null
 +++ b/src/extensions/far/CMakeLists.txt
-@@ -0,0 +1,61 @@
+@@ -0,0 +1,69 @@
 +file(GLOB HEADER_FILES ../../include/fst/extensions/far/*.h)
 +
 +add_library(fstfar
@@ -1139,7 +1158,11 @@ index 0000000..1e367b1
 +    getters.cc 
 +    script-impl.cc
 +  )
-+  target_link_libraries(fstfarscript fstfar fstscript fstscriptutils fst ${CMAKE_DL_LIBS})
++  if (MSVC)
++    target_link_libraries(fstfarscript fstfar fstscript fstscriptutils fst ${CMAKE_DL_LIBS})
++  else()
++    target_link_libraries(fstfarscript fstfar fstscript fst ${CMAKE_DL_LIBS})
++  endif()
 +  set_target_properties(fstfarscript PROPERTIES 
 +    SOVERSION "${SOVERSION}"
 +    FOLDER far
@@ -1156,7 +1179,11 @@ index 0000000..1e367b1
 +  function (add_executable2 _name)
 +      add_executable(${ARGV})
 +      if (TARGET ${_name})
-+          target_link_libraries(${_name} fstfarscript fstscriptutils fstscript fst ${CMAKE_DL_LIBS})
++        if (MSVC)
++        target_link_libraries(${_name} fstfarscript fstscriptutils fstscript fst ${CMAKE_DL_LIBS})
++        else()
++        target_link_libraries(${_name} fstfarscript fstscript fst ${CMAKE_DL_LIBS})
++        endif()
 +          set_target_properties(${_name} PROPERTIES FOLDER far/bin)
 +      endif()
 +      install(TARGETS ${_name} RUNTIME DESTINATION bin)
@@ -1175,10 +1202,10 @@ index 0000000..1e367b1
 +
 diff --git a/src/extensions/linear/CMakeLists.txt b/src/extensions/linear/CMakeLists.txt
 new file mode 100644
-index 0000000..e302e1d
+index 0000000..504583f
 --- /dev/null
 +++ b/src/extensions/linear/CMakeLists.txt
-@@ -0,0 +1,69 @@
+@@ -0,0 +1,101 @@
 +file(GLOB HEADER_FILES ../../include/fst/extensions/linear/*.h)
 +
 +
@@ -1187,11 +1214,18 @@ index 0000000..e302e1d
 +    linearscript.cc
 +    ${HEADER_FILES}
 +  )
-+  target_link_libraries(fstlinearscript
-+    fstscript
-+    fstscriptutils
-+    fst
-+  )
++  if (MSVC)
++    target_link_libraries(fstlinearscript
++      fstscript
++      fstscriptutils
++      fst
++    )
++  else()
++    target_link_libraries(fstlinearscript
++      fstscript
++      fst
++    )
++  endif()
 +  set_target_properties(fstlinearscript PROPERTIES 
 +    SOVERSION "${SOVERSION}"
 +  )
@@ -1207,24 +1241,42 @@ index 0000000..e302e1d
 +  add_executable(fstlinear
 +    fstlinear.cc 
 +    fstlinear-main.cc)
-+  target_link_libraries(fstlinear
-+    fstlinearscript
-+    fstscriptutils
-+    fstscript 
-+    fst
-+    ${CMAKE_DL_LIBS}
-+ )
++    if (MSVC)
++      target_link_libraries(fstlinear
++        fstlinearscript
++        fstscriptutils
++        fstscript 
++        fst
++        ${CMAKE_DL_LIBS}
++      )
++    else()
++    target_link_libraries(fstlinear
++      fstlinearscript
++      fstscript 
++      fst
++      ${CMAKE_DL_LIBS}
++    )
++    endif()
 +
 +  add_executable(fstloglinearapply
 +    fstloglinearapply.cc 
 +    fstloglinearapply-main.cc)
++  if (MSVC)
++    target_link_libraries(fstloglinearapply
++      fstlinearscript
++      fstscriptutils
++      fstscript 
++      fst
++      ${CMAKE_DL_LIBS}
++    )
++  else()
 +  target_link_libraries(fstloglinearapply
 +    fstlinearscript
-+    fstscriptutils
 +    fstscript 
 +    fst
 +    ${CMAKE_DL_LIBS}
 +  )
++  endif()
 +  install(TARGETS fstlinear fstloglinearapply
 +    RUNTIME DESTINATION bin
 +  )
@@ -1237,10 +1289,17 @@ index 0000000..e302e1d
 +        target_link_libraries(${_name} fst)
 +    endif()
 +
-+    install(TARGETS ${_name}
-+    LIBRARY DESTINATION bin
-+    ARCHIVE DESTINATION bin
-+    RUNTIME DESTINATION bin)
++    if (MSVC)
++      install(TARGETS ${_name}
++      LIBRARY DESTINATION bin
++      ARCHIVE DESTINATION bin
++      RUNTIME DESTINATION bin)
++    else()
++      install(TARGETS ${_name}
++      LIBRARY DESTINATION lib
++      ARCHIVE DESTINATION lib
++      RUNTIME DESTINATION bin)
++    endif()
 +endfunction()
 +
 +add_module(linear-tagger-fst MODULE
@@ -1293,15 +1352,19 @@ index 0000000..9b61057
 \ No newline at end of file
 diff --git a/src/extensions/mpdt/CMakeLists.txt b/src/extensions/mpdt/CMakeLists.txt
 new file mode 100644
-index 0000000..9880c45
+index 0000000..291370e
 --- /dev/null
 +++ b/src/extensions/mpdt/CMakeLists.txt
-@@ -0,0 +1,28 @@
+@@ -0,0 +1,36 @@
 +file(GLOB HEADER_FILES ../../include/fst/extensions/mpdt/*.h)
 +
 +if(HAVE_SCRIPT)
 +  add_library(fstmpdtscript mpdtscript.cc ${HEADER_FILES})
-+  target_link_libraries(fstmpdtscript fstscript fstscriptutils fst)
++  if (MSVC)
++    target_link_libraries(fstmpdtscript fstscript fstscriptutils fst)
++  else()
++    target_link_libraries(fstmpdtscript fstscript fst)
++  endif()
 +  set_target_properties(fstmpdtscript PROPERTIES 
 +    SOVERSION "${SOVERSION}"
 +  )
@@ -1316,7 +1379,11 @@ index 0000000..9880c45
 +  function (add_executable2 _name)
 +      add_executable(${ARGV})
 +      if (TARGET ${_name})
++        if (MSVC)
 +          target_link_libraries(${_name} fstmpdtscript fstpdtscript fstscriptutils fstscript fst ${CMAKE_DL_LIBS})
++        else()
++          target_link_libraries(${_name} fstmpdtscript fstpdtscript fstscript fst ${CMAKE_DL_LIBS})
++        endif()
 +      endif()
 +    install(TARGETS ${_name} RUNTIME DESTINATION bin)
 +  endfunction()
@@ -1425,15 +1492,19 @@ index fdbf304..a716ef3 100644
    uint32_t byte_popcount = nth_bit_bit_count[next_byte];
 diff --git a/src/extensions/pdt/CMakeLists.txt b/src/extensions/pdt/CMakeLists.txt
 new file mode 100644
-index 0000000..01bdeb3
+index 0000000..259b890
 --- /dev/null
 +++ b/src/extensions/pdt/CMakeLists.txt
-@@ -0,0 +1,32 @@
+@@ -0,0 +1,41 @@
 +file(GLOB HEADER_FILES ../../include/fst/extensions/pdt/*.h)
 +
 +if(HAVE_SCRIPT)
 +  add_library(fstpdtscript getters.cc pdtscript.cc ${HEADER_FILES})
-+  target_link_libraries(fstpdtscript fstscript fstscriptutils fst)
++  if (MSVC)
++    target_link_libraries(fstpdtscript fstscript fstscriptutils fst)
++  else()
++    target_link_libraries(fstpdtscript fstscript fst)
++  endif()
 +  set_target_properties(fstpdtscript PROPERTIES 
 +    SOVERSION "${SOVERSION}"
 +  )
@@ -1449,7 +1520,12 @@ index 0000000..01bdeb3
 +  function (add_executable2 _name)
 +      add_executable(${ARGV})
 +      if (TARGET ${_name})
++        if (MSVC)
 +          target_link_libraries(${_name} fstpdtscript fstscriptutils fstscript fst ${CMAKE_DL_LIBS})
++        else()
++          target_link_libraries(${_name} fstpdtscript fstscript fst ${CMAKE_DL_LIBS})
++        endif()
++          
 +      endif()
 +      install(TARGETS ${_name} RUNTIME DESTINATION bin)
 +  endfunction()
@@ -1493,10 +1569,10 @@ index 0000000..83b9a7f
 \ No newline at end of file
 diff --git a/src/extensions/special/CMakeLists.txt b/src/extensions/special/CMakeLists.txt
 new file mode 100644
-index 0000000..b9296db
+index 0000000..1c49126
 --- /dev/null
 +++ b/src/extensions/special/CMakeLists.txt
-@@ -0,0 +1,59 @@
+@@ -0,0 +1,72 @@
 +file(GLOB HEADER_FILES ../../include/fst/extensions/special/*.h)
 +
 +if(HAVE_BIN)
@@ -1511,13 +1587,20 @@ index 0000000..b9296db
 +  set_target_properties(fstspecial-bin PROPERTIES 
 +    OUTPUT_NAME fstspecial
 +  )
-+
++  if (MSVC)
++    target_link_libraries(fstspecial-bin
++      fstscript
++      fstscriptutils
++      fst
++      ${CMAKE_DL_LIBS}
++  )
++ else()
 +  target_link_libraries(fstspecial-bin
 +    fstscript
-+    fstscriptutils
 +    fst
 +    ${CMAKE_DL_LIBS}
-+ )
++  )
++ endif()
 +endif(HAVE_BIN)
 +
 +
@@ -1546,11 +1629,17 @@ index 0000000..b9296db
 +    if (TARGET ${_name})
 +        target_link_libraries(${_name} fst)
 +    endif()
-+
-+    install(TARGETS ${_name}
-+    LIBRARY DESTINATION bin
-+    ARCHIVE DESTINATION bin
-+    RUNTIME DESTINATION bin)
++    if (MSVC)
++      install(TARGETS ${_name}
++      LIBRARY DESTINATION bin
++      ARCHIVE DESTINATION bin
++      RUNTIME DESTINATION bin)
++    else()
++      install(TARGETS ${_name}
++      LIBRARY DESTINATION lib
++      ARCHIVE DESTINATION lib
++      RUNTIME DESTINATION bin)
++    endif()
 +endfunction()
 +
 +add_module(phi-fst MODULE phi-fst.cc)
@@ -1832,10 +1921,10 @@ index 009e2bb..846ee3f 100644
  
 diff --git a/src/lib/CMakeLists.txt b/src/lib/CMakeLists.txt
 new file mode 100644
-index 0000000..ef22ce8
+index 0000000..7419b52
 --- /dev/null
 +++ b/src/lib/CMakeLists.txt
-@@ -0,0 +1,41 @@
+@@ -0,0 +1,45 @@
 +
 +
 +add_library(fst
@@ -1852,12 +1941,14 @@ index 0000000..ef22ce8
 +  util.cc
 +  weight.cc
 +)
++if (MSVC)
 +GENERATE_EXPORT_HEADER( fst
 +             BASE_NAME fst
 +             EXPORT_MACRO_NAME fst_EXPORT
 +             EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/fst/fst_Export.h
 +             STATIC_DEFINE fst_BUILT_AS_STATIC
 +)
++endif()
 +set_target_properties(fst PROPERTIES
 +  SOVERSION "${SOVERSION}"
 +)
@@ -1874,9 +1965,11 @@ index 0000000..ef22ce8
 +ARCHIVE DESTINATION lib
 +RUNTIME DESTINATION bin
 +  )
++if (MSVC)
 +install(FILES
 +${CMAKE_BINARY_DIR}/include/fst/fst_Export.h DESTINATION include/fst
 +)
++endif()
 \ No newline at end of file
 diff --git a/src/lib/mapped-file.cc b/src/lib/mapped-file.cc
 index f855422..8186ae8 100644
@@ -1897,57 +1990,58 @@ index f855422..8186ae8 100644
            VLOG(2) << "mmap'ed region of " << size << " at offset " << pos
 diff --git a/src/script/CMakeLists.txt b/src/script/CMakeLists.txt
 new file mode 100644
-index 0000000..e01fe6f
+index 0000000..0966387
 --- /dev/null
 +++ b/src/script/CMakeLists.txt
-@@ -0,0 +1,76 @@
+@@ -0,0 +1,81 @@
 +
 +
-+add_library(fstscriptutils
-+  SHARED
-+  arciterator-class.cc
-+  stateiterator-class.cc
-+  weight-class.cc
-+  draw.cc
-+  getters.cc
-+  print.cc
-+  text-io.cc
-+  arcsort.cc
-+  closure.cc
-+  fst-class.cc
-+  info.cc
-+  info-impl.cc
-+  verify.cc
-+  map.cc
-+  compile.cc
-+  compose.cc
-+  concat.cc
-+  connect.cc
-+  convert.cc
-+  randequivalent.cc
-+  randgen.cc
-+  topsort.cc
-+  union.cc
-+  equal.cc
-+  equivalent.cc
-+  intersect.cc
-+  invert.cc
-+  encode.cc
-+  decode.cc
-+  encodemapper-class.cc
-+)
-+target_link_libraries(fstscriptutils PUBLIC fst)
-+target_include_directories(fstscriptutils PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-+                           $<INSTALL_INTERFACE:include>)
++if (MSVC) # Fix for too many exported symbols in fstscript
++  add_library(fstscriptutils
++    SHARED
++    arciterator-class.cc
++    stateiterator-class.cc
++    weight-class.cc
++    draw.cc
++    getters.cc
++    print.cc
++    text-io.cc
++    arcsort.cc
++    closure.cc
++    fst-class.cc
++    info.cc
++    info-impl.cc
++    verify.cc
++    map.cc
++    compile.cc
++    compose.cc
++    concat.cc
++    connect.cc
++    convert.cc
++    randequivalent.cc
++    randgen.cc
++    topsort.cc
++    union.cc
++    equal.cc
++    equivalent.cc
++    intersect.cc
++    invert.cc
++    encode.cc
++    decode.cc
++    encodemapper-class.cc
++  )
++  target_link_libraries(fstscriptutils PUBLIC fst)
++  target_include_directories(fstscriptutils PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
++                            $<INSTALL_INTERFACE:include>)
 +
-+set_target_properties(fstscriptutils PROPERTIES
-+  SOVERSION "${SOVERSION}"
-+)
-+install(TARGETS fstscriptutils
-+  LIBRARY DESTINATION lib
-+  ARCHIVE DESTINATION lib
-+  RUNTIME DESTINATION bin)
-+
++  set_target_properties(fstscriptutils PROPERTIES
++    SOVERSION "${SOVERSION}"
++  )
++  install(TARGETS fstscriptutils
++    LIBRARY DESTINATION lib
++    ARCHIVE DESTINATION lib
++    RUNTIME DESTINATION bin)
++endif()
 +add_library(fstscript
 +  determinize.cc
 +  difference.cc
@@ -1967,8 +2061,12 @@ index 0000000..e01fe6f
 +  shortest-path.cc
 +  synchronize.cc
 +)
-+target_link_libraries(fstscript PUBLIC fst fstscriptutils)
-+target_include_directories(fstscriptutils PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
++if (MSVC)
++  target_link_libraries(fstscript PUBLIC fst fstscriptutils)
++else()
++  target_link_libraries(fstscript PUBLIC fst)
++endif()
++target_include_directories(fstscript PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 +                           $<INSTALL_INTERFACE:include>)
 +set_target_properties(fstscript PROPERTIES
 +  SOVERSION "${SOVERSION}"
