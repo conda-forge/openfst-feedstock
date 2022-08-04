@@ -78,7 +78,7 @@ requirements:
     "symbol-table-ops.h", "symbol-table.h", "synchronize.h",
     "test-properties.h", "topsort.h", "tuple-weight.h", "union-find.h",
     "union-weight.h", "union.h", "util.h", "vector-fst.h", "verify.h",
-    "visit.h", "windows_defs.inc fst/weight.h",
+    "visit.h", "windows_defs.inc", "fst/weight.h",
     "extensions/compress/compress.h",
     "extensions/compress/compressscript.h", "extensions/compress/elias.h",
     "extensions/far/compile-strings.h",
