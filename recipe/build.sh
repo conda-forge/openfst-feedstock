@@ -21,8 +21,8 @@ if [[ "$SHLIB_EXT" == '.dylib' ]]; then
   export TMPDIR="${SRC_DIR}\build\tmp"
 
   mkdir build
-  mkdir tmp
   pushd build
+  mkdir tmp
 
   cmake -GNinja ${CMAKE_ARGS} \
       -DCMAKE_INSTALL_PREFIX="${PREFIX}" \
