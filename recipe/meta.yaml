@@ -11,7 +11,7 @@ source:
     - patches/0001-Remove-float-equality-check-in-cross-compiling.patch  # [build_platform != target_platform]
     - patches/0002-add-missing-header.patch
     - patches/0003-add-no-undefined-to-some-LDFLAGS.patch                # [win]
-    - patches/0004-Fix-file-closing-on-windows.patch                     # [win]
+    - patches/0004-Cross-platform-CMake-build.patch                     # [not linux]
 
 build:
   number: 2
@@ -23,10 +23,10 @@ build:
 requirements:
   build:
     - {{ compiler('cxx') }}
-    - make         # [unix]
-    - gnuconfig    # [unix]
-    - cmake        # [win]
-    - ninja        # [win]
+    - make         # [linux]
+    - gnuconfig    # [linux]
+    - cmake        # [not linux]
+    - ninja        # [not linux]
     - m2-patch     # [win]
   host:
     - dlfcn-win32  # [win]
@@ -53,9 +53,85 @@ requirements:
 # This list should be substantially longer; this is just a stand-in
 # selection; relevant headers can be added as needed/desired.
 {% set fst_headers = [
-    "fst.h", "shortest-path.h", "weight.h",
-    "extensions/compress/compress.h", "extensions/far/convert.h",
-    "extensions/special/phi-fst.h", "script/compose.h"
+  "accumulator.h", "add-on.h", "arc-arena.h",
+    "arc-map.h", "arc.h", "arcfilter.h", "arcsort.h", "bi-table.h",
+    "cache.h", "closure.h", "compact-fst.h", "compat.h", "complement.h",
+    "compose-filter.h", "compose.h", "concat.h", "connect.h", "const-fst.h",
+    "determinize.h", "dfs-visit.h", "difference.h", "disambiguate.h",
+    "edit-fst.h", "encode.h", "epsnormalize.h", "equal.h", "equivalent.h",
+    "error-weight.h", "expanded-fst.h", "expander-cache.h",
+    "expectation-weight.h", "factor-weight.h", "filter-state.h", "flags.h",
+    "float-weight.h", "fst-decl.h", "fst.h", "fstlib.h",
+    "generic-register.h", "heap.h", "icu.h", "intersect.h",
+    "interval-set.h", "invert.h", "isomorphic.h", "label-reachable.h",
+    "lexicographic-weight.h", "lock.h", "log.h", "lookahead-filter.h",
+    "lookahead-matcher.h", "mapped-file.h", "matcher-fst.h",
+    "matcher.h", "memory.h", "minimize.h", "mutable-fst.h", "pair-weight.h",
+    "partition.h", "power-weight.h", "power-weight-mappers.h",
+    "product-weight.h", "project.h", "properties.h", "prune.h", "push.h",
+    "queue.h", "randequivalent.h", "randgen.h", "rational.h", "register.h",
+    "relabel.h", "replace-util.h", "replace.h", "reverse.h", "reweight.h",
+    "rmepsilon.h", "rmfinalepsilon.h", "set-weight.h", "shortest-distance.h",
+    "shortest-path.h", "signed-log-weight.h", "sparse-power-weight.h",
+    "sparse-tuple-weight.h", "state-map.h", "state-reachable.h",
+    "state-table.h", "statesort.h", "string-weight.h", "string.h",
+    "symbol-table-ops.h", "symbol-table.h", "synchronize.h",
+    "test-properties.h", "topsort.h", "tuple-weight.h", "union-find.h",
+    "union-weight.h", "union.h", "util.h", "vector-fst.h", "verify.h",
+    "visit.h", "windows_defs.inc", "weight.h",
+    "extensions/compress/compress.h",
+    "extensions/compress/compressscript.h", "extensions/compress/elias.h",
+    "extensions/far/compile-strings.h",
+    "extensions/far/convert.h", "extensions/far/create.h",
+    "extensions/far/encode.h", "extensions/far/equal.h",
+    "extensions/far/extract.h", "extensions/far/far.h",
+    "extensions/far/far-class.h", "extensions/far/farlib.h",
+    "extensions/far/farscript.h", "extensions/far/getters.h",
+    "extensions/far/info.h", "extensions/far/isomorphic.h",
+    "extensions/far/map-reduce.h", "extensions/far/print-strings.h",
+    "extensions/far/script-impl.h", "extensions/far/stlist.h",
+    "extensions/far/sttable.h",
+    "extensions/linear/linear-fst-data-builder.h",
+    "extensions/linear/linear-fst-data.h", "extensions/linear/linear-fst.h",
+    "extensions/linear/linearscript.h", "extensions/linear/loglinear-apply.h", 
+    "extensions/linear/trie.h",
+    "extensions/mpdt/compose.h", 
+    "extensions/mpdt/expand.h", "extensions/mpdt/info.h", 
+    "extensions/mpdt/mpdt.h", "extensions/mpdt/mpdtlib.h", 
+    "extensions/mpdt/mpdtscript.h", "extensions/mpdt/read_write_utils.h", 
+    "extensions/mpdt/reverse.h",
+    "extensions/ngram/bitmap-index.h", 
+    "extensions/ngram/ngram-fst.h", "extensions/ngram/nthbit.h",
+    "extensions/pdt/collection.h", 
+    "extensions/pdt/compose.h", "extensions/pdt/expand.h", 
+    "extensions/pdt/getters.h", "extensions/pdt/info.h", 
+    "extensions/pdt/paren.h", "extensions/pdt/pdt.h", 
+    "extensions/pdt/pdtlib.h", "extensions/pdt/pdtscript.h", 
+    "extensions/pdt/replace.h", "extensions/pdt/reverse.h", 
+    "extensions/pdt/shortest-path.h",
+    "extensions/special/phi-fst.h", 
+    "extensions/special/rho-fst.h", "extensions/special/sigma-fst.h",
+    "script/arc-class.h", 
+    "script/arcfilter-impl.h", "script/arciterator-class.h", 
+    "script/arcsort.h", "script/arg-packs.h", "script/closure.h", 
+    "script/compile-impl.h", "script/compile.h", "script/compose.h", 
+    "script/concat.h", "script/connect.h", "script/convert.h", 
+    "script/decode.h", "script/determinize.h", "script/difference.h", 
+    "script/disambiguate.h", "script/draw-impl.h", "script/draw.h", 
+    "script/encode.h", "script/encodemapper-class.h", "script/epsnormalize.h", 
+    "script/equal.h", "script/equivalent.h", "script/fst-class.h", 
+    "script/fstscript.h", "script/getters.h", "script/info-impl.h", 
+    "script/info.h", "script/intersect.h", "script/invert.h", 
+    "script/isomorphic.h", "script/map.h", "script/minimize.h", 
+    "script/print-impl.h", "script/print.h", "script/project.h", 
+    "script/prune.h", "script/push.h", "script/randequivalent.h", 
+    "script/randgen.h", "script/relabel.h", "script/replace.h", 
+    "script/reverse.h", "script/reweight.h", "script/rmepsilon.h", 
+    "script/script-impl.h", "script/shortest-distance.h", 
+    "script/shortest-path.h", "script/stateiterator-class.h", 
+    "script/synchronize.h", "script/text-io.h", "script/topsort.h", 
+    "script/union.h", "script/weight-class.h", "script/fstscript-decl.h", 
+    "script/verify.h"
 ] %}
 
 test:
