@@ -21,7 +21,7 @@ if [[ "$SHLIB_EXT" == '.dylib' ]]; then
   export TMPDIR="${SRC_DIR}\build\tmp"
 
   mkdir build
-
+  mkdir tmp
   pushd build
 
   cmake -GNinja ${CMAKE_ARGS} \
