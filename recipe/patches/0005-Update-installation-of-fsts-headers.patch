@@ -1,0 +1,38 @@
+From dc4fbab1500ec01cddcef5ec01b29f942fd89ff4 Mon Sep 17 00:00:00 2001
+From: Michael McAuliffe <michael.e.mcauliffe@gmail.com>
+Date: Fri, 5 Aug 2022 13:30:23 -0700
+Subject: [PATCH] Update installation of fsts headers
+
+---
+ src/include/Makefile.in | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/src/include/Makefile.in b/src/include/Makefile.in
+index 6e35e65..c68cb50 100644
+--- a/src/include/Makefile.in
++++ b/src/include/Makefile.in
+@@ -434,6 +434,11 @@ top_srcdir = @top_srcdir@
+ @HAVE_LINEAR_TRUE@fst/extensions/linear/linearscript.h fst/extensions/linear/loglinear-apply.h \
+ @HAVE_LINEAR_TRUE@fst/extensions/linear/trie.h
+ 
++@HAVE_FSTS_TRUE@linear_include_headers = fst/extensions/linear/linear-fst-data-builder.h \
++@HAVE_FSTS_TRUE@fst/extensions/linear/linear-fst-data.h fst/extensions/linear/linear-fst.h \
++@HAVE_FSTS_TRUE@fst/extensions/linear/linearscript.h fst/extensions/linear/loglinear-apply.h \
++@HAVE_FSTS_TRUE@fst/extensions/linear/trie.h
++
+ @HAVE_GRM_TRUE@mpdt_include_headers = fst/extensions/mpdt/compose.h \
+ @HAVE_GRM_TRUE@fst/extensions/mpdt/expand.h fst/extensions/mpdt/info.h \
+ @HAVE_GRM_TRUE@fst/extensions/mpdt/mpdt.h fst/extensions/mpdt/mpdtlib.h \
+@@ -449,6 +454,9 @@ top_srcdir = @top_srcdir@
+ @HAVE_NGRAM_TRUE@ngram_include_headers = fst/extensions/ngram/bitmap-index.h \
+ @HAVE_NGRAM_TRUE@fst/extensions/ngram/ngram-fst.h fst/extensions/ngram/nthbit.h
+ 
++@HAVE_FSTS_TRUE@ngram_include_headers = fst/extensions/ngram/bitmap-index.h \
++@HAVE_FSTS_TRUE@fst/extensions/ngram/ngram-fst.h fst/extensions/ngram/nthbit.h
++
+ @HAVE_GRM_TRUE@pdt_include_headers = fst/extensions/pdt/collection.h \
+ @HAVE_GRM_TRUE@fst/extensions/pdt/compose.h fst/extensions/pdt/expand.h \
+ @HAVE_GRM_TRUE@fst/extensions/pdt/getters.h fst/extensions/pdt/info.h \
+-- 
+2.37.1
+
