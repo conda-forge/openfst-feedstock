@@ -40,23 +40,23 @@ if [[ "$SHLIB_EXT" == '.dylib' ]]; then
 else
   # Get an updated config.sub and config.guess
   cp $BUILD_PREFIX/share/gnuconfig/config.* .
+  if [[ "${CONDA_BUILD_CROSS_COMPILATION}" == "1" ]]; then
+    OPENFST_CROSS_COMPILATION_CONFIGURE_OPTS="--build=${BUILD} --host=${HOST}"
+  else
+    OPENFST_CROSS_COMPILATION_CONFIGURE_OPTS=""
+  fi
 
   ./configure \
      --prefix="${PREFIX}" \
      --enable-static=no \
      --enable-compress \
-     --enable-compact-fsts \
      --enable-fsts \
-     --enable-far \
      --enable-grm \
-     --enable-special \
-     --enable-linear-fsts \
-     --enable-lookahead-fsts \
-     --enable-mpdt \
-     --enable-ngram-fsts \
-     --enable-pdt
+     --enable-special ${OPENFST_CROSS_COMPILATION_CONFIGURE_OPTS}
 
-  make -j"${CPU_COUNT}" check || (cat src/test/test-suite.log && exit 1)
+  if [[ "$CONDA_BUILD_CROSS_COMPILATION" != "1" ]]; then
+    make -j"${CPU_COUNT}" check || (cat src/test/test-suite.log && exit 1)
+  fi
 
   make -j"${CPU_COUNT}" install
 
