@@ -41,7 +41,7 @@ requirements:
     "fstequivalent", "fstinfo", "fstintersect", "fstinvert", "fstisomorphic", "fstlinear",
     "fstloglinearapply", "fstmap", "fstminimize", "fstprint", "fstproject", "fstprune", "fstpush",
     "fstrandgen", "fstrelabel", "fstreplace", "fstreverse", "fstreweight", "fstrmepsilon",
-    "fstshortestdistance", "fstshortestpath", "fstspecial", "fstsymbols", "fstsynchronize",
+    "fstshortestdistance", "fstshortestpath", "fstsymbols", "fstsynchronize",
     "fsttopsort", "fstunion", "mpdtcompose", "mpdtexpand", "mpdtinfo", "mpdtreverse",
     "pdtcompose", "pdtexpand", "pdtinfo", "pdtreplace", "pdtreverse", "pdtshortestpath"
 ] %}
