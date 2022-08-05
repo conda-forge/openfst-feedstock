@@ -45,9 +45,16 @@ else
      --prefix="${PREFIX}" \
      --enable-static=no \
      --enable-compress \
+     --enable-compact-fsts \
      --enable-fsts \
+     --enable-far \
      --enable-grm \
-     --enable-special
+     --enable-special \
+     --enable-linear-fsts \
+     --enable-lookahead-fsts \
+     --enable-mpdt \
+     --enable-ngram-fsts \
+     --enable-pdt
 
   make -j"${CPU_COUNT}" check || (cat src/test/test-suite.log && exit 1)
 
