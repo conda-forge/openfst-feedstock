@@ -15,6 +15,8 @@ source:
 
 build:
   number: 2
+  # ensures that packages using openfst as a host dependency get the right runtime dependence as well, see
+  # https://conda-forge.org/docs/maintainer/pinning_deps.html#specifying-run-exports
   run_exports:
   # seems to be changing even with patch releases
   # https://abi-laboratory.pro/tracker/timeline/openfst/
