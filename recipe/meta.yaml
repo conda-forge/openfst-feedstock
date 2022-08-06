@@ -19,8 +19,8 @@ build:
   # ensures that packages using openfst as a host dependency get the right runtime dependence as well, see
   # https://conda-forge.org/docs/maintainer/pinning_deps.html#specifying-run-exports
   run_exports:
-  # seems to be changing even with patch releases
-  # https://abi-laboratory.pro/tracker/timeline/openfst/
+    # seems to be changing even with patch releases
+    # https://abi-laboratory.pro/tracker/timeline/openfst/
     - {{ pin_subpackage('openfst', max_pin='x.x.x') }}
 
 requirements:
@@ -56,7 +56,7 @@ requirements:
 # This list should be substantially longer; this is just a stand-in
 # selection; relevant headers can be added as needed/desired.
 {% set fst_headers = [
-  "accumulator.h", "add-on.h", "arc-arena.h",
+    "accumulator.h", "add-on.h", "arc-arena.h",
     "arc-map.h", "arc.h", "arcfilter.h", "arcsort.h", "bi-table.h",
     "cache.h", "closure.h", "compact-fst.h", "compat.h", "complement.h",
     "compose-filter.h", "compose.h", "concat.h", "connect.h", "const-fst.h",
