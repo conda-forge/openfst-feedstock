@@ -53,8 +53,6 @@ requirements:
     "linearscript", "lookahead", "mpdtscript", "ngram", "pdtscript",
     "script", "special"
 ] %}
-# This list should be substantially longer; this is just a stand-in
-# selection; relevant headers can be added as needed/desired.
 {% set fst_headers = [
     "accumulator.h", "add-on.h", "arc-arena.h",
     "arc-map.h", "arc.h", "arcfilter.h", "arcsort.h", "bi-table.h",
