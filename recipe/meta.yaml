@@ -27,6 +27,7 @@ requirements:
   build:
     - {{ compiler('cxx') }}
     - make         # [linux]
+    - automake     # [linux]
     - gnuconfig    # [linux]
     - cmake        # [not linux]
     - ninja        # [not linux]
