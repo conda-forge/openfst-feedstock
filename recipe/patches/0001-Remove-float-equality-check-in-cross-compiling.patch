@@ -1,0 +1,29 @@
+From 8250a4b33aaaf812bd32f8541d8232048abafbc8 Mon Sep 17 00:00:00 2001
+From: Michael McAuliffe <michael.e.mcauliffe@gmail.com>
+Date: Sat, 5 Feb 2022 10:04:46 -0800
+Subject: [PATCH 1/3] Remove float equality check in cross-compiling
+
+---
+ configure | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/configure b/configure
+index 3567f3a..ec6e64c 100644
+--- a/configure
++++ b/configure
+@@ -17978,10 +17978,8 @@ libfstdir=$with_libfstdir
+ # or when someone does not run `make check`.
+ if test "$cross_compiling" = yes
+ then :
+-  { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+-printf "%s\n" "$as_me: error: in \`$ac_pwd':" >&2;}
+-as_fn_error $? "cannot run test program while cross compiling
+-See \`config.log' for more details" "$LINENO" 5; }
++  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: skipping float equality test" >&5
++printf "%s\n" "$as_me: skipping float equality test" >&2;}
+ else $as_nop
+   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+ /* end confdefs.h.  */
+-- 
+2.35.1.windows.2
+

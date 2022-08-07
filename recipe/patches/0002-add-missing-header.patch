@@ -1,0 +1,24 @@
+From 190209d688d6af874effb325753b5c8eaabf57af Mon Sep 17 00:00:00 2001
+From: "H. Vetinari" <h.vetinari@gmx.com>
+Date: Sun, 3 Apr 2022 10:05:22 +1100
+Subject: [PATCH 2/3] add missing header
+
+---
+ src/lib/compat.cc | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/lib/compat.cc b/src/lib/compat.cc
+index b7ea5ff..0221584 100644
+--- a/src/lib/compat.cc
++++ b/src/lib/compat.cc
+@@ -17,6 +17,7 @@
+ #include <fst/compat.h>
+ 
+ #include <algorithm>
++#include <cctype>
+ #include <iostream>
+ #include <ostream>
+ #include <string>
+-- 
+2.35.1.windows.2
+

@@ -1,0 +1,35 @@
+From 127ed9b426d71260f0ff8afc075cdba2591be5f1 Mon Sep 17 00:00:00 2001
+From: "H. Vetinari" <h.vetinari@gmx.com>
+Date: Mon, 4 Apr 2022 08:40:57 +1100
+Subject: [PATCH 3/3] add -no-undefined to some LDFLAGS
+
+---
+ src/lib/Makefile.am    | 2 +-
+ src/script/Makefile.am | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/lib/Makefile.am b/src/lib/Makefile.am
+index 272e360..4c2aaa5 100644
+--- a/src/lib/Makefile.am
++++ b/src/lib/Makefile.am
+@@ -4,5 +4,5 @@ lib_LTLIBRARIES = libfst.la
+ libfst_la_SOURCES = compat.cc encode.cc flags.cc fst.cc fst-types.cc \
+                     mapped-file.cc properties.cc symbol-table.cc \
+                     symbol-table-ops.cc weight.cc util.cc
+-libfst_la_LDFLAGS = -version-info 25:0:0
++libfst_la_LDFLAGS = -version-info 25:0:0 -no-undefined
+ libfst_la_LIBADD = $(DL_LIBS)
+diff --git a/src/script/Makefile.am b/src/script/Makefile.am
+index fa5b632..87aabf6 100644
+--- a/src/script/Makefile.am
++++ b/src/script/Makefile.am
+@@ -13,5 +13,5 @@ shortest-distance.cc shortest-path.cc stateiterator-class.cc synchronize.cc \
+ text-io.cc topsort.cc union.cc weight-class.cc verify.cc
+ 
+ libfstscript_la_LIBADD = ../lib/libfst.la -lm $(DL_LIBS)
+-libfstscript_la_LDFLAGS = -version-info 25:0:0
++libfstscript_la_LDFLAGS = -version-info 25:0:0 -no-undefined
+ endif
+-- 
+2.35.1.windows.2
+

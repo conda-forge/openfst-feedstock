@@ -1,35 +1,166 @@
-{% set name = "openfst" %}
 {% set version = "1.8.2" %}
 
 package:
-  name: {{ name|lower }}
+  name: openfst
   version: {{ version }}
 
 source:
-  url: http://www.openfst.org/twiki/pub/FST/FstDownload/{{ name }}-{{ version }}.tar.gz
+  url: http://www.openfst.org/twiki/pub/FST/FstDownload/openfst-{{ version }}.tar.gz
   sha256: de987bf3624721c5d5ba321af95751898e4f4bb41c8a36e2d64f0627656d8b42
   patches:
-    - osx_arm64_configure.patch  # [build_platform != target_platform]
+    - patches/0001-Remove-float-equality-check-in-cross-compiling.patch  # [build_platform != target_platform]
+    - patches/0002-add-missing-header.patch
+    - patches/0003-add-no-undefined-to-some-LDFLAGS.patch                # [win]
+    - patches/0004-Cross-platform-CMake-build.patch                      # [not linux]
+    - patches/0005-Update-installation-of-fsts-headers.patch             # [linux]
 
 build:
-  number: 1
-  skip: true  # [win]
+  number: 2
+  # ensures that packages using openfst as a host dependency get the right runtime dependence as well, see
+  # https://conda-forge.org/docs/maintainer/pinning_deps.html#specifying-run-exports
+  run_exports:
+    # seems to be changing even with patch releases
+    # https://abi-laboratory.pro/tracker/timeline/openfst/
+    - {{ pin_subpackage('openfst', max_pin='x.x.x') }}
 
 requirements:
   build:
     - {{ compiler('cxx') }}
-    - make
-    - gnuconfig   # [unix]
+    - make         # [linux]
+    - automake     # [linux]
+    - gnuconfig    # [linux]
+    - cmake        # [not linux]
+    - ninja        # [not linux]
+    - m2-patch     # [win]
+  host:
+    - dlfcn-win32  # [win]
+  run:
+    - ucrt         # [win]
+
+{% set fst_binaries = [
+    "farcompilestrings", "farconvert", "farcreate", "farencode", "farequal", "farextract",
+    "farinfo", "farisomorphic", "farprintstrings", "fstarcsort", "fstclosure", "fstcompile",
+    "fstcompose", "fstcompress", "fstconcat", "fstconnect", "fstconvert", "fstdeterminize",
+    "fstdifference", "fstdisambiguate", "fstdraw", "fstencode", "fstepsnormalize", "fstequal",
+    "fstequivalent", "fstinfo", "fstintersect", "fstinvert", "fstisomorphic", "fstlinear",
+    "fstloglinearapply", "fstmap", "fstminimize", "fstprint", "fstproject", "fstprune", "fstpush",
+    "fstrandgen", "fstrelabel", "fstreplace", "fstreverse", "fstreweight", "fstrmepsilon",
+    "fstshortestdistance", "fstshortestpath", "fstsymbols", "fstsynchronize",
+    "fsttopsort", "fstunion", "mpdtcompose", "mpdtexpand", "mpdtinfo", "mpdtreverse",
+    "pdtcompose", "pdtexpand", "pdtinfo", "pdtreplace", "pdtreverse", "pdtshortestpath"
+] %}
+{% set fst_libraries = [
+    "", "compact", "compressscript", "const", "far", "farscript",
+    "linearscript", "lookahead", "mpdtscript", "ngram", "pdtscript",
+    "script", "special"
+] %}
+{% set fst_headers = [
+    "accumulator.h", "add-on.h", "arc-arena.h",
+    "arc-map.h", "arc.h", "arcfilter.h", "arcsort.h", "bi-table.h",
+    "cache.h", "closure.h", "compact-fst.h", "compat.h", "complement.h",
+    "compose-filter.h", "compose.h", "concat.h", "connect.h", "const-fst.h",
+    "determinize.h", "dfs-visit.h", "difference.h", "disambiguate.h",
+    "edit-fst.h", "encode.h", "epsnormalize.h", "equal.h", "equivalent.h",
+    "error-weight.h", "expanded-fst.h", "expander-cache.h",
+    "expectation-weight.h", "factor-weight.h", "filter-state.h", "flags.h",
+    "float-weight.h", "fst-decl.h", "fst.h", "fstlib.h",
+    "generic-register.h", "heap.h", "icu.h", "intersect.h",
+    "interval-set.h", "invert.h", "isomorphic.h", "label-reachable.h",
+    "lexicographic-weight.h", "lock.h", "log.h", "lookahead-filter.h",
+    "lookahead-matcher.h", "mapped-file.h", "matcher-fst.h",
+    "matcher.h", "memory.h", "minimize.h", "mutable-fst.h", "pair-weight.h",
+    "partition.h", "power-weight.h", "power-weight-mappers.h",
+    "product-weight.h", "project.h", "properties.h", "prune.h", "push.h",
+    "queue.h", "randequivalent.h", "randgen.h", "rational.h", "register.h",
+    "relabel.h", "replace-util.h", "replace.h", "reverse.h", "reweight.h",
+    "rmepsilon.h", "rmfinalepsilon.h", "set-weight.h", "shortest-distance.h",
+    "shortest-path.h", "signed-log-weight.h", "sparse-power-weight.h",
+    "sparse-tuple-weight.h", "state-map.h", "state-reachable.h",
+    "state-table.h", "statesort.h", "string-weight.h", "string.h",
+    "symbol-table-ops.h", "symbol-table.h", "synchronize.h",
+    "test-properties.h", "topsort.h", "tuple-weight.h", "union-find.h",
+    "union-weight.h", "union.h", "util.h", "vector-fst.h", "verify.h",
+    "visit.h", "windows_defs.inc", "weight.h",
+    "extensions/compress/compress.h",
+    "extensions/compress/compressscript.h", "extensions/compress/elias.h",
+    "extensions/far/compile-strings.h",
+    "extensions/far/convert.h", "extensions/far/create.h",
+    "extensions/far/encode.h", "extensions/far/equal.h",
+    "extensions/far/extract.h", "extensions/far/far.h",
+    "extensions/far/far-class.h", "extensions/far/farlib.h",
+    "extensions/far/farscript.h", "extensions/far/getters.h",
+    "extensions/far/info.h", "extensions/far/isomorphic.h",
+    "extensions/far/map-reduce.h", "extensions/far/print-strings.h",
+    "extensions/far/script-impl.h", "extensions/far/stlist.h",
+    "extensions/far/sttable.h",
+    "extensions/linear/linear-fst-data-builder.h",
+    "extensions/linear/linear-fst-data.h", "extensions/linear/linear-fst.h",
+    "extensions/linear/linearscript.h", "extensions/linear/loglinear-apply.h", 
+    "extensions/linear/trie.h",
+    "extensions/mpdt/compose.h", 
+    "extensions/mpdt/expand.h", "extensions/mpdt/info.h", 
+    "extensions/mpdt/mpdt.h", "extensions/mpdt/mpdtlib.h", 
+    "extensions/mpdt/mpdtscript.h", "extensions/mpdt/read_write_utils.h", 
+    "extensions/mpdt/reverse.h",
+    "extensions/ngram/bitmap-index.h", 
+    "extensions/ngram/ngram-fst.h", "extensions/ngram/nthbit.h",
+    "extensions/pdt/collection.h", 
+    "extensions/pdt/compose.h", "extensions/pdt/expand.h", 
+    "extensions/pdt/getters.h", "extensions/pdt/info.h", 
+    "extensions/pdt/paren.h", "extensions/pdt/pdt.h", 
+    "extensions/pdt/pdtlib.h", "extensions/pdt/pdtscript.h", 
+    "extensions/pdt/replace.h", "extensions/pdt/reverse.h", 
+    "extensions/pdt/shortest-path.h",
+    "extensions/special/phi-fst.h", 
+    "extensions/special/rho-fst.h", "extensions/special/sigma-fst.h",
+    "script/arc-class.h", 
+    "script/arcfilter-impl.h", "script/arciterator-class.h", 
+    "script/arcsort.h", "script/arg-packs.h", "script/closure.h", 
+    "script/compile-impl.h", "script/compile.h", "script/compose.h", 
+    "script/concat.h", "script/connect.h", "script/convert.h", 
+    "script/decode.h", "script/determinize.h", "script/difference.h", 
+    "script/disambiguate.h", "script/draw-impl.h", "script/draw.h", 
+    "script/encode.h", "script/encodemapper-class.h", "script/epsnormalize.h", 
+    "script/equal.h", "script/equivalent.h", "script/fst-class.h", 
+    "script/fstscript.h", "script/getters.h", "script/info-impl.h", 
+    "script/info.h", "script/intersect.h", "script/invert.h", 
+    "script/isomorphic.h", "script/map.h", "script/minimize.h", 
+    "script/print-impl.h", "script/print.h", "script/project.h", 
+    "script/prune.h", "script/push.h", "script/randequivalent.h", 
+    "script/randgen.h", "script/relabel.h", "script/replace.h", 
+    "script/reverse.h", "script/reweight.h", "script/rmepsilon.h", 
+    "script/script-impl.h", "script/shortest-distance.h", 
+    "script/shortest-path.h", "script/stateiterator-class.h", 
+    "script/synchronize.h", "script/text-io.h", "script/topsort.h", 
+    "script/union.h", "script/weight-class.h", "script/fstscript-decl.h", 
+    "script/verify.h"
+] %}
 
 test:
-  # If behaving properly these will have return code 1.
   commands:
-    - farinfo --helpshort >/dev/null || [[ $? == 1 ]]
-    - fstcompress --helpshort >/dev/null || [[ $? == 1 ]]
-    - fstinfo --helpshort >/dev/null || [[ $? == 1 ]]
-    - fstspecial --helpshort >/dev/null || [[ $? == 1 ]]
-    - mpdtcompose --helpshort >/dev/null || [[ $? == 1 ]]
-    - pdtcompose --helpshort >/dev/null || [[ $? == 1 ]]
+    # binaries:
+    {% for each_bin in fst_binaries %}
+      # If behaving properly these will have return code 1.
+      - {{ each_bin }} --helpshort >/dev/null || [[ $? == 1 ]]                      # [unix]
+      - {{ each_bin }} --helpshort & if errorlevel 1 ( exit /b 0) else (exit /b 1)  # [win]
+    {% endfor %}
+
+    # libraries:
+    {% for each_lib in fst_libraries %}
+      # shared
+      - test -f $PREFIX/lib/libfst{{ each_lib }}.so               # [linux]
+      - test -f $PREFIX/lib/libfst{{ each_lib }}.dylib            # [osx]
+      - if not exist %LIBRARY_BIN%\fst{{ each_lib }}.dll exit 1   # [win]
+
+      # absence of static libraries
+      - test ! -f $PREFIX/lib/libfst{{ each_lib }}.a              # [not win]
+    {% endfor %}
+
+    # headers:
+    {% for each_header in fst_headers %}
+      - test -f $PREFIX/include/fst/{{ each_header }} || (echo "{{ each_header }} not found" && exit 1)  # [unix]
+      - if not exist %LIBRARY_INC%\fst\{{ "\\".join(each_header.split("/")) }} exit 1                    # [win]
+    {% endfor %}
 
 about:
   home: http://openfst.org

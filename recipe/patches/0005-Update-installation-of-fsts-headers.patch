@@ -1,0 +1,32 @@
+From dbe69f8524051a84683af49fe5b59e2a8d69782f Mon Sep 17 00:00:00 2001
+From: Michael McAuliffe <michael.e.mcauliffe@gmail.com>
+Date: Sat, 6 Aug 2022 12:16:40 -0700
+Subject: [PATCH] Update installation of fsts headers
+
+---
+ src/include/Makefile.am | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/src/include/Makefile.am b/src/include/Makefile.am
+index 043a2b3..8832df2 100644
+--- a/src/include/Makefile.am
++++ b/src/include/Makefile.am
+@@ -31,6 +31,15 @@ fst/extensions/mpdt/mpdtscript.h fst/extensions/mpdt/read_write_utils.h \
+ fst/extensions/mpdt/reverse.h
+ endif
+ 
++if HAVE_FSTS
++linear_include_headers = fst/extensions/linear/linear-fst-data-builder.h \
++fst/extensions/linear/linear-fst-data.h fst/extensions/linear/linear-fst.h \
++fst/extensions/linear/linearscript.h fst/extensions/linear/loglinear-apply.h \
++fst/extensions/linear/trie.h
++ngram_include_headers = fst/extensions/ngram/bitmap-index.h \
++fst/extensions/ngram/ngram-fst.h fst/extensions/ngram/nthbit.h
++endif
++
+ if HAVE_NGRAM
+ ngram_include_headers = fst/extensions/ngram/bitmap-index.h \
+ fst/extensions/ngram/ngram-fst.h fst/extensions/ngram/nthbit.h
+-- 
+2.37.1
+
