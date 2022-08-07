@@ -174,5 +174,6 @@ about:
 
 extra:
   recipe-maintainers:
+    - mmcauliffe
     - kylebgorman
     - mcernak
