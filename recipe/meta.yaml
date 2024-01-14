@@ -13,6 +13,7 @@ source:
     # - patches/0003-add-no-undefined-to-some-LDFLAGS.patch                # [win]
     # - patches/0004-Cross-platform-CMake-build.patch                      # [not linux]
     # - patches/0005-Update-installation-of-fsts-headers.patch             # [linux]
+    - patches/0006-Add-CMake-files.patch                      # [not linux]
 
 build:
   number: 0
