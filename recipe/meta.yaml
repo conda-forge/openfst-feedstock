@@ -133,7 +133,7 @@ requirements:
     "script/script-impl.h", "script/shortest-distance.h", 
     "script/shortest-path.h", "script/stateiterator-class.h", 
     "script/synchronize.h", "script/text-io.h", "script/topsort.h", 
-    "script/union.h", "script/weight-class.h", "script/fstscript-decl.h", 
+    "script/union.h", "script/weight-class.h",
     "script/verify.h"
 ] %}
 

@@ -1,8 +1,78 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
+From 3ade2cc1169a61420101bc640f9063b8e848f295 Mon Sep 17 00:00:00 2001
+From: Michael McAuliffe <michael.e.mcauliffe@gmail.com>
+Date: Sat, 13 Jan 2024 17:12:24 -0800
+Subject: [PATCH] Add CMake files
+
+---
+ CMakeLists.txt                                |  54 ++++++
+ src/CMakeLists.txt                            |  20 ++
+ src/bin/CMakeLists.txt                        |  85 ++++++++
+ src/extensions/CMakeLists.txt                 |  43 ++++
+ src/extensions/compact/CMakeLists.txt         | 103 ++++++++++
+ src/extensions/compress/CMakeLists.txt        |  59 ++++++
+ src/extensions/const/CMakeLists.txt           |  49 +++++
+ src/extensions/far/CMakeLists.txt             |  77 ++++++++
+ src/extensions/linear/CMakeLists.txt          |  88 +++++++++
+ src/extensions/lookahead/CMakeLists.txt       |  43 ++++
+ src/extensions/mpdt/CMakeLists.txt            |  38 ++++
+ src/extensions/ngram/CMakeLists.txt           |  54 ++++++
+ src/extensions/pdt/CMakeLists.txt             |  44 +++++
+ src/extensions/python/CMakeLists.txt          |  22 +++
+ src/extensions/special/CMakeLists.txt         |  47 +++++
+ src/include/fst/exports/exports.h             |  34 ++++
+ src/include/fst/exports/fst_Export.h          |  42 ++++
+ src/include/fst/exports/fstcompact_Export.h   |  42 ++++
+ .../fst/exports/fstcompressscript_Export.h    |  42 ++++
+ src/include/fst/exports/fstconst_Export.h     |  42 ++++
+ src/include/fst/exports/fstfar_Export.h       |  42 ++++
+ src/include/fst/exports/fstfarscript_Export.h |  42 ++++
+ .../fst/exports/fstlinearscript_Export.h      |  42 ++++
+ .../fst/exports/fstmpdtscript_Export.h        |  42 ++++
+ src/include/fst/exports/fstngram_Export.h     |  42 ++++
+ src/include/fst/exports/fstpdtscript_Export.h |  42 ++++
+ src/include/fst/exports/fstscript_Export.h    |  42 ++++
+ src/include/fst/exports/fstspecial_Export.h   |  42 ++++
+ src/lib/CMakeLists.txt                        |  41 ++++
+ src/script/CMakeLists.txt                     |  75 +++++++
+ src/test/CMakeLists.txt                       | 183 ++++++++++++++++++
+ 31 files changed, 1663 insertions(+)
+ create mode 100644 CMakeLists.txt
+ create mode 100644 src/CMakeLists.txt
+ create mode 100644 src/bin/CMakeLists.txt
+ create mode 100644 src/extensions/CMakeLists.txt
+ create mode 100644 src/extensions/compact/CMakeLists.txt
+ create mode 100644 src/extensions/compress/CMakeLists.txt
+ create mode 100644 src/extensions/const/CMakeLists.txt
+ create mode 100644 src/extensions/far/CMakeLists.txt
+ create mode 100644 src/extensions/linear/CMakeLists.txt
+ create mode 100644 src/extensions/lookahead/CMakeLists.txt
+ create mode 100644 src/extensions/mpdt/CMakeLists.txt
+ create mode 100644 src/extensions/ngram/CMakeLists.txt
+ create mode 100644 src/extensions/pdt/CMakeLists.txt
+ create mode 100644 src/extensions/python/CMakeLists.txt
+ create mode 100644 src/extensions/special/CMakeLists.txt
+ create mode 100644 src/include/fst/exports/exports.h
+ create mode 100644 src/include/fst/exports/fst_Export.h
+ create mode 100644 src/include/fst/exports/fstcompact_Export.h
+ create mode 100644 src/include/fst/exports/fstcompressscript_Export.h
+ create mode 100644 src/include/fst/exports/fstconst_Export.h
+ create mode 100644 src/include/fst/exports/fstfar_Export.h
+ create mode 100644 src/include/fst/exports/fstfarscript_Export.h
+ create mode 100644 src/include/fst/exports/fstlinearscript_Export.h
+ create mode 100644 src/include/fst/exports/fstmpdtscript_Export.h
+ create mode 100644 src/include/fst/exports/fstngram_Export.h
+ create mode 100644 src/include/fst/exports/fstpdtscript_Export.h
+ create mode 100644 src/include/fst/exports/fstscript_Export.h
+ create mode 100644 src/include/fst/exports/fstspecial_Export.h
+ create mode 100644 src/lib/CMakeLists.txt
+ create mode 100644 src/script/CMakeLists.txt
+ create mode 100644 src/test/CMakeLists.txt
+
+diff --git CMakeLists.txt CMakeLists.txt
 new file mode 100644
 index 0000000..fb41928
 --- /dev/null
-+++ b/CMakeLists.txt
++++ CMakeLists.txt
 @@ -0,0 +1,54 @@
 +
 +cmake_minimum_required(VERSION 3.20)
@@ -58,11 +128,11 @@ index 0000000..fb41928
 +endif()
 +
 +add_subdirectory(src)
-diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+diff --git src/CMakeLists.txt src/CMakeLists.txt
 new file mode 100644
 index 0000000..0bdd55d
 --- /dev/null
-+++ b/src/CMakeLists.txt
++++ src/CMakeLists.txt
 @@ -0,0 +1,20 @@
 +#-DHAVE_CONFIG_H -I./../include -fno-exceptions -funsigned-char -std=c++11 -MT symbol-table.lo -MD -MP -MF .deps/symbol-table.Tpo -c symbol-table.cc  -fno-common -DPIC -o .libs/symbol-table.o
 +
@@ -85,11 +155,103 @@ index 0000000..0bdd55d
 +add_subdirectory(test)
 +endif()
 \ No newline at end of file
-diff --git a/src/extensions/CMakeLists.txt b/src/extensions/CMakeLists.txt
+diff --git src/bin/CMakeLists.txt src/bin/CMakeLists.txt
+new file mode 100644
+index 0000000..2d02c25
+--- /dev/null
++++ src/bin/CMakeLists.txt
+@@ -0,0 +1,85 @@
++function (add_executable2 _name)
++    add_executable(${ARGV})
++    if (TARGET ${_name})
++        target_link_libraries(${_name} fstscript fst ${CMAKE_DL_LIBS})
++        set_target_properties(${_name} PROPERTIES FOLDER bin)
++    endif()
++
++    install(TARGETS ${_name} RUNTIME DESTINATION bin)
++endfunction()
++
++include_directories(../include ../script/)
++
++add_executable2(fstarcsort fstarcsort-main.cc fstarcsort.cc)
++
++add_executable2(fstclosure fstclosure-main.cc fstclosure.cc)
++
++add_executable2(fstcompile  fstcompile-main.cc fstcompile.cc)
++
++add_executable2(fstcompose fstcompose-main.cc fstcompose.cc)
++
++add_executable2(fstconcat fstconcat-main.cc fstconcat.cc)
++
++add_executable2(fstconnect fstconnect-main.cc fstconnect.cc)
++
++add_executable2(fstconvert fstconvert-main.cc fstconvert.cc)
++
++add_executable2(fstdeterminize fstdeterminize-main.cc fstdeterminize.cc)
++
++add_executable2(fstdifference fstdifference-main.cc fstdifference.cc)
++
++add_executable2(fstdisambiguate fstdisambiguate-main.cc fstdisambiguate.cc)
++
++add_executable2(fstdraw fstdraw-main.cc fstdraw.cc)
++
++add_executable2(fstencode fstencode-main.cc fstencode.cc)
++
++add_executable2(fstepsnormalize fstepsnormalize-main.cc fstepsnormalize.cc)
++
++add_executable2(fstequal fstequal-main.cc fstequal.cc)
++
++add_executable2(fstequivalent fstequivalent-main.cc fstequivalent.cc)
++
++add_executable2(fstinfo fstinfo-main.cc fstinfo.cc)
++
++add_executable2(fstintersect fstintersect-main.cc fstintersect.cc)
++
++add_executable2(fstinvert fstinvert-main.cc fstinvert.cc)
++
++add_executable2(fstisomorphic fstisomorphic-main.cc fstisomorphic.cc)
++
++add_executable2(fstmap fstmap-main.cc fstmap.cc)
++
++add_executable2(fstminimize fstminimize-main.cc fstminimize.cc)
++
++add_executable2(fstprint fstprint-main.cc fstprint.cc)
++
++add_executable2(fstproject fstproject-main.cc fstproject.cc)
++
++add_executable2(fstprune fstprune-main.cc fstprune.cc)
++
++add_executable2(fstpush fstpush-main.cc fstpush.cc)
++
++add_executable2(fstrandgen fstrandgen-main.cc fstrandgen.cc)
++
++add_executable2(fstrelabel fstrelabel-main.cc fstrelabel.cc)
++
++add_executable2(fstreplace fstreplace-main.cc fstreplace.cc)
++
++add_executable2(fstreverse fstreverse-main.cc fstreverse.cc)
++
++add_executable2(fstreweight fstreweight-main.cc fstreweight.cc)
++
++add_executable2(fstrmepsilon fstrmepsilon-main.cc fstrmepsilon.cc)
++
++add_executable2(fstshortestdistance fstshortestdistance-main.cc fstshortestdistance.cc)
++
++add_executable2(fstshortestpath fstshortestpath-main.cc fstshortestpath.cc)
++
++add_executable2(fstsymbols fstsymbols-main.cc fstsymbols.cc)
++
++add_executable2(fstsynchronize fstsynchronize-main.cc fstsynchronize.cc)
++
++add_executable2(fsttopsort fsttopsort-main.cc fsttopsort.cc)
++
++add_executable2(fstunion fstunion-main.cc fstunion.cc)
+\ No newline at end of file
+diff --git src/extensions/CMakeLists.txt src/extensions/CMakeLists.txt
 new file mode 100644
 index 0000000..094ab74
 --- /dev/null
-+++ b/src/extensions/CMakeLists.txt
++++ src/extensions/CMakeLists.txt
 @@ -0,0 +1,43 @@
 +if(HAVE_COMPACT)
 +  add_subdirectory(compact)
@@ -135,11 +297,11 @@ index 0000000..094ab74
 +  add_subdirectory(special)
 +endif(HAVE_SPECIAL)
 \ No newline at end of file
-diff --git a/src/extensions/compact/CMakeLists.txt b/src/extensions/compact/CMakeLists.txt
+diff --git src/extensions/compact/CMakeLists.txt src/extensions/compact/CMakeLists.txt
 new file mode 100644
 index 0000000..cb8a2b1
 --- /dev/null
-+++ b/src/extensions/compact/CMakeLists.txt
++++ src/extensions/compact/CMakeLists.txt
 @@ -0,0 +1,103 @@
 +add_library(fstcompact
 +  compact8_acceptor-fst.cc 
@@ -244,11 +406,11 @@ index 0000000..cb8a2b1
 +add_module(compact64_weighted_string-fst MODULE
 +  compact64_weighted_string-fst.cc)
 +
-diff --git a/src/extensions/compress/CMakeLists.txt b/src/extensions/compress/CMakeLists.txt
+diff --git src/extensions/compress/CMakeLists.txt src/extensions/compress/CMakeLists.txt
 new file mode 100644
 index 0000000..028cd76
 --- /dev/null
-+++ b/src/extensions/compress/CMakeLists.txt
++++ src/extensions/compress/CMakeLists.txt
 @@ -0,0 +1,59 @@
 +
 +add_library(fstcompressscript
@@ -310,11 +472,11 @@ index 0000000..028cd76
 +		)
 +endif(HAVE_BIN)
 \ No newline at end of file
-diff --git a/src/extensions/const/CMakeLists.txt b/src/extensions/const/CMakeLists.txt
+diff --git src/extensions/const/CMakeLists.txt src/extensions/const/CMakeLists.txt
 new file mode 100644
 index 0000000..1f041b2
 --- /dev/null
-+++ b/src/extensions/const/CMakeLists.txt
++++ src/extensions/const/CMakeLists.txt
 @@ -0,0 +1,49 @@
 +function (add_module _name)
 +    add_library(${ARGV})
@@ -366,11 +528,11 @@ index 0000000..1f041b2
 +  RUNTIME DESTINATION bin
 + )
 \ No newline at end of file
-diff --git a/src/extensions/far/CMakeLists.txt b/src/extensions/far/CMakeLists.txt
+diff --git src/extensions/far/CMakeLists.txt src/extensions/far/CMakeLists.txt
 new file mode 100644
 index 0000000..e37ce8f
 --- /dev/null
-+++ b/src/extensions/far/CMakeLists.txt
++++ src/extensions/far/CMakeLists.txt
 @@ -0,0 +1,77 @@
 +
 +add_library(fstfar
@@ -449,11 +611,11 @@ index 0000000..e37ce8f
 +  add_executable2(farprintstrings  farprintstrings.cc farprintstrings-main.cc)
 +endif(HAVE_BIN)
 +
-diff --git a/src/extensions/linear/CMakeLists.txt b/src/extensions/linear/CMakeLists.txt
+diff --git src/extensions/linear/CMakeLists.txt src/extensions/linear/CMakeLists.txt
 new file mode 100644
 index 0000000..6a5ecfd
 --- /dev/null
-+++ b/src/extensions/linear/CMakeLists.txt
++++ src/extensions/linear/CMakeLists.txt
 @@ -0,0 +1,88 @@
 +
 +
@@ -543,11 +705,11 @@ index 0000000..6a5ecfd
 +
 +add_module(linear-classifier-fst MODULE
 +  linear-classifier-fst.cc)
-diff --git a/src/extensions/lookahead/CMakeLists.txt b/src/extensions/lookahead/CMakeLists.txt
+diff --git src/extensions/lookahead/CMakeLists.txt src/extensions/lookahead/CMakeLists.txt
 new file mode 100644
 index 0000000..e265acc
 --- /dev/null
-+++ b/src/extensions/lookahead/CMakeLists.txt
++++ src/extensions/lookahead/CMakeLists.txt
 @@ -0,0 +1,43 @@
 +add_library(fstlookahead
 +  arc_lookahead-fst.cc 
@@ -593,11 +755,11 @@ index 0000000..e265acc
 +add_module(olabel_lookahead-fst MODULE
 +  olabel_lookahead-fst.cc)
 \ No newline at end of file
-diff --git a/src/extensions/mpdt/CMakeLists.txt b/src/extensions/mpdt/CMakeLists.txt
+diff --git src/extensions/mpdt/CMakeLists.txt src/extensions/mpdt/CMakeLists.txt
 new file mode 100644
 index 0000000..ef89f17
 --- /dev/null
-+++ b/src/extensions/mpdt/CMakeLists.txt
++++ src/extensions/mpdt/CMakeLists.txt
 @@ -0,0 +1,38 @@
 +
 +if(HAVE_SCRIPT)
@@ -638,11 +800,11 @@ index 0000000..ef89f17
 +  add_executable2(mpdtreverse  mpdtreverse.cc mpdtreverse-main.cc)
 +endif(HAVE_BIN)
 \ No newline at end of file
-diff --git a/src/extensions/ngram/CMakeLists.txt b/src/extensions/ngram/CMakeLists.txt
+diff --git src/extensions/ngram/CMakeLists.txt src/extensions/ngram/CMakeLists.txt
 new file mode 100644
 index 0000000..206f3c9
 --- /dev/null
-+++ b/src/extensions/ngram/CMakeLists.txt
++++ src/extensions/ngram/CMakeLists.txt
 @@ -0,0 +1,54 @@
 +
 +add_library(fstngram
@@ -699,11 +861,11 @@ index 0000000..206f3c9
 +        RUNTIME DESTINATION bin)
 +endif()
 \ No newline at end of file
-diff --git a/src/extensions/pdt/CMakeLists.txt b/src/extensions/pdt/CMakeLists.txt
+diff --git src/extensions/pdt/CMakeLists.txt src/extensions/pdt/CMakeLists.txt
 new file mode 100644
 index 0000000..10c5907
 --- /dev/null
-+++ b/src/extensions/pdt/CMakeLists.txt
++++ src/extensions/pdt/CMakeLists.txt
 @@ -0,0 +1,44 @@
 +
 +
@@ -750,11 +912,11 @@ index 0000000..10c5907
 +  add_executable2(pdtshortestpath  pdtshortestpath.cc pdtshortestpath-main.cc)
 +endif(HAVE_BIN)
 \ No newline at end of file
-diff --git a/src/extensions/python/CMakeLists.txt b/src/extensions/python/CMakeLists.txt
+diff --git src/extensions/python/CMakeLists.txt src/extensions/python/CMakeLists.txt
 new file mode 100644
 index 0000000..83b9a7f
 --- /dev/null
-+++ b/src/extensions/python/CMakeLists.txt
++++ src/extensions/python/CMakeLists.txt
 @@ -0,0 +1,22 @@
 +
 +add_library(pywrapfst
@@ -779,11 +941,11 @@ index 0000000..83b9a7f
 +	RUNTIME DESTINATION lib
 +)
 \ No newline at end of file
-diff --git a/src/extensions/special/CMakeLists.txt b/src/extensions/special/CMakeLists.txt
+diff --git src/extensions/special/CMakeLists.txt src/extensions/special/CMakeLists.txt
 new file mode 100644
 index 0000000..42c72d1
 --- /dev/null
-+++ b/src/extensions/special/CMakeLists.txt
++++ src/extensions/special/CMakeLists.txt
 @@ -0,0 +1,47 @@
 +
 +
@@ -832,11 +994,11 @@ index 0000000..42c72d1
 +ARCHIVE DESTINATION lib
 +RUNTIME DESTINATION bin
 +)
-diff --git a/src/include/fst/exports/exports.h b/src/include/fst/exports/exports.h
+diff --git src/include/fst/exports/exports.h src/include/fst/exports/exports.h
 new file mode 100644
 index 0000000..f9cb5e9
 --- /dev/null
-+++ b/src/include/fst/exports/exports.h
++++ src/include/fst/exports/exports.h
 @@ -0,0 +1,34 @@
 +
 +#ifndef exports_H
@@ -873,11 +1035,11 @@ index 0000000..f9cb5e9
 +#endif // _WIN32
 +#endif
 \ No newline at end of file
-diff --git a/src/include/fst/exports/fst_Export.h b/src/include/fst/exports/fst_Export.h
+diff --git src/include/fst/exports/fst_Export.h src/include/fst/exports/fst_Export.h
 new file mode 100644
 index 0000000..c1cc62d
 --- /dev/null
-+++ b/src/include/fst/exports/fst_Export.h
++++ src/include/fst/exports/fst_Export.h
 @@ -0,0 +1,42 @@
 +
 +#ifndef fst_EXPORT_H
@@ -921,11 +1083,11 @@ index 0000000..c1cc62d
 +#endif
 +
 +#endif /* fst_EXPORT_H */
-diff --git a/src/include/fst/exports/fstcompact_Export.h b/src/include/fst/exports/fstcompact_Export.h
+diff --git src/include/fst/exports/fstcompact_Export.h src/include/fst/exports/fstcompact_Export.h
 new file mode 100644
 index 0000000..89e9e68
 --- /dev/null
-+++ b/src/include/fst/exports/fstcompact_Export.h
++++ src/include/fst/exports/fstcompact_Export.h
 @@ -0,0 +1,42 @@
 +
 +#ifndef fstcompact_EXPORT_H
@@ -969,11 +1131,11 @@ index 0000000..89e9e68
 +#endif
 +
 +#endif /* fstcompact_EXPORT_H */
-diff --git a/src/include/fst/exports/fstcompressscript_Export.h b/src/include/fst/exports/fstcompressscript_Export.h
+diff --git src/include/fst/exports/fstcompressscript_Export.h src/include/fst/exports/fstcompressscript_Export.h
 new file mode 100644
 index 0000000..693e000
 --- /dev/null
-+++ b/src/include/fst/exports/fstcompressscript_Export.h
++++ src/include/fst/exports/fstcompressscript_Export.h
 @@ -0,0 +1,42 @@
 +
 +#ifndef fstcompressscript_EXPORT_H
@@ -1017,11 +1179,11 @@ index 0000000..693e000
 +#endif
 +
 +#endif /* fstcompressscript_EXPORT_H */
-diff --git a/src/include/fst/exports/fstconst_Export.h b/src/include/fst/exports/fstconst_Export.h
+diff --git src/include/fst/exports/fstconst_Export.h src/include/fst/exports/fstconst_Export.h
 new file mode 100644
 index 0000000..6d634c9
 --- /dev/null
-+++ b/src/include/fst/exports/fstconst_Export.h
++++ src/include/fst/exports/fstconst_Export.h
 @@ -0,0 +1,42 @@
 +
 +#ifndef fstconst_EXPORT_H
@@ -1065,11 +1227,11 @@ index 0000000..6d634c9
 +#endif
 +
 +#endif /* fstconst_EXPORT_H */
-diff --git a/src/include/fst/exports/fstfar_Export.h b/src/include/fst/exports/fstfar_Export.h
+diff --git src/include/fst/exports/fstfar_Export.h src/include/fst/exports/fstfar_Export.h
 new file mode 100644
 index 0000000..e3bf966
 --- /dev/null
-+++ b/src/include/fst/exports/fstfar_Export.h
++++ src/include/fst/exports/fstfar_Export.h
 @@ -0,0 +1,42 @@
 +
 +#ifndef fstfar_EXPORT_H
@@ -1113,11 +1275,11 @@ index 0000000..e3bf966
 +#endif
 +
 +#endif /* fstfar_EXPORT_H */
-diff --git a/src/include/fst/exports/fstfarscript_Export.h b/src/include/fst/exports/fstfarscript_Export.h
+diff --git src/include/fst/exports/fstfarscript_Export.h src/include/fst/exports/fstfarscript_Export.h
 new file mode 100644
 index 0000000..4c6d29a
 --- /dev/null
-+++ b/src/include/fst/exports/fstfarscript_Export.h
++++ src/include/fst/exports/fstfarscript_Export.h
 @@ -0,0 +1,42 @@
 +
 +#ifndef fstfarscript_EXPORT_H
@@ -1161,11 +1323,11 @@ index 0000000..4c6d29a
 +#endif
 +
 +#endif /* fstfarscript_EXPORT_H */
-diff --git a/src/include/fst/exports/fstlinearscript_Export.h b/src/include/fst/exports/fstlinearscript_Export.h
+diff --git src/include/fst/exports/fstlinearscript_Export.h src/include/fst/exports/fstlinearscript_Export.h
 new file mode 100644
 index 0000000..a809cc7
 --- /dev/null
-+++ b/src/include/fst/exports/fstlinearscript_Export.h
++++ src/include/fst/exports/fstlinearscript_Export.h
 @@ -0,0 +1,42 @@
 +
 +#ifndef fstlinearscript_EXPORT_H
@@ -1209,11 +1371,11 @@ index 0000000..a809cc7
 +#endif
 +
 +#endif /* fstlinearscript_EXPORT_H */
-diff --git a/src/include/fst/exports/fstmpdtscript_Export.h b/src/include/fst/exports/fstmpdtscript_Export.h
+diff --git src/include/fst/exports/fstmpdtscript_Export.h src/include/fst/exports/fstmpdtscript_Export.h
 new file mode 100644
 index 0000000..68aac12
 --- /dev/null
-+++ b/src/include/fst/exports/fstmpdtscript_Export.h
++++ src/include/fst/exports/fstmpdtscript_Export.h
 @@ -0,0 +1,42 @@
 +
 +#ifndef fstmpdtscript_EXPORT_H
@@ -1257,11 +1419,11 @@ index 0000000..68aac12
 +#endif
 +
 +#endif /* fstmpdtscript_EXPORT_H */
-diff --git a/src/include/fst/exports/fstngram_Export.h b/src/include/fst/exports/fstngram_Export.h
+diff --git src/include/fst/exports/fstngram_Export.h src/include/fst/exports/fstngram_Export.h
 new file mode 100644
 index 0000000..15bc06a
 --- /dev/null
-+++ b/src/include/fst/exports/fstngram_Export.h
++++ src/include/fst/exports/fstngram_Export.h
 @@ -0,0 +1,42 @@
 +
 +#ifndef fstngram_EXPORT_H
@@ -1305,11 +1467,11 @@ index 0000000..15bc06a
 +#endif
 +
 +#endif /* fstngram_EXPORT_H */
-diff --git a/src/include/fst/exports/fstpdtscript_Export.h b/src/include/fst/exports/fstpdtscript_Export.h
+diff --git src/include/fst/exports/fstpdtscript_Export.h src/include/fst/exports/fstpdtscript_Export.h
 new file mode 100644
 index 0000000..c4995b3
 --- /dev/null
-+++ b/src/include/fst/exports/fstpdtscript_Export.h
++++ src/include/fst/exports/fstpdtscript_Export.h
 @@ -0,0 +1,42 @@
 +
 +#ifndef fstpdtscript_EXPORT_H
@@ -1353,11 +1515,11 @@ index 0000000..c4995b3
 +#endif
 +
 +#endif /* fstpdtscript_EXPORT_H */
-diff --git a/src/include/fst/exports/fstscript_Export.h b/src/include/fst/exports/fstscript_Export.h
+diff --git src/include/fst/exports/fstscript_Export.h src/include/fst/exports/fstscript_Export.h
 new file mode 100644
 index 0000000..4f4407e
 --- /dev/null
-+++ b/src/include/fst/exports/fstscript_Export.h
++++ src/include/fst/exports/fstscript_Export.h
 @@ -0,0 +1,42 @@
 +
 +#ifndef fstscript_EXPORT_H
@@ -1401,11 +1563,11 @@ index 0000000..4f4407e
 +#endif
 +
 +#endif /* fstscript_EXPORT_H */
-diff --git a/src/include/fst/exports/fstspecial_Export.h b/src/include/fst/exports/fstspecial_Export.h
+diff --git src/include/fst/exports/fstspecial_Export.h src/include/fst/exports/fstspecial_Export.h
 new file mode 100644
 index 0000000..56010fb
 --- /dev/null
-+++ b/src/include/fst/exports/fstspecial_Export.h
++++ src/include/fst/exports/fstspecial_Export.h
 @@ -0,0 +1,42 @@
 +
 +#ifndef fstspecial_EXPORT_H
@@ -1449,11 +1611,11 @@ index 0000000..56010fb
 +#endif
 +
 +#endif /* fstspecial_EXPORT_H */
-diff --git a/src/lib/CMakeLists.txt b/src/lib/CMakeLists.txt
+diff --git src/lib/CMakeLists.txt src/lib/CMakeLists.txt
 new file mode 100644
 index 0000000..5194802
 --- /dev/null
-+++ b/src/lib/CMakeLists.txt
++++ src/lib/CMakeLists.txt
 @@ -0,0 +1,41 @@
 +
 +
@@ -1497,11 +1659,11 @@ index 0000000..5194802
 +RUNTIME DESTINATION bin
 +  )
 \ No newline at end of file
-diff --git a/src/script/CMakeLists.txt b/src/script/CMakeLists.txt
+diff --git src/script/CMakeLists.txt src/script/CMakeLists.txt
 new file mode 100644
 index 0000000..0aec3b9
 --- /dev/null
-+++ b/src/script/CMakeLists.txt
++++ src/script/CMakeLists.txt
 @@ -0,0 +1,75 @@
 +
 +    add_library(fstscript
@@ -1579,11 +1741,11 @@ index 0000000..0aec3b9
 +  ARCHIVE DESTINATION lib
 +  RUNTIME DESTINATION bin)
 \ No newline at end of file
-diff --git a/src/test/CMakeLists.txt b/src/test/CMakeLists.txt
+diff --git src/test/CMakeLists.txt src/test/CMakeLists.txt
 new file mode 100644
 index 0000000..eba0144
 --- /dev/null
-+++ b/src/test/CMakeLists.txt
++++ src/test/CMakeLists.txt
 @@ -0,0 +1,183 @@
 +
 +add_executable(fst_test
@@ -1769,3 +1931,6 @@ index 0000000..eba0144
 +endif()
 +add_test(NAME algo_test_power_test COMMAND algo_test_power WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/src/lib)
 \ No newline at end of file
+-- 
+2.33.0.windows.1
+
