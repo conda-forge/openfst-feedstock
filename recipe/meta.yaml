@@ -8,11 +8,11 @@ source:
   url: http://www.openfst.org/twiki/pub/FST/FstDownload/openfst-{{ version }}.tar.gz
   sha256: 077714159d5cf3e38a80b6c6656d3ccc2c8b8b6c50bb41bb65c5fec10796bf53
   patches:
-    - patches/0001-Remove-float-equality-check-in-cross-compiling.patch  # [build_platform != target_platform]
-    - patches/0002-add-missing-header.patch
-    - patches/0003-add-no-undefined-to-some-LDFLAGS.patch                # [win]
-    - patches/0004-Cross-platform-CMake-build.patch                      # [not linux]
-    - patches/0005-Update-installation-of-fsts-headers.patch             # [linux]
+    # - patches/0001-Remove-float-equality-check-in-cross-compiling.patch  # [build_platform != target_platform]
+    # - patches/0002-add-missing-header.patch
+    # - patches/0003-add-no-undefined-to-some-LDFLAGS.patch                # [win]
+    # - patches/0004-Cross-platform-CMake-build.patch                      # [not linux]
+    # - patches/0005-Update-installation-of-fsts-headers.patch             # [linux]
 
 build:
   number: 0
