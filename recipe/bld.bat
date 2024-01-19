@@ -22,7 +22,7 @@ if %ERRORLEVEL% neq 0 exit 1
 cmake --build . --verbose --config Release -- -v -j %CPU_COUNT%
 if %ERRORLEVEL% neq 0 exit 1
 set "PATH=%LIBRARY_PREFIX%\lib;%SRC_DIR%\build\src\lib;%SRC_DIR%\build\src\test;%PATH%"
-ctest
+ctest --rerun-failed --output-on-failure
 set "PATH=%OLDPATH%"
 if %ERRORLEVEL% neq 0 exit 1
 
