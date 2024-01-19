@@ -1,4 +1,4 @@
-From afd027762223b3fd1be485cd834c7b06bcc806fb Mon Sep 17 00:00:00 2001
+From 91853dabc1dea78838b8f68185a4e067ed35de3b Mon Sep 17 00:00:00 2001
 From: Michael McAuliffe <michael.e.mcauliffe@gmail.com>
 Date: Fri, 19 Jan 2024 12:54:02 -0800
 Subject: [PATCH] Windows compatibility
@@ -11,10 +11,8 @@ Subject: [PATCH] Windows compatibility
  src/extensions/far/farcompilestrings-main.cc  |  2 +-
  src/extensions/far/sttable.cc                 |  2 +-
  src/extensions/linear/linearscript.cc         |  2 +-
- src/extensions/ngram/bitmap-index.cc          | 12 ++--
- src/extensions/ngram/nthbit.cc                |  2 +-
  src/include/fst/cache.h                       |  6 +-
- src/include/fst/compat.h                      | 53 ++++++++++++-----
+ src/include/fst/compat.h                      | 37 +++++++-----
  src/include/fst/encode.h                      |  2 +-
  src/include/fst/expanded-fst.h                | 11 ++++
  src/include/fst/exports/exports.h             | 34 +++++++++++
@@ -49,7 +47,7 @@ Subject: [PATCH] Windows compatibility
  .../fst/extensions/mpdt/read_write_utils.h    |  4 +-
  .../fst/extensions/ngram/bitmap-index.h       |  3 +-
  src/include/fst/extensions/ngram/ngram-fst.h  |  8 +++
- src/include/fst/extensions/ngram/nthbit.h     | 11 ++--
+ src/include/fst/extensions/ngram/nthbit.h     |  3 +-
  src/include/fst/extensions/pdt/getters.h      |  5 +-
  src/include/fst/extensions/pdt/pdtscript.h    | 19 +++---
  src/include/fst/extensions/special/phi-fst.h  |  7 ++-
@@ -128,7 +126,7 @@ Subject: [PATCH] Windows compatibility
  src/lib/fst.cc                                |  3 +
  src/lib/symbol-table.cc                       |  4 +-
  src/script/text-io.cc                         |  4 +-
- 124 files changed, 1178 insertions(+), 301 deletions(-)
+ 122 files changed, 1151 insertions(+), 290 deletions(-)
  create mode 100644 src/include/fst/exports/exports.h
  create mode 100644 src/include/fst/exports/fst_Export.h
  create mode 100644 src/include/fst/exports/fstcompact_Export.h
@@ -234,56 +232,6 @@ index 84397b9..a099340 100644
    std::string buf;
    while (strm >> buf) out->push_back(buf);
  }
-diff --git src/extensions/ngram/bitmap-index.cc src/extensions/ngram/bitmap-index.cc
-index ca9f4a3..0020b1a 100644
---- src/extensions/ngram/bitmap-index.cc
-+++ src/extensions/ngram/bitmap-index.cc
-@@ -52,7 +52,7 @@ size_t BitmapIndex::Rank1(size_t end) const {
-   // TODO(jrosenstock): better with or without special case, and does
-   // this depend on whether there's a popcnt instruction?
-   if (bit_index == 0) return sum;  // Entire answer is in the index.
--  return sum + __builtin_popcountll(bits_[end_word] & kLowBitsMasks[bit_index]);
-+  return sum + popcountll(bits_[end_word] & kLowBitsMasks[bit_index]);
- }
- 
- size_t BitmapIndex::Select1(size_t bit_index) const {
-@@ -210,7 +210,7 @@ std::pair<size_t, size_t> BitmapIndex::Select0s(size_t bit_index) const {
-   // If this is 0, then the next zero is not in the same word.
-   if (masked_inv_word != 0) {
-     // We can't ctz on 0, but we already checked that.
--    const int next_nth = __builtin_ctzll(masked_inv_word);
-+    const int next_nth = ctzll(masked_inv_word);
-     return {kStorageBitSize * word_index + nth,
-             kStorageBitSize * word_index + next_nth};
-   } else {
-@@ -269,10 +269,10 @@ void BitmapIndex::BuildIndex(const uint64_t* bits, size_t num_bits,
-     };
- 
-     const int word_ones_count[8] = {
--        __builtin_popcountll(word[0]), __builtin_popcountll(word[1]),
--        __builtin_popcountll(word[2]), __builtin_popcountll(word[3]),
--        __builtin_popcountll(word[4]), __builtin_popcountll(word[5]),
--        __builtin_popcountll(word[6]), __builtin_popcountll(word[7]),
-+        popcountll(word[0]), popcountll(word[1]),
-+        popcountll(word[2]), popcountll(word[3]),
-+        popcountll(word[4]), popcountll(word[5]),
-+        popcountll(word[6]), popcountll(word[7]),
-     };
- 
-     auto& rank_index_entry = rank_index_[word_index / kUnitsPerRankIndexEntry];
-diff --git src/extensions/ngram/nthbit.cc src/extensions/ngram/nthbit.cc
-index 51c5f70..14d5822 100644
---- src/extensions/ngram/nthbit.cc
-+++ src/extensions/ngram/nthbit.cc
-@@ -235,7 +235,7 @@ static const uint8_t nth_bit_bit_pos[8][256] = {
- int nth_bit(const uint64_t v, uint32_t r) {
-   DCHECK_NE(v, 0);
-   DCHECK_LE(0, r);
--  DCHECK_LT(r, __builtin_popcountll(v));
-+  DCHECK_LT(r, popcountll(v));
- 
-   uint32_t next_byte = v & 255;
-   uint32_t byte_popcount = nth_bit_bit_count[next_byte];
 diff --git src/include/fst/cache.h src/include/fst/cache.h
 index 4a7c22c..4044642 100644
 --- src/include/fst/cache.h
@@ -306,40 +254,24 @@ index 4a7c22c..4044642 100644
    size_t gc_limit;  // Number of bytes allowed before GC.
  
 diff --git src/include/fst/compat.h src/include/fst/compat.h
-index 381b4c1..d54ff7d 100644
+index 381b4c1..b878f15 100644
 --- src/include/fst/compat.h
 +++ src/include/fst/compat.h
-@@ -33,6 +33,29 @@
+@@ -33,6 +33,13 @@
  #include <type_traits>
  #include <utility>
  #include <vector>
 +#include <fst/exports/exports.h>
 +
-+#ifdef _WIN32
-+#include <intrin.h>
-+
-+  inline uint64_t ctzll(uint64_t input_int) {
-+    return  _tzcnt_u64(input_int);
-+  }
-+
-+  inline uint64_t popcountll(uint64_t input_int) {
-+    return  __popcnt64(input_int);
-+  }
-+#else
-+  inline uint64_t ctzll(uint64_t input_int) {
-+    return  __builtin_ctzll(input_int);
-+  }
-+
-+  inline uint64_t popcountll(uint64_t input_int) {
-+    return  __builtin_popcountll(input_int);
-+  }
-+
-+
++#ifdef _MSC_VER
++#  include <intrin.h>
++#  define __builtin_popcountll __popcnt64
++#  define __builtin_ctzll _tzcnt_u64
 +#endif
  
  #if defined(__GNUC__) || defined(__clang__)
  #define OPENFST_DEPRECATED(message) __attribute__((deprecated(message)))
-@@ -92,7 +115,7 @@ constexpr To implicit_cast(typename internal::type_identity_t<To> to) {
+@@ -92,7 +99,7 @@ constexpr To implicit_cast(typename internal::type_identity_t<To> to) {
  }
  
  // Checksums.
@@ -348,7 +280,7 @@ index 381b4c1..d54ff7d 100644
   public:
    CheckSummer();
  
-@@ -215,7 +238,7 @@ struct ByAnyChar {
+@@ -215,7 +222,7 @@ struct ByAnyChar {
  
  namespace internal {
  
@@ -357,7 +289,7 @@ index 381b4c1..d54ff7d 100644
   public:
    using const_iterator = std::vector<std::string_view>::const_iterator;
    using value_type = std::string_view;
-@@ -255,17 +278,17 @@ class StringSplitter {
+@@ -255,17 +262,17 @@ class StringSplitter {
  // `StrSplit` replacements. Only support splitting on `char` or
  // `ByAnyChar` (notable not on a multi-char string delimiter), and with or
  // without `SkipEmpty`.
@@ -382,7 +314,7 @@ index 381b4c1..d54ff7d 100644
   public:
    template <typename T, typename = std::enable_if_t<
                              std::is_convertible_v<T, std::string_view>>>
-@@ -283,21 +306,21 @@ class StringOrInt {
+@@ -283,21 +290,21 @@ class StringOrInt {
  
  // TODO(kbg): Make this work with variadic template, maybe.
  
@@ -408,7 +340,7 @@ index 381b4c1..d54ff7d 100644
                            const StringOrInt &s3, const StringOrInt &s4,
                            const StringOrInt &s5) {
    return s1.Get() + StrCat(s2, s3, s4, s5);
-@@ -305,13 +328,13 @@ inline std::string StrCat(const StringOrInt &s1, const StringOrInt &s2,
+@@ -305,13 +312,13 @@ inline std::string StrCat(const StringOrInt &s1, const StringOrInt &s2,
  
  // TODO(agutkin): Remove this once we migrate to C++20, where `starts_with`
  // is available.
@@ -1892,7 +1824,7 @@ index d024947..ebd96ef 100644
      }
    }
 diff --git src/include/fst/extensions/ngram/nthbit.h src/include/fst/extensions/ngram/nthbit.h
-index d33e05e..fbc7884 100644
+index d33e05e..b18a23b 100644
 --- src/include/fst/extensions/ngram/nthbit.h
 +++ src/include/fst/extensions/ngram/nthbit.h
 @@ -26,6 +26,7 @@
@@ -1903,22 +1835,7 @@ index d33e05e..fbc7884 100644
  
  #if defined(__BMI2__)  // Intel Bit Manipulation Instruction Set 2
  // PDEP requires BMI2; this is present starting with Haswell.
-@@ -38,12 +39,12 @@ namespace fst {
- inline int nth_bit(uint64_t v, uint32_t r) {
-   DCHECK_NE(v, 0);
-   DCHECK_LE(0, r);
--  DCHECK_LT(r, __builtin_popcountll(v));
-+  DCHECK_LT(r, popcountll(v));
- 
-   // PDEP example from https://stackoverflow.com/a/27453505
-   // __builtin_ctzll is UB for 0, but the conditions above ensure that can't
-   // happen.
--  return __builtin_ctzll(_pdep_u64(uint64_t{1} << r, v));
-+  return ctzll(_pdep_u64(uint64_t{1} << r, v));
- }
- }  // namespace fst
- 
-@@ -83,13 +84,13 @@ extern const uint8_t kSelectInByte[2048];
+@@ -83,7 +84,7 @@ extern const uint8_t kSelectInByte[2048];
  // Rank/Select Queries" by Sebastiano Vigna, p. 5, Algorithm 2, with
  // improvements from "Optimized Succinct Data Structures for Massive Data"
  // by Gog & Petri, 2014.
@@ -1927,22 +1844,6 @@ index d33e05e..fbc7884 100644
    constexpr uint64_t kOnesStep8 = 0x0101010101010101;
    constexpr uint64_t kMSBsStep8 = 0x80 * kOnesStep8;
  
-   DCHECK_NE(v, 0);
-   DCHECK_LE(0, r);
--  DCHECK_LT(r, __builtin_popcountll(v));
-+  DCHECK_LT(r, popcountll(v));
- 
- #if defined(__aarch64__)
-   // Use the ARM64 CNT instruction to compute a byte-wise popcount.
-@@ -116,7 +117,7 @@ inline int nth_bit(const uint64_t v, const uint32_t r) {
-   // The first bit set is the high bit in the byte, so
-   // num_trailing_zeros == 8 * byte_nr + 7 and the byte number is the
-   // number of trailing zeros divided by 8.
--  const int byte_nr = __builtin_ctzll(b) >> 3;
-+  const int byte_nr = ctzll(b) >> 3;
-   const int shift = byte_nr << 3;
-   // The top byte contains the whole-word popcount; we never need that.
-   byte_sums <<= 8;
 diff --git src/include/fst/extensions/pdt/getters.h src/include/fst/extensions/pdt/getters.h
 index 294511a..99c8ffa 100644
 --- src/include/fst/extensions/pdt/getters.h
