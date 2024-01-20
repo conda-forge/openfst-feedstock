@@ -1,4 +1,4 @@
-From 91853dabc1dea78838b8f68185a4e067ed35de3b Mon Sep 17 00:00:00 2001
+From 5f9fb83aaf0753684511fb060ca1725ff29016e7 Mon Sep 17 00:00:00 2001
 From: Michael McAuliffe <michael.e.mcauliffe@gmail.com>
 Date: Fri, 19 Jan 2024 12:54:02 -0800
 Subject: [PATCH] Windows compatibility
@@ -2186,7 +2186,7 @@ index f48eff6..24609d7 100644
      }
    }
 diff --git src/include/fst/generic-register.h src/include/fst/generic-register.h
-index d95d095..4dedd8b 100644
+index d95d095..ee513c1 100644
 --- src/include/fst/generic-register.h
 +++ src/include/fst/generic-register.h
 @@ -58,16 +58,51 @@ struct KeyLookupReferenceType<std::string> {
@@ -2195,7 +2195,7 @@ index d95d095..4dedd8b 100644
  
 +
 +
-+#ifdef _WIN32
++#if defined(_WIN32) || defined(__APPLE__)
 +
 +class RegisterBase { };
 +
@@ -2221,7 +2221,7 @@ index d95d095..4dedd8b 100644
 +#endif
 +
  template <class KeyType, class EntryType, class RegisterType>
-+#ifdef _WIN32
++#if defined(_WIN32) || defined(__APPLE__)
 +class GenericRegister : public RegisterBase {
 +#else
  class GenericRegister {
@@ -2234,7 +2234,7 @@ index d95d095..4dedd8b 100644
    static RegisterType *GetRegister() {
 -    static auto reg = new RegisterType;
 -    return reg;
-+    #ifdef _WIN32
++    #if defined(_WIN32) || defined(__APPLE__)
 +      return GetSingleton().GetRegister<RegisterType>().get();
 +    #else
 +      static auto reg = new RegisterType;
@@ -2247,7 +2247,7 @@ index d95d095..4dedd8b 100644
    using Entry = typename RegisterType::Entry;
  
    GenericRegisterer(Key key, Entry entry) {
-+    #ifdef _WIN32
++    #if defined(_WIN32) || defined(__APPLE__)
 +      GetSingleton().GetRegister<RegisterType>()->SetEntry(key, entry);
 +    #else
      RegisterType::GetRegister()->SetEntry(key, entry);
