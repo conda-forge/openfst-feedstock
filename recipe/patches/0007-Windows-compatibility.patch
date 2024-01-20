@@ -1,4 +1,4 @@
-From 5f9fb83aaf0753684511fb060ca1725ff29016e7 Mon Sep 17 00:00:00 2001
+From db0d8d741b124d52c587f534f8178d6fab18a1a3 Mon Sep 17 00:00:00 2001
 From: Michael McAuliffe <michael.e.mcauliffe@gmail.com>
 Date: Fri, 19 Jan 2024 12:54:02 -0800
 Subject: [PATCH] Windows compatibility
@@ -4107,14 +4107,14 @@ index b32460d..653a426 100644
  
  DEFINE_int32(v, 0, "verbosity level");
 diff --git src/lib/fst-types.cc src/lib/fst-types.cc
-index dd4e164..c656552 100644
+index dd4e164..dad1e88 100644
 --- src/lib/fst-types.cc
 +++ src/lib/fst-types.cc
 @@ -28,6 +28,13 @@
  
  namespace fst {
  
-+#ifdef _WIN32
++#if defined(_WIN32) || defined(__APPLE__)
 +Singleton& GetSingleton() {
 +    static Singleton _instance;
 +    return _instance;
