@@ -32,7 +32,7 @@ if [[ "$SHLIB_EXT" == '.dylib' ]]; then
 
 
   cmake --build . --verbose --config Release -- -v -j ${CPU_COUNT}
-  ctest
+  ctest --rerun-failed --output-on-failure
   cmake --install . --verbose --config Release
 
 
