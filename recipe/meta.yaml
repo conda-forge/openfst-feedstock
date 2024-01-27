@@ -12,7 +12,7 @@ source:
     - patches/0002-Windows-compatibility.patch                      # [not linux]
 
 build:
-  number: 0
+  number: 1
   # ensures that packages using openfst as a host dependency get the right runtime dependence as well, see
   # https://conda-forge.org/docs/maintainer/pinning_deps.html#specifying-run-exports
   run_exports:
