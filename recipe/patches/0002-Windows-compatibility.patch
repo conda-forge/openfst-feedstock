@@ -1,4 +1,4 @@
-From db0d8d741b124d52c587f534f8178d6fab18a1a3 Mon Sep 17 00:00:00 2001
+From a0587d7955d58369d9fd1f0c92bdaeddc609795a Mon Sep 17 00:00:00 2001
 From: Michael McAuliffe <michael.e.mcauliffe@gmail.com>
 Date: Fri, 19 Jan 2024 12:54:02 -0800
 Subject: [PATCH] Windows compatibility
@@ -7,15 +7,22 @@ Subject: [PATCH] Windows compatibility
  src/bin/fstcompile-main.cc                    |  2 +-
  src/bin/fstdraw-main.cc                       |  2 +-
  src/bin/fstprint-main.cc                      |  2 +-
+ src/extensions/compress/CMakeLists.txt        | 15 ++---
+ src/extensions/far/CMakeLists.txt             |  2 -
  src/extensions/far/compile-strings.cc         |  2 +-
  src/extensions/far/farcompilestrings-main.cc  |  2 +-
  src/extensions/far/sttable.cc                 |  2 +-
+ src/extensions/linear/CMakeLists.txt          |  2 +-
  src/extensions/linear/linearscript.cc         |  2 +-
+ src/extensions/ngram/CMakeLists.txt           |  6 +-
+ src/extensions/pdt/CMakeLists.txt             |  7 +--
+ src/extensions/python/CMakeLists.txt          |  1 +
+ src/extensions/special/CMakeLists.txt         |  7 ++-
  src/include/fst/cache.h                       |  6 +-
  src/include/fst/compat.h                      | 37 +++++++-----
  src/include/fst/encode.h                      |  2 +-
  src/include/fst/expanded-fst.h                | 11 ++++
- src/include/fst/exports/exports.h             | 34 +++++++++++
+ src/include/fst/exports/exports.h             | 33 +++++++++++
  src/include/fst/exports/fst_Export.h          | 42 +++++++++++++
  src/include/fst/exports/fstcompact_Export.h   | 42 +++++++++++++
  .../fst/exports/fstcompressscript_Export.h    | 42 +++++++++++++
@@ -64,7 +71,7 @@ Subject: [PATCH] Windows compatibility
  src/include/fst/register.h                    | 10 +++-
  src/include/fst/script/arc-class.h            |  3 +-
  src/include/fst/script/arcfilter-impl.h       |  3 +-
- src/include/fst/script/arciterator-class.h    |  2 +-
+ src/include/fst/script/arciterator-class.h    |  8 +--
  src/include/fst/script/arcsort.h              |  4 +-
  src/include/fst/script/closure.h              |  3 +-
  src/include/fst/script/compile-impl.h         |  2 -
@@ -121,12 +128,14 @@ Subject: [PATCH] Windows compatibility
  src/include/fst/util.h                        | 16 ++---
  src/include/fst/vector-fst.h                  |  4 +-
  src/include/fst/weight.h                      | 10 ++--
+ src/lib/CMakeLists.txt                        |  4 +-
  src/lib/flags.cc                              |  7 +++
  src/lib/fst-types.cc                          |  7 +++
  src/lib/fst.cc                                |  3 +
  src/lib/symbol-table.cc                       |  4 +-
+ src/script/CMakeLists.txt                     |  8 +--
  src/script/text-io.cc                         |  4 +-
- 122 files changed, 1151 insertions(+), 290 deletions(-)
+ 131 files changed, 1173 insertions(+), 325 deletions(-)
  create mode 100644 src/include/fst/exports/exports.h
  create mode 100644 src/include/fst/exports/fst_Export.h
  create mode 100644 src/include/fst/exports/fstcompact_Export.h
@@ -180,6 +189,59 @@ index 4edc16d..d173fd5 100644
      if (!fstrm) {
        LOG(ERROR) << argv[0] << ": Open failed, file = " << argv[2];
        return 1;
+diff --git src/extensions/compress/CMakeLists.txt src/extensions/compress/CMakeLists.txt
+index 028cd76..3a1ac2e 100644
+--- src/extensions/compress/CMakeLists.txt
++++ src/extensions/compress/CMakeLists.txt
+@@ -2,11 +2,10 @@
+ add_library(fstcompressscript
+   compressscript.cc
+  )
+-if (MSVC)
+-  target_link_libraries(fstcompressscript
+-    fstscript
+-    fst
+-  )
++ target_link_libraries(fstcompressscript
++   fstscript
++   fst
++ )
+ GENERATE_EXPORT_HEADER( fstcompressscript
+              BASE_NAME fstcompressscript
+              EXPORT_MACRO_NAME fstcompressscript_EXPORT
+@@ -16,12 +15,6 @@ GENERATE_EXPORT_HEADER( fstcompressscript
+ target_compile_definitions(fstcompressscript PRIVATE fstcompressscript_EXPORTS)
+ target_include_directories(fstcompressscript PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
+                            $<INSTALL_INTERFACE:include>)
+-else()
+-  target_link_libraries(fstcompressscript
+-    fstscript
+-    fst
+-  )
+-endif()
+ set_target_properties(fstcompressscript PROPERTIES
+   SOVERSION "${SOVERSION}"
+ )
+diff --git src/extensions/far/CMakeLists.txt src/extensions/far/CMakeLists.txt
+index e37ce8f..d5573e3 100644
+--- src/extensions/far/CMakeLists.txt
++++ src/extensions/far/CMakeLists.txt
+@@ -32,7 +32,6 @@ if(HAVE_SCRIPT)
+     getters.cc 
+     script-impl.cc
+   )
+-  if (MSVC)
+ GENERATE_EXPORT_HEADER( fstfarscript
+              BASE_NAME fstfarscript
+              EXPORT_MACRO_NAME fstfarscript_EXPORT
+@@ -42,7 +41,6 @@ GENERATE_EXPORT_HEADER( fstfarscript
+ target_compile_definitions(fstfarscript PRIVATE fstfarscript_EXPORTS)
+ target_include_directories(fstfarscript PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
+                            $<INSTALL_INTERFACE:include>)
+-  endif()
+     target_link_libraries(fstfarscript fstfar fstscript fst ${CMAKE_DL_LIBS})
+   set_target_properties(fstfarscript PROPERTIES 
+     SOVERSION "${SOVERSION}"
 diff --git src/extensions/far/compile-strings.cc src/extensions/far/compile-strings.cc
 index 5f6923e..29f2f2f 100644
 --- src/extensions/far/compile-strings.cc
@@ -219,6 +281,26 @@ index c3f925a..a1d897f 100644
    if (!strm.good()) return false;
  
    int32_t magic_number = 0;
+diff --git src/extensions/linear/CMakeLists.txt src/extensions/linear/CMakeLists.txt
+index 6a5ecfd..139fb15 100644
+--- src/extensions/linear/CMakeLists.txt
++++ src/extensions/linear/CMakeLists.txt
+@@ -11,7 +11,6 @@ if(HAVE_SCRIPT)
+       fstscript
+       fst
+     )
+-  if (MSVC)
+ GENERATE_EXPORT_HEADER( fstlinearscript
+              BASE_NAME fstlinearscript
+              EXPORT_MACRO_NAME fstlinearscript_EXPORT
+@@ -21,6 +20,7 @@ GENERATE_EXPORT_HEADER( fstlinearscript
+ target_compile_definitions(fstlinearscript PRIVATE fstlinearscript_EXPORTS)
+ target_include_directories(fstlinearscript PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
+                            $<INSTALL_INTERFACE:include>)
++  if (MSVC)
+     install(TARGETS fstlinearscript
+     LIBRARY DESTINATION bin
+     ARCHIVE DESTINATION lib
 diff --git src/extensions/linear/linearscript.cc src/extensions/linear/linearscript.cc
 index 84397b9..a099340 100644
 --- src/extensions/linear/linearscript.cc
@@ -232,6 +314,97 @@ index 84397b9..a099340 100644
    std::string buf;
    while (strm >> buf) out->push_back(buf);
  }
+diff --git src/extensions/ngram/CMakeLists.txt src/extensions/ngram/CMakeLists.txt
+index 206f3c9..cf176d2 100644
+--- src/extensions/ngram/CMakeLists.txt
++++ src/extensions/ngram/CMakeLists.txt
+@@ -11,11 +11,11 @@ target_link_libraries(fstngram
+ GENERATE_EXPORT_HEADER( fstngram
+              BASE_NAME fstngram
+              EXPORT_MACRO_NAME fstngram_EXPORT
+-             EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/fst/exports/fstngram_Export.h
++             EXPORT_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/include/fst/exports/fstngram_Export.h
+              STATIC_DEFINE fstngram_BUILT_AS_STATIC
+ )
+ target_compile_definitions(fstngram PRIVATE fstngram_EXPORTS)
+-target_include_directories(fstngram PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
++target_include_directories(fstngram PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+                            $<INSTALL_INTERFACE:include>)
+ 
+ set_target_properties(fstngram PROPERTIES
+@@ -38,7 +38,7 @@ target_link_libraries(ngram_fst
+     fst
+ )
+ target_compile_definitions(ngram_fst PRIVATE fstngram_EXPORTS)
+-target_include_directories(ngram_fst PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
++target_include_directories(ngram_fst PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+                            $<INSTALL_INTERFACE:include>)
+ 
+ if (MSVC)
+diff --git src/extensions/pdt/CMakeLists.txt src/extensions/pdt/CMakeLists.txt
+index 10c5907..c996882 100644
+--- src/extensions/pdt/CMakeLists.txt
++++ src/extensions/pdt/CMakeLists.txt
+@@ -3,17 +3,16 @@
+ if(HAVE_SCRIPT)
+   add_library(fstpdtscript getters.cc pdtscript.cc)
+     target_link_libraries(fstpdtscript fstscript fst)
+-  if (MSVC)
++
+ GENERATE_EXPORT_HEADER( fstpdtscript
+              BASE_NAME fstpdtscript
+              EXPORT_MACRO_NAME fstpdtscript_EXPORT
+-             EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/fst/exports/fstpdtscript_Export.h
++             EXPORT_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/include/fst/exports/fstpdtscript_Export.h
+              STATIC_DEFINE fstpdtscript_BUILT_AS_STATIC
+ )
+ target_compile_definitions(fstpdtscript PRIVATE fstpdtscript_EXPORTS)
+-target_include_directories(fstpdtscript PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
++target_include_directories(fstpdtscript PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+                            $<INSTALL_INTERFACE:include>)
+-  endif()
+   set_target_properties(fstpdtscript PROPERTIES 
+     SOVERSION "${SOVERSION}"
+   )
+diff --git src/extensions/python/CMakeLists.txt src/extensions/python/CMakeLists.txt
+index 83b9a7f..c0c43d7 100644
+--- src/extensions/python/CMakeLists.txt
++++ src/extensions/python/CMakeLists.txt
+@@ -1,5 +1,6 @@
+ 
+ add_library(pywrapfst
++  SHARED
+     pywrapfst.cpp
+ )
+ 
+diff --git src/extensions/special/CMakeLists.txt src/extensions/special/CMakeLists.txt
+index 42c72d1..c715b28 100644
+--- src/extensions/special/CMakeLists.txt
++++ src/extensions/special/CMakeLists.txt
+@@ -1,18 +1,21 @@
+ 
+ 
+ add_library(fstspecial
++  SHARED
+   phi-fst.cc
+   rho-fst.cc
+   sigma-fst.cc
+ )
++if (MSCV)
+ GENERATE_EXPORT_HEADER( fstspecial
+              BASE_NAME fstspecial
+              EXPORT_MACRO_NAME fstspecial_EXPORT
+-             EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/fst/exports/fstspecial_Export.h
++             EXPORT_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/include/fst/exports/fstspecial_Export.h
+              STATIC_DEFINE fstspecial_BUILT_AS_STATIC
+ )
+ target_compile_definitions(fstspecial PRIVATE fstspecial_EXPORTS)
+-target_include_directories(fstspecial PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
++endif()
++target_include_directories(fstspecial PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+                            $<INSTALL_INTERFACE:include>)
+ 
+ set_target_properties(fstspecial PROPERTIES
 diff --git src/include/fst/cache.h src/include/fst/cache.h
 index 4a7c22c..4044642 100644
 --- src/include/fst/cache.h
@@ -407,10 +580,10 @@ index 2674e66..8d30058 100644
    }
 diff --git src/include/fst/exports/exports.h src/include/fst/exports/exports.h
 new file mode 100644
-index 0000000..f9cb5e9
+index 0000000..84f836a
 --- /dev/null
 +++ src/include/fst/exports/exports.h
-@@ -0,0 +1,34 @@
+@@ -0,0 +1,33 @@
 +
 +#ifndef exports_H
 +#define exports_H
@@ -433,7 +606,6 @@ index 0000000..f9cb5e9
 +    #define fst_EXPORT
 +    #define fstcompact_EXPORT
 +    #define fstcompressscript_EXPORT
-+    #define fstconst_EXPORT
 +    #define fstconst_EXPORT
 +    #define fstfar_EXPORT
 +    #define fstfarscript_EXPORT
@@ -2459,7 +2631,7 @@ index 1a29fa9..8c0e722 100644
    EPSILON,
    INPUT_EPSILON,
 diff --git src/include/fst/script/arciterator-class.h src/include/fst/script/arciterator-class.h
-index fe0d78d..73bb45a 100644
+index fe0d78d..61693de 100644
 --- src/include/fst/script/arciterator-class.h
 +++ src/include/fst/script/arciterator-class.h
 @@ -41,7 +41,7 @@ namespace script {
@@ -2471,6 +2643,33 @@ index fe0d78d..73bb45a 100644
   public:
    virtual bool Done() const = 0;
    virtual uint8_t Flags() const = 0;
+@@ -87,7 +87,7 @@ class ArcIteratorClassImpl : public ArcIteratorImplBase {
+   ArcIterator<Fst<Arc>> aiter_;
+ };
+ 
+-class ArcIteratorClass;
++class fstscript_EXPORT ArcIteratorClass;
+ 
+ using InitArcIteratorClassArgs =
+     std::tuple<const FstClass &, int64_t, ArcIteratorClass *>;
+@@ -134,7 +134,7 @@ void InitArcIteratorClass(InitArcIteratorClassArgs *args) {
+ // Mutable arc iterators.
+ 
+ // Virtual interface implemented by each concrete MutableArcIteratorImpl<F>.
+-class MutableArcIteratorImplBase : public ArcIteratorImplBase {
++class fstscript_EXPORT MutableArcIteratorImplBase : public ArcIteratorImplBase {
+  public:
+   virtual void SetValue(const ArcClass &) = 0;
+ 
+@@ -178,7 +178,7 @@ class MutableArcIteratorClassImpl : public MutableArcIteratorImplBase {
+   MutableArcIterator<MutableFst<Arc>> aiter_;
+ };
+ 
+-class MutableArcIteratorClass;
++class fstscript_EXPORT MutableArcIteratorClass;
+ 
+ using InitMutableArcIteratorClassArgs =
+     std::tuple<MutableFstClass *, int64_t, MutableArcIteratorClass *>;
 diff --git src/include/fst/script/arcsort.h src/include/fst/script/arcsort.h
 index 82053f2..38969ef 100644
 --- src/include/fst/script/arcsort.h
@@ -4088,6 +4287,28 @@ index 0159f95..681e624 100644
   public:
    // Uses configuration from flags (FST_FLAGS_fst_weight_separator,
    // FST_FLAGS_fst_weight_parentheses).
+diff --git src/lib/CMakeLists.txt src/lib/CMakeLists.txt
+index 5194802..c8fe9ea 100644
+--- src/lib/CMakeLists.txt
++++ src/lib/CMakeLists.txt
+@@ -18,7 +18,7 @@ if (MSVC)
+ GENERATE_EXPORT_HEADER( fst
+              BASE_NAME fst
+              EXPORT_MACRO_NAME fst_EXPORT
+-             EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/fst/exports/fst_Export.h
++             EXPORT_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/include/fst/exports/fst_Export.h
+              STATIC_DEFINE fst_BUILT_AS_STATIC
+ )
+ endif()
+@@ -27,8 +27,6 @@ set_target_properties(fst PROPERTIES
+ )
+ target_include_directories(fst PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+                            $<INSTALL_INTERFACE:include>)
+-target_include_directories(fst PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
+-                           $<INSTALL_INTERFACE:include>)
+ target_link_libraries(fst ${CMAKE_DL_LIBS})
+ target_compile_definitions(fst PRIVATE fst_EXPORTS)
+ 
 diff --git src/lib/flags.cc src/lib/flags.cc
 index b32460d..653a426 100644
 --- src/lib/flags.cc
@@ -4160,6 +4381,33 @@ index 93dc753..0563e03 100644
      if (!strm) {
        LOG(ERROR) << "SymbolTable::WriteText: Can't open file: " << sink;
        return false;
+diff --git src/script/CMakeLists.txt src/script/CMakeLists.txt
+index 0aec3b9..c590666 100644
+--- src/script/CMakeLists.txt
++++ src/script/CMakeLists.txt
+@@ -49,20 +49,16 @@
+       synchronize.cc
+     )
+ 
+-if (MSVC) # Fix for too many exported symbols in fstscript
++# Fix for too many exported symbols in fstscript
+   
+ GENERATE_EXPORT_HEADER( fstscript
+              BASE_NAME fstscript
+              EXPORT_MACRO_NAME fstscript_EXPORT
+-             EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/fst/exports/fstscript_Export.h
++             EXPORT_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/include/fst/exports/fstscript_Export.h
+              STATIC_DEFINE fstscript_BUILT_AS_STATIC
+ )
+-target_include_directories(fstscript PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
+-                           $<INSTALL_INTERFACE:include>)
+ target_compile_definitions(fstscript PRIVATE fstscript_EXPORTS)
+-    else()
+ 
+-endif()
+     target_link_libraries(fstscript PUBLIC fst)
+ target_include_directories(fstscript PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+                            $<INSTALL_INTERFACE:include>)
 diff --git src/script/text-io.cc src/script/text-io.cc
 index ebfbd8b..e1a3d6e 100644
 --- src/script/text-io.cc
