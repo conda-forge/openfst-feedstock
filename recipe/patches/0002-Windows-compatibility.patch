@@ -1,4 +1,4 @@
-From a0587d7955d58369d9fd1f0c92bdaeddc609795a Mon Sep 17 00:00:00 2001
+From 90b68e4f10d82a328e76372e6845e6a4f0594381 Mon Sep 17 00:00:00 2001
 From: Michael McAuliffe <michael.e.mcauliffe@gmail.com>
 Date: Fri, 19 Jan 2024 12:54:02 -0800
 Subject: [PATCH] Windows compatibility
@@ -2175,7 +2175,7 @@ index 44b0b7a..b9bb8f7 100644
  namespace fst {
  namespace internal {
 diff --git src/include/fst/flags.h src/include/fst/flags.h
-index 761ad35..91c4cdf 100644
+index 761ad35..9bcd091 100644
 --- src/include/fst/flags.h
 +++ src/include/fst/flags.h
 @@ -32,6 +32,8 @@
@@ -2207,7 +2207,7 @@ index 761ad35..91c4cdf 100644
  
 +
 +
-+#ifdef _WIN32
++#if defined(_WIN32) || defined(__APPLE__)
 +class FlagRegisterBase { };
 +
 +class FlagSingleton {
@@ -2232,7 +2232,7 @@ index 761ad35..91c4cdf 100644
 +#endif // _WIN32
 +
  template <typename T>
-+#ifdef _WIN32
++#if defined(_WIN32) || defined(__APPLE__)
 +class FlagRegister: public FlagRegisterBase {
 +#else
  class FlagRegister {
@@ -2241,7 +2241,7 @@ index 761ad35..91c4cdf 100644
    static FlagRegister<T> *GetRegister() {
 -    static auto reg = new FlagRegister<T>;
 -    return reg;
-+    #ifdef _WIN32
++    #if defined(_WIN32) || defined(__APPLE__)
 +      return GetFlagSingleton().GetRegister<FlagRegister<T>>().get();
 +    #else
 +      static auto reg = new FlagRegister<T>;
@@ -2254,7 +2254,7 @@ index 761ad35..91c4cdf 100644
  class FlagRegisterer {
   public:
    FlagRegisterer(const std::string &name, const FlagDescription<T> &desc) {
-+    #ifdef _WIN32
++    #if defined(_WIN32) || defined(__APPLE__)
 +    GetFlagSingleton().GetRegister<FlagRegister<T>>()->SetDescription(name, desc);
 +    #else
      auto registr = FlagRegister<T>::GetRegister();
@@ -4310,14 +4310,14 @@ index 5194802..c8fe9ea 100644
  target_compile_definitions(fst PRIVATE fst_EXPORTS)
  
 diff --git src/lib/flags.cc src/lib/flags.cc
-index b32460d..653a426 100644
+index b32460d..7f1036d 100644
 --- src/lib/flags.cc
 +++ src/lib/flags.cc
 @@ -28,6 +28,13 @@
  
  #include <fst/log.h>
  
-+#ifdef _WIN32
++#if defined(_WIN32) || defined(__APPLE__)
 +FlagSingleton& GetFlagSingleton() {
 +    static FlagSingleton _instance;
 +    return _instance;
