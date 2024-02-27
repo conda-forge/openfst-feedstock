@@ -9,7 +9,7 @@ source:
   sha256: 077714159d5cf3e38a80b6c6656d3ccc2c8b8b6c50bb41bb65c5fec10796bf53
   patches:
     - patches/0001-Add-CMake-files.patch                      # [not linux]
-    - patches/0002-Windows-compatibility.patch                # [win]
+    - patches/0002-Windows-compatibility.patch                      # [not linux]
 
 build:
   number: 2
