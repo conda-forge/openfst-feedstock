@@ -24,6 +24,7 @@ requirements:
   build:
     - {{ compiler('cxx') }}
     - {{ stdlib("c") }}
+    - {{ stdlib("c") }}
     - make         # [linux]
     - automake     # [linux]
     - gnuconfig    # [linux]
