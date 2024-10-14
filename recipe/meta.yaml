@@ -8,11 +8,11 @@ source:
   url: http://www.openfst.org/twiki/pub/FST/FstDownload/openfst-{{ version }}.tar.gz
   sha256: 077714159d5cf3e38a80b6c6656d3ccc2c8b8b6c50bb41bb65c5fec10796bf53
   patches:
-    - patches/0001-Add-CMake-files.patch                      # [not linux]
+    - patches/0001-Add-CMake-files.patch                            # [not linux64]
     - patches/0002-Windows-compatibility.patch                      # [not linux]
 
 build:
-  number: 2
+  number: 3
   # ensures that packages using openfst as a host dependency get the right runtime dependence as well, see
   # https://conda-forge.org/docs/maintainer/pinning_deps.html#specifying-run-exports
   run_exports:
@@ -23,11 +23,12 @@ build:
 requirements:
   build:
     - {{ compiler('cxx') }}
-    - make         # [linux]
-    - automake     # [linux]
-    - gnuconfig    # [linux]
-    - cmake        # [not linux]
-    - ninja        # [not linux]
+    - {{ stdlib("c") }}
+    - make         # [linux64]
+    - automake     # [linux64]
+    - gnuconfig    # [linux64]
+    - cmake        # [not linux64]
+    - ninja        # [not linux64]
     - m2-patch     # [win]
   host:
     - dlfcn-win32  # [win]

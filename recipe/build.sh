@@ -6,45 +6,9 @@ set -ex
 # https://conda-forge.org/docs/maintainer/knowledge_base.html#newer-c-features-with-old-sdk
 export CXXFLAGS="$(echo "${CXXFLAGS}" | sed -E 's@-std=c\+\+[^ ]+@@g') -D_LIBCPP_DISABLE_AVAILABILITY"
 
-if [[ "$SHLIB_EXT" == '.dylib' ]]; then
-
-  if [[ "${CONDA_BUILD_CROSS_COMPILATION}" != "1" ]]; then
-  BUILD_TEST=ON
-  else
-  BUILD_TEST=OFF
-  fi
-
-  export CMAKE_BUILD_TYPE=Release
-  export BUILD_SHARED_LIBS=ON
-  export CMAKE_BUILD_WITH_INSTALL_RPATH=ON
-  export CMAKE_CXX_STANDARD=17
-  export TMPDIR="${SRC_DIR}\build\tmp"
-
-  mkdir build
-  pushd build
-  mkdir tmp
-
-  cmake -GNinja ${CMAKE_ARGS} \
-      -DCMAKE_INSTALL_PREFIX="${PREFIX}" \
-      -DCMAKE_PREFIX_PATH="${PREFIX}" \
-      -DOPENFST_BUILD_TEST=$BUILD_TEST \
-      ..
-
-
-  cmake --build . --verbose --config Release -- -v -j ${CPU_COUNT}
-  ctest --rerun-failed --output-on-failure
-  cmake --install . --verbose --config Release
-
-
-  popd
-else
+if [[ "$target_platform" == 'linux-64' ]]; then
   # Get an updated config.sub and config.guess
   cp $BUILD_PREFIX/share/gnuconfig/config.* .
-  if [[ "${CONDA_BUILD_CROSS_COMPILATION}" == "1" ]]; then
-    OPENFST_CROSS_COMPILATION_CONFIGURE_OPTS="--build=${BUILD} --host=${HOST}"
-  else
-    OPENFST_CROSS_COMPILATION_CONFIGURE_OPTS=""
-  fi
 
   ./configure \
      --prefix="${PREFIX}" \
@@ -52,13 +16,37 @@ else
      --enable-compress \
      --enable-fsts \
      --enable-grm \
-     --enable-special ${OPENFST_CROSS_COMPILATION_CONFIGURE_OPTS}
+     --enable-special
 
-  if [[ "$CONDA_BUILD_CROSS_COMPILATION" != "1" ]]; then
-    make -j"${CPU_COUNT}" check || (cat src/test/test-suite.log && exit 1)
-  fi
-
+  make -j"${CPU_COUNT}" check || (cat src/test/test-suite.log && exit 1)
   make -j"${CPU_COUNT}" install
-
+else
+  if [[ "${CONDA_BUILD_CROSS_COMPILATION}" != "1" ]]; then
+    BUILD_TEST=ON
+  else
+    BUILD_TEST=OFF
+  fi
+  
+  export CMAKE_BUILD_TYPE=Release
+  export BUILD_SHARED_LIBS=ON
+  export CMAKE_BUILD_WITH_INSTALL_RPATH=ON
+  export CMAKE_CXX_STANDARD=17
+  export TMPDIR="${SRC_DIR}\build\tmp"
+  
+  mkdir build
+  pushd build
+  mkdir tmp
+  
+  cmake -GNinja ${CMAKE_ARGS} \
+      -DCMAKE_INSTALL_PREFIX="${PREFIX}" \
+      -DCMAKE_PREFIX_PATH="${PREFIX}" \
+      -DOPENFST_BUILD_TEST=$BUILD_TEST \
+      ..
+  
+  
+  cmake --build . --verbose --config Release -- -v -j ${CPU_COUNT}
+  ctest --rerun-failed --output-on-failure
+  cmake --install . --verbose --config Release
+  
+  popd
 fi
-
