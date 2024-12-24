@@ -8,8 +8,7 @@ source:
   url: http://www.openfst.org/twiki/pub/FST/FstDownload/openfst-{{ version }}.tar.gz
   sha256: a8ebbb6f3d92d07e671500587472518cfc87cb79b9a654a5a8abb2d0eb298016
   patches:
-    - patches/0001-Add-CMake-files.patch                            # [not linux64]
-    - patches/0002-Windows-compatibility.patch                      # [not linux]
+    - patches/0001-Add-CMake-files-and-Windows-compat.patch                            # [not linux64]
 
 build:
   number: 0
