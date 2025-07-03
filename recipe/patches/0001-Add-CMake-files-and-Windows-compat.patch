@@ -716,10 +716,29 @@ index d887caa..70128e8 100644
  }
 diff --git a/src/extensions/lookahead/CMakeLists.txt b/src/extensions/lookahead/CMakeLists.txt
 new file mode 100644
-index 0000000..e265acc
+index 0000000..2560e3d
 --- /dev/null
 +++ b/src/extensions/lookahead/CMakeLists.txt
 @@ -0,0 +1,43 @@
++function (add_module _name)
++    add_library(${ARGV})
++    if (TARGET ${_name})
++        target_link_libraries(${_name} fst)
++    endif()
++    set_target_properties(${_name} PROPERTIES PREFIX "")
++    if (MSVC)
++    install(TARGETS ${_name} 
++	        LIBRARY DESTINATION bin
++			    ARCHIVE DESTINATION bin
++          RUNTIME DESTINATION bin)
++    else()
++    install(TARGETS ${_name} 
++	        LIBRARY DESTINATION lib
++			    ARCHIVE DESTINATION lib
++          RUNTIME DESTINATION bin)
++    endif()
++endfunction()
++
 +add_library(fstlookahead
 +  arc_lookahead-fst.cc 
 +  ilabel_lookahead-fst.cc
@@ -735,25 +754,6 @@ index 0000000..e265acc
 +ARCHIVE DESTINATION lib
 +RUNTIME DESTINATION bin
 +)
-+  
-+function (add_module _name)
-+    add_library(${ARGV})
-+    if (TARGET ${_name})
-+        target_link_libraries(${_name} fst)
-+    endif()
-+
-+    if (MSVC)
-+    install(TARGETS ${_name} 
-+	        LIBRARY DESTINATION bin
-+			ARCHIVE DESTINATION bin
-+            RUNTIME DESTINATION bin)
-+    else()
-+    install(TARGETS ${_name} 
-+	        LIBRARY DESTINATION lib
-+			ARCHIVE DESTINATION lib
-+            RUNTIME DESTINATION bin)
-+    endif()
-+endfunction()
 +  
 +add_module(arc_lookahead-fst MODULE
 +  arc_lookahead-fst.cc)
