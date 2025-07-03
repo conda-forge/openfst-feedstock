@@ -956,14 +956,13 @@ index 0000000..c0c43d7
 \ No newline at end of file
 diff --git a/src/extensions/special/CMakeLists.txt b/src/extensions/special/CMakeLists.txt
 new file mode 100644
-index 0000000..8430483
+index 0000000..10b79e0
 --- /dev/null
 +++ b/src/extensions/special/CMakeLists.txt
-@@ -0,0 +1,82 @@
+@@ -0,0 +1,80 @@
 +
 +
 +add_library(fstspecial
-+  SHARED
 +  phi-fst.cc
 +  rho-fst.cc
 +  sigma-fst.cc
@@ -989,15 +988,16 @@ index 0000000..8430483
 +
 +if(HAVE_BIN)
 +  add_executable(fstspecial_bin
-+    fstspecial.cc
++    ../../bin/fstconvert.cc 
++    ../../bin/fstconvert-main.cc
 +  )
 +
 +  set_target_properties(fstspecial_bin PROPERTIES 
 +    OUTPUT_NAME fstspecial
++    ARCHIVE_OUTPUT_NAME fstspecial_bin # Not actually generated, but needed to workaround multiple rules that would generate the same .lib file
 +  )
 +  target_link_libraries(fstspecial_bin
 +    fstscript
-+    fstspecial
 +    ${CMAKE_DL_LIBS}
 +  )
 +endif(HAVE_BIN)
@@ -1010,8 +1010,6 @@ index 0000000..8430483
 +)
 +
 +install(TARGETS fstspecial_bin
-+LIBRARY DESTINATION lib
-+ARCHIVE DESTINATION lib
 +RUNTIME DESTINATION bin
 +)
 +
@@ -1024,13 +1022,13 @@ index 0000000..8430483
 +    if (MSVC)
 +    install(TARGETS ${_name} 
 +	        LIBRARY DESTINATION bin
-+			ARCHIVE DESTINATION bin
-+            RUNTIME DESTINATION bin)
++			    ARCHIVE DESTINATION bin
++          RUNTIME DESTINATION bin)
 +    else()
 +    install(TARGETS ${_name} 
 +	        LIBRARY DESTINATION lib
-+			ARCHIVE DESTINATION lib
-+            RUNTIME DESTINATION bin)
++			    ARCHIVE DESTINATION lib
++          RUNTIME DESTINATION bin)
 +    endif()
 +endfunction()
 +
