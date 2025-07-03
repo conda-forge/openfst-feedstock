@@ -956,10 +956,10 @@ index 0000000..c0c43d7
 \ No newline at end of file
 diff --git a/src/extensions/special/CMakeLists.txt b/src/extensions/special/CMakeLists.txt
 new file mode 100644
-index 0000000..c715b28
+index 0000000..e057ebf
 --- /dev/null
 +++ b/src/extensions/special/CMakeLists.txt
-@@ -0,0 +1,50 @@
+@@ -0,0 +1,76 @@
 +
 +
 +add_library(fstspecial
@@ -988,16 +988,14 @@ index 0000000..c715b28
 +)
 +
 +if(HAVE_BIN)
-+  add_executable(fstspecialconvert
-+    ../../bin/fstconvert.cc 
-+    ../../bin/fstconvert-main.cc
++  add_executable(fstspecial
++    fstspecial.cc
 +  )
 +
-+  set_target_properties(fstspecialconvert PROPERTIES 
-+    OUTPUT_NAME fstspecialconvert
++  set_target_properties(fstspecial PROPERTIES 
++    OUTPUT_NAME fstspecial
 +  )
-+  target_link_libraries(fstspecialconvert
-+  fstspecial
++  target_link_libraries(fstspecial
 +    fstscript
 +    fst
 +    ${CMAKE_DL_LIBS}
@@ -1005,11 +1003,39 @@ index 0000000..c715b28
 +endif(HAVE_BIN)
 +
 +
-+install(TARGETS fstspecial fstspecialconvert
++install(TARGETS fstspecial
 +LIBRARY DESTINATION lib
 +ARCHIVE DESTINATION lib
 +RUNTIME DESTINATION bin
 +)
++
++function (add_module _name)
++    add_library(${ARGV})
++    if (TARGET ${_name})
++        target_link_libraries(${_name} fst)
++    endif()
++
++    if (MSVC)
++    install(TARGETS ${_name} 
++	        LIBRARY DESTINATION bin
++			ARCHIVE DESTINATION bin
++            RUNTIME DESTINATION bin)
++    else()
++    install(TARGETS ${_name} 
++	        LIBRARY DESTINATION lib
++			ARCHIVE DESTINATION lib
++            RUNTIME DESTINATION bin)
++    endif()
++endfunction()
++
++add_module(sigma-fst MODULE
++  sigma-fst.cc)
++
++add_module(sigma-fst MODULE
++  phi-fst.cc)
++
++add_module(sigma-fst MODULE
++  rho-fst.cc)
 diff --git a/src/include/fst/cache.h b/src/include/fst/cache.h
 index 4cfa9c8..e7058ff 100644
 --- a/src/include/fst/cache.h

@@ -11,7 +11,7 @@ source:
     - patches/0001-Add-CMake-files-and-Windows-compat.patch                            # [not linux64]
 
 build:
-  number: 0
+  number: 1
   # ensures that packages using openfst as a host dependency get the right runtime dependence as well, see
   # https://conda-forge.org/docs/maintainer/pinning_deps.html#specifying-run-exports
   run_exports:
@@ -42,14 +42,14 @@ requirements:
     "fstequivalent", "fstinfo", "fstintersect", "fstinvert", "fstisomorphic", "fstlinear",
     "fstloglinearapply", "fstmap", "fstminimize", "fstprint", "fstproject", "fstprune", "fstpush",
     "fstrandgen", "fstrelabel", "fstreplace", "fstreverse", "fstreweight", "fstrmepsilon",
-    "fstshortestdistance", "fstshortestpath", "fstsymbols", "fstsynchronize",
+    "fstshortestdistance", "fstshortestpath", "fstspecial", "fstsymbols", "fstsynchronize",
     "fsttopsort", "fstunion", "mpdtcompose", "mpdtexpand", "mpdtinfo", "mpdtreverse",
     "pdtcompose", "pdtexpand", "pdtinfo", "pdtreplace", "pdtreverse", "pdtshortestpath"
 ] %}
 {% set fst_libraries = [
     "", "compact", "compressscript", "const", "far", "farscript",
     "linearscript", "lookahead", "mpdtscript", "ngram", "pdtscript",
-    "script", "special"
+    "script", "special", "phi-fst", "rho-fst", "sigma-fst"
 ] %}
 {% set fst_headers = [
     "accumulator.h", "add-on.h", "arc-arena.h",
