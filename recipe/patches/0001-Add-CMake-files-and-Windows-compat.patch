@@ -612,11 +612,28 @@ index c3f925a..a1d897f 100644
    int32_t magic_number = 0;
 diff --git a/src/extensions/linear/CMakeLists.txt b/src/extensions/linear/CMakeLists.txt
 new file mode 100644
-index 0000000..139fb15
+index 0000000..2243ef7
 --- /dev/null
 +++ b/src/extensions/linear/CMakeLists.txt
-@@ -0,0 +1,88 @@
-+
+@@ -0,0 +1,85 @@
++function (add_module _name)
++    add_library(${ARGV})
++    if (TARGET ${_name})
++        target_link_libraries(${_name} fst)
++    endif()
++    set_target_properties(${_name} PROPERTIES PREFIX "")
++    if (MSVC)
++    install(TARGETS ${_name} 
++	        LIBRARY DESTINATION bin
++			    ARCHIVE DESTINATION bin
++          RUNTIME DESTINATION bin)
++    else()
++    install(TARGETS ${_name} 
++	        LIBRARY DESTINATION lib
++			    ARCHIVE DESTINATION lib
++          RUNTIME DESTINATION bin)
++    endif()
++endfunction()
 +
 +if(HAVE_SCRIPT)
 +  add_library(fstlinearscript
@@ -678,26 +695,6 @@ index 0000000..139fb15
 +    RUNTIME DESTINATION bin
 +  )
 +endif(HAVE_BIN)
-+
-+
-+function (add_module _name)
-+    add_library(${ARGV})
-+    if (TARGET ${_name})
-+        target_link_libraries(${_name} fst)
-+    endif()
-+
-+    if (MSVC)
-+      install(TARGETS ${_name}
-+      LIBRARY DESTINATION bin
-+      ARCHIVE DESTINATION bin
-+      RUNTIME DESTINATION bin)
-+    else()
-+      install(TARGETS ${_name}
-+      LIBRARY DESTINATION lib
-+      ARCHIVE DESTINATION lib
-+      RUNTIME DESTINATION bin)
-+    endif()
-+endfunction()
 +
 +add_module(linear-tagger-fst MODULE
 +  linear-tagger-fst.cc)
