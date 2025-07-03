@@ -269,10 +269,29 @@ index 0000000..094ab74
 \ No newline at end of file
 diff --git a/src/extensions/compact/CMakeLists.txt b/src/extensions/compact/CMakeLists.txt
 new file mode 100644
-index 0000000..cb8a2b1
+index 0000000..768ddaa
 --- /dev/null
 +++ b/src/extensions/compact/CMakeLists.txt
-@@ -0,0 +1,103 @@
+@@ -0,0 +1,102 @@
++function (add_module _name)
++    add_library(${ARGV})
++    if (TARGET ${_name})
++        target_link_libraries(${_name} fst)
++    endif()
++    set_target_properties(${_name} PROPERTIES PREFIX "")
++    if (MSVC)
++    install(TARGETS ${_name} 
++	        LIBRARY DESTINATION bin
++			    ARCHIVE DESTINATION bin
++          RUNTIME DESTINATION bin)
++    else()
++    install(TARGETS ${_name} 
++	        LIBRARY DESTINATION lib
++			    ARCHIVE DESTINATION lib
++          RUNTIME DESTINATION bin)
++    endif()
++endfunction()
++
 +add_library(fstcompact
 +  compact8_acceptor-fst.cc 
 +  compact8_string-fst.cc 
@@ -310,26 +329,6 @@ index 0000000..cb8a2b1
 +			ARCHIVE DESTINATION lib
 +            RUNTIME DESTINATION bin
 +)
-+
-+function (add_module _name)
-+    add_library(${ARGV})
-+    if (TARGET ${_name})
-+        target_link_libraries(${_name} fst)
-+    endif()
-+
-+    #set_target_properties(${_name} PROPERTIES SOVERSION "1")
-+    if (MSVC)
-+    install(TARGETS ${_name} 
-+	        LIBRARY DESTINATION bin
-+			ARCHIVE DESTINATION bin
-+            RUNTIME DESTINATION bin)
-+    else()
-+    install(TARGETS ${_name} 
-+	        LIBRARY DESTINATION lib
-+			ARCHIVE DESTINATION lib
-+            RUNTIME DESTINATION bin)
-+    endif()
-+endfunction()
 +
 +add_module(compact8_acceptor-fst MODULE
 +  compact8_acceptor-fst.cc)
@@ -437,7 +436,7 @@ index 0000000..3a1ac2e
 \ No newline at end of file
 diff --git a/src/extensions/const/CMakeLists.txt b/src/extensions/const/CMakeLists.txt
 new file mode 100644
-index 0000000..1f041b2
+index 0000000..0d25d74
 --- /dev/null
 +++ b/src/extensions/const/CMakeLists.txt
 @@ -0,0 +1,49 @@
@@ -446,17 +445,17 @@ index 0000000..1f041b2
 +    if (TARGET ${_name})
 +        target_link_libraries(${_name} fst)
 +    endif()
-+
++    set_target_properties(${_name} PROPERTIES PREFIX "")
 +    if (MSVC)
 +    install(TARGETS ${_name} 
 +	        LIBRARY DESTINATION bin
-+			ARCHIVE DESTINATION bin
-+            RUNTIME DESTINATION bin)
++			    ARCHIVE DESTINATION bin
++          RUNTIME DESTINATION bin)
 +    else()
 +    install(TARGETS ${_name} 
 +	        LIBRARY DESTINATION lib
-+			ARCHIVE DESTINATION lib
-+            RUNTIME DESTINATION bin)
++			    ARCHIVE DESTINATION lib
++          RUNTIME DESTINATION bin)
 +    endif()
 +endfunction()
 +
@@ -815,10 +814,29 @@ index 0000000..ef89f17
 \ No newline at end of file
 diff --git a/src/extensions/ngram/CMakeLists.txt b/src/extensions/ngram/CMakeLists.txt
 new file mode 100644
-index 0000000..cf176d2
+index 0000000..4573229
 --- /dev/null
 +++ b/src/extensions/ngram/CMakeLists.txt
-@@ -0,0 +1,54 @@
+@@ -0,0 +1,65 @@
++function (add_module _name)
++    add_library(${ARGV})
++    if (TARGET ${_name})
++        target_link_libraries(${_name} fst)
++    endif()
++    set_target_properties(${_name} PROPERTIES PREFIX "")
++    if (MSVC)
++    install(TARGETS ${_name} 
++	        LIBRARY DESTINATION bin
++			    ARCHIVE DESTINATION bin
++          RUNTIME DESTINATION bin)
++    else()
++    install(TARGETS ${_name} 
++	        LIBRARY DESTINATION lib
++			    ARCHIVE DESTINATION lib
++          RUNTIME DESTINATION bin)
++    endif()
++endfunction()
++
 +
 +add_library(fstngram
 +    bitmap-index.cc 
@@ -849,19 +867,6 @@ index 0000000..cf176d2
 +RUNTIME DESTINATION bin
 +)
 +
-+add_library(ngram_fst MODULE
-+    bitmap-index.cc 
-+    ngram-fst.cc 
-+    nthbit.cc
-+)
-+
-+target_link_libraries(ngram_fst
-+    fst
-+)
-+target_compile_definitions(ngram_fst PRIVATE fstngram_EXPORTS)
-+target_include_directories(ngram_fst PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-+                           $<INSTALL_INTERFACE:include>)
-+
 +if (MSVC)
 +install(TARGETS ${_name} 
 +        LIBRARY DESTINATION bin
@@ -873,6 +878,11 @@ index 0000000..cf176d2
 +        ARCHIVE DESTINATION lib
 +        RUNTIME DESTINATION bin)
 +endif()
++
++add_module(ngram-fst MODULE
++    bitmap-index.cc 
++    ngram-fst.cc 
++    nthbit.cc)
 \ No newline at end of file
 diff --git a/src/extensions/pdt/CMakeLists.txt b/src/extensions/pdt/CMakeLists.txt
 new file mode 100644
@@ -956,11 +966,28 @@ index 0000000..c0c43d7
 \ No newline at end of file
 diff --git a/src/extensions/special/CMakeLists.txt b/src/extensions/special/CMakeLists.txt
 new file mode 100644
-index 0000000..10b79e0
+index 0000000..1a141eb
 --- /dev/null
 +++ b/src/extensions/special/CMakeLists.txt
-@@ -0,0 +1,80 @@
-+
+@@ -0,0 +1,78 @@
++function (add_module _name)
++    add_library(${ARGV})
++    if (TARGET ${_name})
++        target_link_libraries(${_name} fst)
++    endif()
++    set_target_properties(${_name} PROPERTIES PREFIX "")
++    if (MSVC)
++    install(TARGETS ${_name} 
++	        LIBRARY DESTINATION bin
++			    ARCHIVE DESTINATION bin
++          RUNTIME DESTINATION bin)
++    else()
++    install(TARGETS ${_name} 
++	        LIBRARY DESTINATION lib
++			    ARCHIVE DESTINATION lib
++          RUNTIME DESTINATION bin)
++    endif()
++endfunction()
 +
 +add_library(fstspecial
 +  phi-fst.cc
@@ -1012,25 +1039,6 @@ index 0000000..10b79e0
 +install(TARGETS fstspecial_bin
 +RUNTIME DESTINATION bin
 +)
-+
-+function (add_module _name)
-+    add_library(${ARGV})
-+    if (TARGET ${_name})
-+        target_link_libraries(${_name} fst)
-+    endif()
-+
-+    if (MSVC)
-+    install(TARGETS ${_name} 
-+	        LIBRARY DESTINATION bin
-+			    ARCHIVE DESTINATION bin
-+          RUNTIME DESTINATION bin)
-+    else()
-+    install(TARGETS ${_name} 
-+	        LIBRARY DESTINATION lib
-+			    ARCHIVE DESTINATION lib
-+          RUNTIME DESTINATION bin)
-+    endif()
-+endfunction()
 +
 +add_module(sigma-fst MODULE
 +  sigma-fst.cc)

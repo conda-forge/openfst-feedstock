@@ -49,7 +49,30 @@ requirements:
 {% set fst_libraries = [
     "", "compact", "compressscript", "const", "far", "farscript",
     "linearscript", "lookahead", "mpdtscript", "ngram", "pdtscript",
-    "script", "special", "phi-fst", "rho-fst", "sigma-fst"
+    "script", "special"
+] %}
+{% set fst_modules = [
+    # compact
+    "compact8_acceptor-fst", "compact8_string-fst", "compact8_unweighted-fst", "compact8_unweighted_acceptor-fst",
+    "compact8_weighted_string-fst", "compact16_acceptor-fst", "compact16_string-fst", "compact16_unweighted-fst",
+    "compact16_unweighted_acceptor-fst", "compact16_weighted_string-fst", "compact64_acceptor-fst", "compact64_string-fst",
+    "compact64_unweighted-fst", "compact64_unweighted_acceptor-fst", "compact64_weighted_string-fst",
+
+    # const
+    "const8-fst", "const16-fst", "const64-fst",
+
+    # linear
+    "linear-tagger-fst", "linear-classifier-fst",
+
+    # lookahead
+    "arc_lookahead-fst", "ilabel_lookahead-fst", "olabel_lookahead-fst",
+
+    # ngram
+    "ngram-fst",
+
+    # special
+    "phi-fst", "rho-fst", "sigma-fst"
+
 ] %}
 {% set fst_headers = [
     "accumulator.h", "add-on.h", "arc-arena.h",
@@ -151,6 +174,14 @@ test:
 
       # absence of static libraries
     - test ! -f $PREFIX/lib/libfst{{ each_lib }}.a                # [not win]
+    {% endfor %}
+
+    # modules:
+    {% for each_lib in fst_modules %}
+      # shared
+    - test -f $PREFIX/lib/{{ each_lib }}.so                 # [linux]
+    - test -f $PREFIX/lib/{{ each_lib }}.dylib              # [osx]
+    - if not exist %LIBRARY_BIN%\fst{{ each_lib }}.dll exit 1     # [win]
     {% endfor %}
 
     # headers:
