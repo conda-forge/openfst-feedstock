@@ -269,10 +269,10 @@ index 0000000..094ab74
 \ No newline at end of file
 diff --git a/src/extensions/compact/CMakeLists.txt b/src/extensions/compact/CMakeLists.txt
 new file mode 100644
-index 0000000..768ddaa
+index 0000000..f889cd9
 --- /dev/null
 +++ b/src/extensions/compact/CMakeLists.txt
-@@ -0,0 +1,102 @@
+@@ -0,0 +1,103 @@
 +function (add_module _name)
 +    add_library(${ARGV})
 +    if (TARGET ${_name})
@@ -280,15 +280,16 @@ index 0000000..768ddaa
 +    endif()
 +    set_target_properties(${_name} PROPERTIES PREFIX "")
 +    if (MSVC)
-+    install(TARGETS ${_name} 
-+	        LIBRARY DESTINATION bin
-+			    ARCHIVE DESTINATION bin
-+          RUNTIME DESTINATION bin)
++      target_compile_definitions(${_name} PRIVATE fstcompact_EXPORTS)
++      install(TARGETS ${_name} 
++            LIBRARY DESTINATION bin
++            ARCHIVE DESTINATION bin
++            RUNTIME DESTINATION bin)
 +    else()
-+    install(TARGETS ${_name} 
-+	        LIBRARY DESTINATION lib
-+			    ARCHIVE DESTINATION lib
-+          RUNTIME DESTINATION bin)
++      install(TARGETS ${_name} 
++            LIBRARY DESTINATION lib
++            ARCHIVE DESTINATION lib
++            RUNTIME DESTINATION bin)
 +    endif()
 +endfunction()
 +
@@ -436,10 +437,10 @@ index 0000000..3a1ac2e
 \ No newline at end of file
 diff --git a/src/extensions/const/CMakeLists.txt b/src/extensions/const/CMakeLists.txt
 new file mode 100644
-index 0000000..0d25d74
+index 0000000..cd661b6
 --- /dev/null
 +++ b/src/extensions/const/CMakeLists.txt
-@@ -0,0 +1,49 @@
+@@ -0,0 +1,52 @@
 +function (add_module _name)
 +    add_library(${ARGV})
 +    if (TARGET ${_name})
@@ -447,15 +448,16 @@ index 0000000..0d25d74
 +    endif()
 +    set_target_properties(${_name} PROPERTIES PREFIX "")
 +    if (MSVC)
-+    install(TARGETS ${_name} 
-+	        LIBRARY DESTINATION bin
-+			    ARCHIVE DESTINATION bin
-+          RUNTIME DESTINATION bin)
++      target_compile_definitions(${_name} PRIVATE fstconst_EXPORTS)
++      install(TARGETS ${_name} 
++            LIBRARY DESTINATION bin
++            ARCHIVE DESTINATION bin
++            RUNTIME DESTINATION bin)
 +    else()
-+    install(TARGETS ${_name} 
-+	        LIBRARY DESTINATION lib
-+			    ARCHIVE DESTINATION lib
-+          RUNTIME DESTINATION bin)
++      install(TARGETS ${_name} 
++            LIBRARY DESTINATION lib
++            ARCHIVE DESTINATION lib
++            RUNTIME DESTINATION bin)
 +    endif()
 +endfunction()
 +
@@ -474,13 +476,15 @@ index 0000000..0d25d74
 +set_target_properties(fstconst PROPERTIES
 +  SOVERSION "${SOVERSION}"
 +)
-+GENERATE_EXPORT_HEADER( fstconst
-+             BASE_NAME fstconst
-+             EXPORT_MACRO_NAME fstconst_EXPORT
-+             EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/fst/exports/fstconst_Export.h
-+             STATIC_DEFINE fstconst_BUILT_AS_STATIC
-+)
-+target_compile_definitions(fstconst PRIVATE fstconst_EXPORTS)
++if (MSVC)
++  GENERATE_EXPORT_HEADER( fstconst
++              BASE_NAME fstconst
++              EXPORT_MACRO_NAME fstconst_EXPORT
++              EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/fst/exports/fstconst_Export.h
++              STATIC_DEFINE fstconst_BUILT_AS_STATIC
++  )
++  target_compile_definitions(fstconst PRIVATE fstconst_EXPORTS)
++endif()
 +target_include_directories(fstconst PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
 +                           $<INSTALL_INTERFACE:include>)
 +
@@ -612,10 +616,10 @@ index c3f925a..a1d897f 100644
    int32_t magic_number = 0;
 diff --git a/src/extensions/linear/CMakeLists.txt b/src/extensions/linear/CMakeLists.txt
 new file mode 100644
-index 0000000..2243ef7
+index 0000000..f7a97c8
 --- /dev/null
 +++ b/src/extensions/linear/CMakeLists.txt
-@@ -0,0 +1,85 @@
+@@ -0,0 +1,86 @@
 +function (add_module _name)
 +    add_library(${ARGV})
 +    if (TARGET ${_name})
@@ -623,15 +627,16 @@ index 0000000..2243ef7
 +    endif()
 +    set_target_properties(${_name} PROPERTIES PREFIX "")
 +    if (MSVC)
-+    install(TARGETS ${_name} 
-+	        LIBRARY DESTINATION bin
-+			    ARCHIVE DESTINATION bin
-+          RUNTIME DESTINATION bin)
++        target_compile_definitions(${_name} PRIVATE fstlinearscript_EXPORTS)
++        install(TARGETS ${_name} 
++              LIBRARY DESTINATION bin
++              ARCHIVE DESTINATION bin
++              RUNTIME DESTINATION bin)
 +    else()
-+    install(TARGETS ${_name} 
-+	        LIBRARY DESTINATION lib
-+			    ARCHIVE DESTINATION lib
-+          RUNTIME DESTINATION bin)
++        install(TARGETS ${_name} 
++              LIBRARY DESTINATION lib
++              ARCHIVE DESTINATION lib
++              RUNTIME DESTINATION bin)
 +    endif()
 +endfunction()
 +
@@ -811,10 +816,10 @@ index 0000000..ef89f17
 \ No newline at end of file
 diff --git a/src/extensions/ngram/CMakeLists.txt b/src/extensions/ngram/CMakeLists.txt
 new file mode 100644
-index 0000000..4573229
+index 0000000..d13fc17
 --- /dev/null
 +++ b/src/extensions/ngram/CMakeLists.txt
-@@ -0,0 +1,65 @@
+@@ -0,0 +1,68 @@
 +function (add_module _name)
 +    add_library(${ARGV})
 +    if (TARGET ${_name})
@@ -822,15 +827,16 @@ index 0000000..4573229
 +    endif()
 +    set_target_properties(${_name} PROPERTIES PREFIX "")
 +    if (MSVC)
-+    install(TARGETS ${_name} 
-+	        LIBRARY DESTINATION bin
-+			    ARCHIVE DESTINATION bin
-+          RUNTIME DESTINATION bin)
++        target_compile_definitions(${_name} PRIVATE fstngram_EXPORTS)
++        install(TARGETS ${_name} 
++                LIBRARY DESTINATION bin
++                ARCHIVE DESTINATION bin
++                RUNTIME DESTINATION bin)
 +    else()
 +    install(TARGETS ${_name} 
 +	        LIBRARY DESTINATION lib
-+			    ARCHIVE DESTINATION lib
-+          RUNTIME DESTINATION bin)
++			ARCHIVE DESTINATION lib
++            RUNTIME DESTINATION bin)
 +    endif()
 +endfunction()
 +
@@ -844,13 +850,15 @@ index 0000000..4573229
 +target_link_libraries(fstngram
 +    fst
 +)
-+GENERATE_EXPORT_HEADER( fstngram
-+             BASE_NAME fstngram
-+             EXPORT_MACRO_NAME fstngram_EXPORT
-+             EXPORT_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/include/fst/exports/fstngram_Export.h
-+             STATIC_DEFINE fstngram_BUILT_AS_STATIC
-+)
-+target_compile_definitions(fstngram PRIVATE fstngram_EXPORTS)
++if (MSVC)
++    GENERATE_EXPORT_HEADER( fstngram
++                BASE_NAME fstngram
++                EXPORT_MACRO_NAME fstngram_EXPORT
++                EXPORT_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/include/fst/exports/fstngram_Export.h
++                STATIC_DEFINE fstngram_BUILT_AS_STATIC
++    )
++    target_compile_definitions(fstngram PRIVATE fstngram_EXPORTS)
++endif()
 +target_include_directories(fstngram PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 +                           $<INSTALL_INTERFACE:include>)
 +
@@ -963,10 +971,10 @@ index 0000000..c0c43d7
 \ No newline at end of file
 diff --git a/src/extensions/special/CMakeLists.txt b/src/extensions/special/CMakeLists.txt
 new file mode 100644
-index 0000000..1a141eb
+index 0000000..6e75fa5
 --- /dev/null
 +++ b/src/extensions/special/CMakeLists.txt
-@@ -0,0 +1,78 @@
+@@ -0,0 +1,79 @@
 +function (add_module _name)
 +    add_library(${ARGV})
 +    if (TARGET ${_name})
@@ -974,15 +982,16 @@ index 0000000..1a141eb
 +    endif()
 +    set_target_properties(${_name} PROPERTIES PREFIX "")
 +    if (MSVC)
-+    install(TARGETS ${_name} 
-+	        LIBRARY DESTINATION bin
-+			    ARCHIVE DESTINATION bin
-+          RUNTIME DESTINATION bin)
++      target_compile_definitions(${_name} PRIVATE fstspecial_EXPORTS)
++      install(TARGETS ${_name} 
++            LIBRARY DESTINATION bin
++            ARCHIVE DESTINATION bin
++            RUNTIME DESTINATION bin)
 +    else()
-+    install(TARGETS ${_name} 
-+	        LIBRARY DESTINATION lib
-+			    ARCHIVE DESTINATION lib
-+          RUNTIME DESTINATION bin)
++      install(TARGETS ${_name} 
++            LIBRARY DESTINATION lib
++            ARCHIVE DESTINATION lib
++            RUNTIME DESTINATION bin)
 +    endif()
 +endfunction()
 +
@@ -991,7 +1000,7 @@ index 0000000..1a141eb
 +  rho-fst.cc
 +  sigma-fst.cc
 +)
-+if (MSCV)
++if (MSVC)
 +GENERATE_EXPORT_HEADER( fstspecial
 +             BASE_NAME fstspecial
 +             EXPORT_MACRO_NAME fstspecial_EXPORT
