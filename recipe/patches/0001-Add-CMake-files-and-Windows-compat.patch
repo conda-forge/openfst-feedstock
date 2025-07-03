@@ -956,10 +956,10 @@ index 0000000..c0c43d7
 \ No newline at end of file
 diff --git a/src/extensions/special/CMakeLists.txt b/src/extensions/special/CMakeLists.txt
 new file mode 100644
-index 0000000..e057ebf
+index 0000000..ad2ede4
 --- /dev/null
 +++ b/src/extensions/special/CMakeLists.txt
-@@ -0,0 +1,76 @@
+@@ -0,0 +1,82 @@
 +
 +
 +add_library(fstspecial
@@ -988,22 +988,28 @@ index 0000000..e057ebf
 +)
 +
 +if(HAVE_BIN)
-+  add_executable(fstspecial
++  add_executable(fstspecial_bin
 +    fstspecial.cc
 +  )
 +
-+  set_target_properties(fstspecial PROPERTIES 
++  set_target_properties(fstspecial_bin PROPERTIES 
 +    OUTPUT_NAME fstspecial
 +  )
-+  target_link_libraries(fstspecial
++  target_link_libraries(fstspecial_bin
 +    fstscript
-+    fst
++    fstspecial
 +    ${CMAKE_DL_LIBS}
 +  )
 +endif(HAVE_BIN)
 +
 +
 +install(TARGETS fstspecial
++LIBRARY DESTINATION lib
++ARCHIVE DESTINATION lib
++RUNTIME DESTINATION bin
++)
++
++install(TARGETS fstspecial_bin
 +LIBRARY DESTINATION lib
 +ARCHIVE DESTINATION lib
 +RUNTIME DESTINATION bin
