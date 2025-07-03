@@ -46,34 +46,32 @@ requirements:
     "fsttopsort", "fstunion", "mpdtcompose", "mpdtexpand", "mpdtinfo", "mpdtreverse",
     "pdtcompose", "pdtexpand", "pdtinfo", "pdtreplace", "pdtreverse", "pdtshortestpath"
 ] %}
+
 {% set fst_libraries = [
     "", "compact", "compressscript", "const", "far", "farscript",
     "linearscript", "lookahead", "mpdtscript", "ngram", "pdtscript",
     "script", "special"
 ] %}
+
+# Modules from compact, linear, lookahead, ngram, and special do not have "libfst" prefixes, so separating their testing
 {% set fst_modules = [
-    # compact
     "compact8_acceptor-fst", "compact8_string-fst", "compact8_unweighted-fst", "compact8_unweighted_acceptor-fst",
     "compact8_weighted_string-fst", "compact16_acceptor-fst", "compact16_string-fst", "compact16_unweighted-fst",
     "compact16_unweighted_acceptor-fst", "compact16_weighted_string-fst", "compact64_acceptor-fst", "compact64_string-fst",
     "compact64_unweighted-fst", "compact64_unweighted_acceptor-fst", "compact64_weighted_string-fst",
 
-    # const
     "const8-fst", "const16-fst", "const64-fst",
 
-    # linear
     "linear-tagger-fst", "linear-classifier-fst",
 
-    # lookahead
     "arc_lookahead-fst", "ilabel_lookahead-fst", "olabel_lookahead-fst",
 
-    # ngram
     "ngram-fst",
 
-    # special
     "phi-fst", "rho-fst", "sigma-fst"
 
 ] %}
+
 {% set fst_headers = [
     "accumulator.h", "add-on.h", "arc-arena.h",
     "arc-map.h", "arc.h", "arcfilter.h", "arcsort.h", "bi-table.h",
