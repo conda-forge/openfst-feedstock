@@ -62,7 +62,7 @@ requirements:
 
     "const8-fst", "const16-fst", "const64-fst",
 
-    "linear-tagger-fst", "linear-classifier-fst",
+    "linear_tagger-fst", "linear_classifier-fst",
 
     "arc_lookahead-fst", "ilabel_lookahead-fst", "olabel_lookahead-fst",
 

@@ -616,7 +616,7 @@ index c3f925a..a1d897f 100644
    int32_t magic_number = 0;
 diff --git a/src/extensions/linear/CMakeLists.txt b/src/extensions/linear/CMakeLists.txt
 new file mode 100644
-index 0000000..f7a97c8
+index 0000000..41b8b2b
 --- /dev/null
 +++ b/src/extensions/linear/CMakeLists.txt
 @@ -0,0 +1,86 @@
@@ -701,10 +701,10 @@ index 0000000..f7a97c8
 +  )
 +endif(HAVE_BIN)
 +
-+add_module(linear-tagger-fst MODULE
++add_module(linear_tagger-fst MODULE
 +  linear-tagger-fst.cc)
 +
-+add_module(linear-classifier-fst MODULE
++add_module(linear_classifier-fst MODULE
 +  linear-classifier-fst.cc)
 diff --git a/src/extensions/linear/linearscript.cc b/src/extensions/linear/linearscript.cc
 index d887caa..70128e8 100644
