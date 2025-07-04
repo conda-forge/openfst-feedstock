@@ -11,7 +11,7 @@ source:
     - patches/0001-Add-CMake-files-and-Windows-compat.patch                            # [not linux64]
 
 build:
-  number: 0
+  number: 1
   # ensures that packages using openfst as a host dependency get the right runtime dependence as well, see
   # https://conda-forge.org/docs/maintainer/pinning_deps.html#specifying-run-exports
   run_exports:
@@ -42,15 +42,36 @@ requirements:
     "fstequivalent", "fstinfo", "fstintersect", "fstinvert", "fstisomorphic", "fstlinear",
     "fstloglinearapply", "fstmap", "fstminimize", "fstprint", "fstproject", "fstprune", "fstpush",
     "fstrandgen", "fstrelabel", "fstreplace", "fstreverse", "fstreweight", "fstrmepsilon",
-    "fstshortestdistance", "fstshortestpath", "fstsymbols", "fstsynchronize",
+    "fstshortestdistance", "fstshortestpath", "fstspecial", "fstsymbols", "fstsynchronize",
     "fsttopsort", "fstunion", "mpdtcompose", "mpdtexpand", "mpdtinfo", "mpdtreverse",
     "pdtcompose", "pdtexpand", "pdtinfo", "pdtreplace", "pdtreverse", "pdtshortestpath"
 ] %}
+
 {% set fst_libraries = [
     "", "compact", "compressscript", "const", "far", "farscript",
     "linearscript", "lookahead", "mpdtscript", "ngram", "pdtscript",
     "script", "special"
 ] %}
+
+# Modules from compact, linear, lookahead, ngram, and special do not have "libfst" prefixes, so separating their testing
+{% set fst_modules = [
+    "compact8_acceptor-fst", "compact8_string-fst", "compact8_unweighted-fst", "compact8_unweighted_acceptor-fst",
+    "compact8_weighted_string-fst", "compact16_acceptor-fst", "compact16_string-fst", "compact16_unweighted-fst",
+    "compact16_unweighted_acceptor-fst", "compact16_weighted_string-fst", "compact64_acceptor-fst", "compact64_string-fst",
+    "compact64_unweighted-fst", "compact64_unweighted_acceptor-fst", "compact64_weighted_string-fst",
+
+    "const8-fst", "const16-fst", "const64-fst",
+
+    "linear_tagger-fst", "linear_classifier-fst",
+
+    "arc_lookahead-fst", "ilabel_lookahead-fst", "olabel_lookahead-fst",
+
+    "ngram-fst",
+
+    "phi-fst", "rho-fst", "sigma-fst"
+
+] %}
+
 {% set fst_headers = [
     "accumulator.h", "add-on.h", "arc-arena.h",
     "arc-map.h", "arc.h", "arcfilter.h", "arcsort.h", "bi-table.h",
@@ -151,6 +172,14 @@ test:
 
       # absence of static libraries
     - test ! -f $PREFIX/lib/libfst{{ each_lib }}.a                # [not win]
+    {% endfor %}
+
+    # modules:
+    {% for each_lib in fst_modules %}
+      # shared
+    - test -f $PREFIX/lib/fst/{{ each_lib }}.so                 # [linux]
+    - test -f $PREFIX/lib/fst/{{ each_lib }}.so                 # [osx]
+    - if not exist %LIBRARY_BIN%\{{ each_lib }}.dll exit 1      # [win]
     {% endfor %}
 
     # headers:

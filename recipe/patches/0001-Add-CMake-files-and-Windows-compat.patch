@@ -269,10 +269,30 @@ index 0000000..094ab74
 \ No newline at end of file
 diff --git a/src/extensions/compact/CMakeLists.txt b/src/extensions/compact/CMakeLists.txt
 new file mode 100644
-index 0000000..cb8a2b1
+index 0000000..fb08349
 --- /dev/null
 +++ b/src/extensions/compact/CMakeLists.txt
 @@ -0,0 +1,103 @@
++function (add_module _name)
++    add_library(${ARGV})
++    if (TARGET ${_name})
++        target_link_libraries(${_name} fst)
++    endif()
++    set_target_properties(${_name} PROPERTIES PREFIX "")
++    if (MSVC)
++      target_compile_definitions(${_name} PRIVATE fstcompact_EXPORTS)
++      install(TARGETS ${_name} 
++            LIBRARY DESTINATION bin
++            ARCHIVE DESTINATION bin
++            RUNTIME DESTINATION bin)
++    else()
++      install(TARGETS ${_name} 
++            LIBRARY DESTINATION lib/fst
++            ARCHIVE DESTINATION lib/fst
++            RUNTIME DESTINATION bin)
++    endif()
++endfunction()
++
 +add_library(fstcompact
 +  compact8_acceptor-fst.cc 
 +  compact8_string-fst.cc 
@@ -310,26 +330,6 @@ index 0000000..cb8a2b1
 +			ARCHIVE DESTINATION lib
 +            RUNTIME DESTINATION bin
 +)
-+
-+function (add_module _name)
-+    add_library(${ARGV})
-+    if (TARGET ${_name})
-+        target_link_libraries(${_name} fst)
-+    endif()
-+
-+    #set_target_properties(${_name} PROPERTIES SOVERSION "1")
-+    if (MSVC)
-+    install(TARGETS ${_name} 
-+	        LIBRARY DESTINATION bin
-+			ARCHIVE DESTINATION bin
-+            RUNTIME DESTINATION bin)
-+    else()
-+    install(TARGETS ${_name} 
-+	        LIBRARY DESTINATION lib
-+			ARCHIVE DESTINATION lib
-+            RUNTIME DESTINATION bin)
-+    endif()
-+endfunction()
 +
 +add_module(compact8_acceptor-fst MODULE
 +  compact8_acceptor-fst.cc)
@@ -437,25 +437,26 @@ index 0000000..3a1ac2e
 \ No newline at end of file
 diff --git a/src/extensions/const/CMakeLists.txt b/src/extensions/const/CMakeLists.txt
 new file mode 100644
-index 0000000..1f041b2
+index 0000000..adb8d44
 --- /dev/null
 +++ b/src/extensions/const/CMakeLists.txt
-@@ -0,0 +1,49 @@
+@@ -0,0 +1,52 @@
 +function (add_module _name)
 +    add_library(${ARGV})
 +    if (TARGET ${_name})
 +        target_link_libraries(${_name} fst)
 +    endif()
-+
++    set_target_properties(${_name} PROPERTIES PREFIX "")
 +    if (MSVC)
-+    install(TARGETS ${_name} 
-+	        LIBRARY DESTINATION bin
-+			ARCHIVE DESTINATION bin
++      target_compile_definitions(${_name} PRIVATE fstconst_EXPORTS)
++      install(TARGETS ${_name} 
++            LIBRARY DESTINATION bin
++            ARCHIVE DESTINATION bin
 +            RUNTIME DESTINATION bin)
 +    else()
-+    install(TARGETS ${_name} 
-+	        LIBRARY DESTINATION lib
-+			ARCHIVE DESTINATION lib
++      install(TARGETS ${_name} 
++            LIBRARY DESTINATION lib/fst
++            ARCHIVE DESTINATION lib/fst
 +            RUNTIME DESTINATION bin)
 +    endif()
 +endfunction()
@@ -475,13 +476,15 @@ index 0000000..1f041b2
 +set_target_properties(fstconst PROPERTIES
 +  SOVERSION "${SOVERSION}"
 +)
-+GENERATE_EXPORT_HEADER( fstconst
-+             BASE_NAME fstconst
-+             EXPORT_MACRO_NAME fstconst_EXPORT
-+             EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/fst/exports/fstconst_Export.h
-+             STATIC_DEFINE fstconst_BUILT_AS_STATIC
-+)
-+target_compile_definitions(fstconst PRIVATE fstconst_EXPORTS)
++if (MSVC)
++  GENERATE_EXPORT_HEADER( fstconst
++              BASE_NAME fstconst
++              EXPORT_MACRO_NAME fstconst_EXPORT
++              EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/fst/exports/fstconst_Export.h
++              STATIC_DEFINE fstconst_BUILT_AS_STATIC
++  )
++  target_compile_definitions(fstconst PRIVATE fstconst_EXPORTS)
++endif()
 +target_include_directories(fstconst PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
 +                           $<INSTALL_INTERFACE:include>)
 +
@@ -613,11 +616,29 @@ index c3f925a..a1d897f 100644
    int32_t magic_number = 0;
 diff --git a/src/extensions/linear/CMakeLists.txt b/src/extensions/linear/CMakeLists.txt
 new file mode 100644
-index 0000000..139fb15
+index 0000000..9197e1e
 --- /dev/null
 +++ b/src/extensions/linear/CMakeLists.txt
-@@ -0,0 +1,88 @@
-+
+@@ -0,0 +1,86 @@
++function (add_module _name)
++    add_library(${ARGV})
++    if (TARGET ${_name})
++        target_link_libraries(${_name} fst)
++    endif()
++    set_target_properties(${_name} PROPERTIES PREFIX "")
++    if (MSVC)
++        target_compile_definitions(${_name} PRIVATE fstlinearscript_EXPORTS)
++        install(TARGETS ${_name} 
++              LIBRARY DESTINATION bin
++              ARCHIVE DESTINATION bin
++              RUNTIME DESTINATION bin)
++    else()
++        install(TARGETS ${_name} 
++              LIBRARY DESTINATION lib/fst
++              ARCHIVE DESTINATION lib/fst
++              RUNTIME DESTINATION bin)
++    endif()
++endfunction()
 +
 +if(HAVE_SCRIPT)
 +  add_library(fstlinearscript
@@ -680,30 +701,10 @@ index 0000000..139fb15
 +  )
 +endif(HAVE_BIN)
 +
-+
-+function (add_module _name)
-+    add_library(${ARGV})
-+    if (TARGET ${_name})
-+        target_link_libraries(${_name} fst)
-+    endif()
-+
-+    if (MSVC)
-+      install(TARGETS ${_name}
-+      LIBRARY DESTINATION bin
-+      ARCHIVE DESTINATION bin
-+      RUNTIME DESTINATION bin)
-+    else()
-+      install(TARGETS ${_name}
-+      LIBRARY DESTINATION lib
-+      ARCHIVE DESTINATION lib
-+      RUNTIME DESTINATION bin)
-+    endif()
-+endfunction()
-+
-+add_module(linear-tagger-fst MODULE
++add_module(linear_tagger-fst MODULE
 +  linear-tagger-fst.cc)
 +
-+add_module(linear-classifier-fst MODULE
++add_module(linear_classifier-fst MODULE
 +  linear-classifier-fst.cc)
 diff --git a/src/extensions/linear/linearscript.cc b/src/extensions/linear/linearscript.cc
 index d887caa..70128e8 100644
@@ -720,10 +721,29 @@ index d887caa..70128e8 100644
  }
 diff --git a/src/extensions/lookahead/CMakeLists.txt b/src/extensions/lookahead/CMakeLists.txt
 new file mode 100644
-index 0000000..e265acc
+index 0000000..ccbc3e1
 --- /dev/null
 +++ b/src/extensions/lookahead/CMakeLists.txt
 @@ -0,0 +1,43 @@
++function (add_module _name)
++    add_library(${ARGV})
++    if (TARGET ${_name})
++        target_link_libraries(${_name} fst)
++    endif()
++    set_target_properties(${_name} PROPERTIES PREFIX "")
++    if (MSVC)
++    install(TARGETS ${_name} 
++	        LIBRARY DESTINATION bin
++			    ARCHIVE DESTINATION bin
++          RUNTIME DESTINATION bin)
++    else()
++    install(TARGETS ${_name} 
++	        LIBRARY DESTINATION lib/fst
++			    ARCHIVE DESTINATION lib/fst
++          RUNTIME DESTINATION bin)
++    endif()
++endfunction()
++
 +add_library(fstlookahead
 +  arc_lookahead-fst.cc 
 +  ilabel_lookahead-fst.cc
@@ -739,25 +759,6 @@ index 0000000..e265acc
 +ARCHIVE DESTINATION lib
 +RUNTIME DESTINATION bin
 +)
-+  
-+function (add_module _name)
-+    add_library(${ARGV})
-+    if (TARGET ${_name})
-+        target_link_libraries(${_name} fst)
-+    endif()
-+
-+    if (MSVC)
-+    install(TARGETS ${_name} 
-+	        LIBRARY DESTINATION bin
-+			ARCHIVE DESTINATION bin
-+            RUNTIME DESTINATION bin)
-+    else()
-+    install(TARGETS ${_name} 
-+	        LIBRARY DESTINATION lib
-+			ARCHIVE DESTINATION lib
-+            RUNTIME DESTINATION bin)
-+    endif()
-+endfunction()
 +  
 +add_module(arc_lookahead-fst MODULE
 +  arc_lookahead-fst.cc)
@@ -815,10 +816,30 @@ index 0000000..ef89f17
 \ No newline at end of file
 diff --git a/src/extensions/ngram/CMakeLists.txt b/src/extensions/ngram/CMakeLists.txt
 new file mode 100644
-index 0000000..cf176d2
+index 0000000..d2a9336
 --- /dev/null
 +++ b/src/extensions/ngram/CMakeLists.txt
-@@ -0,0 +1,54 @@
+@@ -0,0 +1,68 @@
++function (add_module _name)
++    add_library(${ARGV})
++    if (TARGET ${_name})
++        target_link_libraries(${_name} fst)
++    endif()
++    set_target_properties(${_name} PROPERTIES PREFIX "")
++    if (MSVC)
++        target_compile_definitions(${_name} PRIVATE fstngram_EXPORTS)
++        install(TARGETS ${_name} 
++                LIBRARY DESTINATION bin
++                ARCHIVE DESTINATION bin
++                RUNTIME DESTINATION bin)
++    else()
++    install(TARGETS ${_name} 
++	        LIBRARY DESTINATION lib/fst
++			ARCHIVE DESTINATION lib/fst
++            RUNTIME DESTINATION bin)
++    endif()
++endfunction()
++
 +
 +add_library(fstngram
 +    bitmap-index.cc 
@@ -829,13 +850,15 @@ index 0000000..cf176d2
 +target_link_libraries(fstngram
 +    fst
 +)
-+GENERATE_EXPORT_HEADER( fstngram
-+             BASE_NAME fstngram
-+             EXPORT_MACRO_NAME fstngram_EXPORT
-+             EXPORT_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/include/fst/exports/fstngram_Export.h
-+             STATIC_DEFINE fstngram_BUILT_AS_STATIC
-+)
-+target_compile_definitions(fstngram PRIVATE fstngram_EXPORTS)
++if (MSVC)
++    GENERATE_EXPORT_HEADER( fstngram
++                BASE_NAME fstngram
++                EXPORT_MACRO_NAME fstngram_EXPORT
++                EXPORT_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/include/fst/exports/fstngram_Export.h
++                STATIC_DEFINE fstngram_BUILT_AS_STATIC
++    )
++    target_compile_definitions(fstngram PRIVATE fstngram_EXPORTS)
++endif()
 +target_include_directories(fstngram PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 +                           $<INSTALL_INTERFACE:include>)
 +
@@ -849,19 +872,6 @@ index 0000000..cf176d2
 +RUNTIME DESTINATION bin
 +)
 +
-+add_library(ngram_fst MODULE
-+    bitmap-index.cc 
-+    ngram-fst.cc 
-+    nthbit.cc
-+)
-+
-+target_link_libraries(ngram_fst
-+    fst
-+)
-+target_compile_definitions(ngram_fst PRIVATE fstngram_EXPORTS)
-+target_include_directories(ngram_fst PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-+                           $<INSTALL_INTERFACE:include>)
-+
 +if (MSVC)
 +install(TARGETS ${_name} 
 +        LIBRARY DESTINATION bin
@@ -873,6 +883,11 @@ index 0000000..cf176d2
 +        ARCHIVE DESTINATION lib
 +        RUNTIME DESTINATION bin)
 +endif()
++
++add_module(ngram-fst MODULE
++    bitmap-index.cc 
++    ngram-fst.cc 
++    nthbit.cc)
 \ No newline at end of file
 diff --git a/src/extensions/pdt/CMakeLists.txt b/src/extensions/pdt/CMakeLists.txt
 new file mode 100644
@@ -956,19 +971,36 @@ index 0000000..c0c43d7
 \ No newline at end of file
 diff --git a/src/extensions/special/CMakeLists.txt b/src/extensions/special/CMakeLists.txt
 new file mode 100644
-index 0000000..c715b28
+index 0000000..9def40b
 --- /dev/null
 +++ b/src/extensions/special/CMakeLists.txt
-@@ -0,0 +1,50 @@
-+
+@@ -0,0 +1,79 @@
++function (add_module _name)
++    add_library(${ARGV})
++    if (TARGET ${_name})
++        target_link_libraries(${_name} fst)
++    endif()
++    set_target_properties(${_name} PROPERTIES PREFIX "")
++    if (MSVC)
++      target_compile_definitions(${_name} PRIVATE fstspecial_EXPORTS)
++      install(TARGETS ${_name} 
++            LIBRARY DESTINATION bin
++            ARCHIVE DESTINATION bin
++            RUNTIME DESTINATION bin)
++    else()
++      install(TARGETS ${_name} 
++            LIBRARY DESTINATION lib/fst
++            ARCHIVE DESTINATION lib/fst
++            RUNTIME DESTINATION bin)
++    endif()
++endfunction()
 +
 +add_library(fstspecial
-+  SHARED
 +  phi-fst.cc
 +  rho-fst.cc
 +  sigma-fst.cc
 +)
-+if (MSCV)
++if (MSVC)
 +GENERATE_EXPORT_HEADER( fstspecial
 +             BASE_NAME fstspecial
 +             EXPORT_MACRO_NAME fstspecial_EXPORT
@@ -988,28 +1020,40 @@ index 0000000..c715b28
 +)
 +
 +if(HAVE_BIN)
-+  add_executable(fstspecialconvert
++  add_executable(fstspecial_bin
 +    ../../bin/fstconvert.cc 
 +    ../../bin/fstconvert-main.cc
 +  )
 +
-+  set_target_properties(fstspecialconvert PROPERTIES 
-+    OUTPUT_NAME fstspecialconvert
++  set_target_properties(fstspecial_bin PROPERTIES 
++    OUTPUT_NAME fstspecial
++    ARCHIVE_OUTPUT_NAME fstspecial_bin # Not actually generated, but needed to workaround multiple rules that would generate the same .lib file
 +  )
-+  target_link_libraries(fstspecialconvert
-+  fstspecial
++  target_link_libraries(fstspecial_bin
 +    fstscript
-+    fst
 +    ${CMAKE_DL_LIBS}
 +  )
 +endif(HAVE_BIN)
 +
 +
-+install(TARGETS fstspecial fstspecialconvert
++install(TARGETS fstspecial
 +LIBRARY DESTINATION lib
 +ARCHIVE DESTINATION lib
 +RUNTIME DESTINATION bin
 +)
++
++install(TARGETS fstspecial_bin
++RUNTIME DESTINATION bin
++)
++
++add_module(sigma-fst MODULE
++  sigma-fst.cc)
++
++add_module(phi-fst MODULE
++  phi-fst.cc)
++
++add_module(rho-fst MODULE
++  rho-fst.cc)
 diff --git a/src/include/fst/cache.h b/src/include/fst/cache.h
 index 4cfa9c8..e7058ff 100644
 --- a/src/include/fst/cache.h
