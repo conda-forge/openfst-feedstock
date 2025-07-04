@@ -269,7 +269,7 @@ index 0000000..094ab74
 \ No newline at end of file
 diff --git a/src/extensions/compact/CMakeLists.txt b/src/extensions/compact/CMakeLists.txt
 new file mode 100644
-index 0000000..f889cd9
+index 0000000..fb08349
 --- /dev/null
 +++ b/src/extensions/compact/CMakeLists.txt
 @@ -0,0 +1,103 @@
@@ -287,8 +287,8 @@ index 0000000..f889cd9
 +            RUNTIME DESTINATION bin)
 +    else()
 +      install(TARGETS ${_name} 
-+            LIBRARY DESTINATION lib
-+            ARCHIVE DESTINATION lib
++            LIBRARY DESTINATION lib/fst
++            ARCHIVE DESTINATION lib/fst
 +            RUNTIME DESTINATION bin)
 +    endif()
 +endfunction()
@@ -437,7 +437,7 @@ index 0000000..3a1ac2e
 \ No newline at end of file
 diff --git a/src/extensions/const/CMakeLists.txt b/src/extensions/const/CMakeLists.txt
 new file mode 100644
-index 0000000..cd661b6
+index 0000000..adb8d44
 --- /dev/null
 +++ b/src/extensions/const/CMakeLists.txt
 @@ -0,0 +1,52 @@
@@ -455,8 +455,8 @@ index 0000000..cd661b6
 +            RUNTIME DESTINATION bin)
 +    else()
 +      install(TARGETS ${_name} 
-+            LIBRARY DESTINATION lib
-+            ARCHIVE DESTINATION lib
++            LIBRARY DESTINATION lib/fst
++            ARCHIVE DESTINATION lib/fst
 +            RUNTIME DESTINATION bin)
 +    endif()
 +endfunction()
@@ -616,7 +616,7 @@ index c3f925a..a1d897f 100644
    int32_t magic_number = 0;
 diff --git a/src/extensions/linear/CMakeLists.txt b/src/extensions/linear/CMakeLists.txt
 new file mode 100644
-index 0000000..41b8b2b
+index 0000000..9197e1e
 --- /dev/null
 +++ b/src/extensions/linear/CMakeLists.txt
 @@ -0,0 +1,86 @@
@@ -634,8 +634,8 @@ index 0000000..41b8b2b
 +              RUNTIME DESTINATION bin)
 +    else()
 +        install(TARGETS ${_name} 
-+              LIBRARY DESTINATION lib
-+              ARCHIVE DESTINATION lib
++              LIBRARY DESTINATION lib/fst
++              ARCHIVE DESTINATION lib/fst
 +              RUNTIME DESTINATION bin)
 +    endif()
 +endfunction()
@@ -721,7 +721,7 @@ index d887caa..70128e8 100644
  }
 diff --git a/src/extensions/lookahead/CMakeLists.txt b/src/extensions/lookahead/CMakeLists.txt
 new file mode 100644
-index 0000000..2560e3d
+index 0000000..ccbc3e1
 --- /dev/null
 +++ b/src/extensions/lookahead/CMakeLists.txt
 @@ -0,0 +1,43 @@
@@ -738,8 +738,8 @@ index 0000000..2560e3d
 +          RUNTIME DESTINATION bin)
 +    else()
 +    install(TARGETS ${_name} 
-+	        LIBRARY DESTINATION lib
-+			    ARCHIVE DESTINATION lib
++	        LIBRARY DESTINATION lib/fst
++			    ARCHIVE DESTINATION lib/fst
 +          RUNTIME DESTINATION bin)
 +    endif()
 +endfunction()
@@ -816,7 +816,7 @@ index 0000000..ef89f17
 \ No newline at end of file
 diff --git a/src/extensions/ngram/CMakeLists.txt b/src/extensions/ngram/CMakeLists.txt
 new file mode 100644
-index 0000000..d13fc17
+index 0000000..d2a9336
 --- /dev/null
 +++ b/src/extensions/ngram/CMakeLists.txt
 @@ -0,0 +1,68 @@
@@ -834,8 +834,8 @@ index 0000000..d13fc17
 +                RUNTIME DESTINATION bin)
 +    else()
 +    install(TARGETS ${_name} 
-+	        LIBRARY DESTINATION lib
-+			ARCHIVE DESTINATION lib
++	        LIBRARY DESTINATION lib/fst
++			ARCHIVE DESTINATION lib/fst
 +            RUNTIME DESTINATION bin)
 +    endif()
 +endfunction()
@@ -971,7 +971,7 @@ index 0000000..c0c43d7
 \ No newline at end of file
 diff --git a/src/extensions/special/CMakeLists.txt b/src/extensions/special/CMakeLists.txt
 new file mode 100644
-index 0000000..6e75fa5
+index 0000000..9def40b
 --- /dev/null
 +++ b/src/extensions/special/CMakeLists.txt
 @@ -0,0 +1,79 @@
@@ -989,8 +989,8 @@ index 0000000..6e75fa5
 +            RUNTIME DESTINATION bin)
 +    else()
 +      install(TARGETS ${_name} 
-+            LIBRARY DESTINATION lib
-+            ARCHIVE DESTINATION lib
++            LIBRARY DESTINATION lib/fst
++            ARCHIVE DESTINATION lib/fst
 +            RUNTIME DESTINATION bin)
 +    endif()
 +endfunction()
