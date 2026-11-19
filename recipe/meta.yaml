@@ -11,7 +11,7 @@ source:
     - patches/0001-Add-CMake-files-and-Windows-compat.patch                            # [not linux64]
 
 build:
-  number: 1
+  number: 2
   # ensures that packages using openfst as a host dependency get the right runtime dependence as well, see
   # https://conda-forge.org/docs/maintainer/pinning_deps.html#specifying-run-exports
   run_exports:
